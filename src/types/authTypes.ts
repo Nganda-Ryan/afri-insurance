@@ -1,0 +1,91 @@
+// import { IUserDetailedInfo } from "./userType";
+
+export type SignInSuccess = {
+    user: {
+      uid: string;
+      accessToken: string;
+      email: string | null;
+      refreshToken: string;
+    };
+    error: null;
+    code: null;
+};
+  
+export type SignInError = {
+    user: null;
+    error: string;
+    code: string;
+};
+  
+export type SignInResult = SignInSuccess | SignInError;
+
+export type SignUpResult = {
+  user: any;
+  error: string | null | any;
+  code: string | null;
+  redirectTo: string | null;
+};
+
+export type Profile = {
+  Code: string;
+  UserCode: string;
+  RoleCode: string;
+  IsActive: number;
+  Status: string;
+  CreatedAt: string;
+}
+
+type Address = {
+  Code: string;
+  City: string;
+  Country: string;
+  Street: string;
+}
+export interface IUserSession {
+  user_code: string;
+  user_name: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  gender: "MALE" | "FEMALE";
+  phone_number: string;
+
+  student_number?: string | null;
+}
+
+
+export type SessionPayload = {
+  accessToken: string;
+  refreshToken: string;
+  email: string;
+  roles: string[];
+  selectedRole?: string | null;
+  expiresAt: Date;
+  user: IUserSession;
+  // userDetailled?: IUserDetailedInfo;
+}
+
+
+export type ProfileDetail = {
+  Code: string;
+  AddressCode: string;
+  Email: string;
+  Firstname: string;
+  Gender: 'MALE' | 'FEMALE' | string;
+  Lastname: string;
+  NIU: string;
+  OtherEmail: string | null;
+  OtherPhone: string | null;
+  Phone: string;
+  Status: string;
+  AvatarUrl: string;
+  userId: string;
+  IsVerified: number;
+  expiresAt: Date
+  Profiles: Profile[];
+  Address: Address;
+  Subscriptions: any[];
+  roles: string[];
+  activeRole: string;
+}
+  

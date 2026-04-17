@@ -1,97 +1,182 @@
-"use client"
+"use client";
 
-import React from 'react'
-import { ChevronLeftIcon } from 'lucide-react'
-import { useForm, useWatch } from 'react-hook-form'
-import { TravelerInfoData } from '@/types/travel'
+import React, { useEffect, useMemo } from "react";
+import { ChevronLeftIcon } from "lucide-react";
+import { useForm, useWatch } from "react-hook-form";
+
+import { usePlanStore } from "@/store/planStore";
+import type { TravelerInfoData, TripDetailsData } from "@/types/travel";
+
 interface TravelerInfoProps {
-  onSubmit: (data: TravelerInfoData) => void
-  onBack: () => void
+  onSubmit: (data: TravelerInfoData) => void;
+  onBack: () => void;
+  tripDetails: TripDetailsData;
+  initialValues?: TravelerInfoData | null;
+  onDraftChange?: (data: TravelerInfoData) => void;
 }
-
-const ADULT_AGE_IN_MS = 18 * 365.25 * 24 * 60 * 60 * 1000
-const maxAdultDob = new Date(Date.now() - ADULT_AGE_IN_MS)
-  .toISOString()
-  .split('T')[0]
 
 export function TravelerInfo({
   onSubmit,
   onBack,
+  tripDetails,
+  initialValues,
+  onDraftChange,
 }: TravelerInfoProps) {
+  /** Destination active dans le store (dérivée de la catégorie + destination du voyage). */
+  const destination = usePlanStore((s) =>
+    s.plans
+      .find((c) => c.name === tripDetails.product_category)
+      ?.destinations.find((d) => d.destination === tripDetails.destination_area),
+  );
+
+  const { ageMin, ageMax, ageRanges } = useMemo(() => {
+    if (!destination) return { ageMin: 0, ageMax: 99, ageRanges: [] };
+    const ranges = destination.age_ranges;
+    return {
+      ageMin: Math.min(...ranges.map((r) => r.min_age)),
+      ageMax: Math.max(...ranges.map((r) => r.max_age)),
+      ageRanges: ranges,
+    };
+  }, [destination]);
+
   const {
     control,
     register,
     handleSubmit,
+    reset,
     formState: { errors, touchedFields },
-  } = useForm<{ dateOfBirth: string }>({
-    mode: 'onChange',
+  } = useForm<{ oldest_traveler_age: number }>({
+    mode: "onChange",
     defaultValues: {
-      dateOfBirth: '',
+      oldest_traveler_age: initialValues?.oldest_traveler_age ?? ageMin,
     },
-  })
+  });
 
-  const dateOfBirth = useWatch({ control, name: 'dateOfBirth' })
+  const oldestTravelerAge = useWatch({ control, name: "oldest_traveler_age" });
 
-  const isDateValid =
-    touchedFields.dateOfBirth && !errors.dateOfBirth && Boolean(dateOfBirth)
+  useEffect(() => {
+    reset({
+      oldest_traveler_age: initialValues?.oldest_traveler_age ?? ageMin,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialValues?.oldest_traveler_age, reset]);
+
+  useEffect(() => {
+    if (oldestTravelerAge != null) {
+      onDraftChange?.({ oldest_traveler_age: oldestTravelerAge });
+    }
+  }, [oldestTravelerAge, onDraftChange]);
+
+  const isAgeValid =
+    touchedFields.oldest_traveler_age &&
+    !errors.oldest_traveler_age &&
+    Number.isFinite(oldestTravelerAge);
+
+  /** Tranche correspondant à l'âge saisi (indication visuelle). */
+  const matchedRange = useMemo(() => {
+    if (!Number.isFinite(oldestTravelerAge) || ageRanges.length === 0) return null;
+    return (
+      ageRanges.find(
+        (r) => oldestTravelerAge >= r.min_age && oldestTravelerAge < r.max_age,
+      ) ??
+      ageRanges.find((r) => oldestTravelerAge === r.max_age) ??
+      null
+    );
+  }, [oldestTravelerAge, ageRanges]);
 
   return (
     <form
       onSubmit={handleSubmit((data) =>
-        onSubmit({
-          oldestTravelerBirthDate: data.dateOfBirth,
-        }),
+        onSubmit({ oldest_traveler_age: data.oldest_traveler_age }),
       )}
-      className="bg-surface-base rounded-lg p-6 lg:p-8 shadow-sm border border-gray-100"
+      className="rounded-lg border border-gray-100 bg-surface-base p-6 shadow-sm lg:p-8"
     >
-      <h2 className="text-2xl font-bold text-brand-secondary mb-6">
+      <h2 className="mb-6 text-2xl font-bold text-brand-secondary">
         Voyageur le plus âgé
       </h2>
 
       <div className="space-y-6">
         <div>
-          <label className="block text-sm font-semibold text-text-main mb-2">
-            Date de naissance du voyageur le plus âgé
+          <label className="mb-2 block text-sm font-semibold text-text-main">
+            Âge du voyageur le plus âgé
           </label>
           <input
-            type="date"
-            {...register('dateOfBirth', {
-              required: 'La date de naissance est obligatoire',
-              validate: (value) =>
-                value <= maxAdultDob ||
-                'Le voyageur le plus âgé doit avoir au moins 18 ans',
+            type="number"
+            {...register("oldest_traveler_age", {
+              valueAsNumber: true,
+              required: "L'âge est obligatoire",
+              min: {
+                value: ageMin,
+                message: `L'âge minimum est de ${ageMin} an(s)`,
+              },
+              max: {
+                value: ageMax,
+                message: `L'âge maximum est de ${ageMax} ans`,
+              },
             })}
-            max={maxAdultDob}
-            className={`w-full px-4 py-3 border-2 rounded-lg bg-surface-muted focus:bg-surface-base focus:outline-none transition-colors ${errors.dateOfBirth ? 'border-red-500' : isDateValid ? 'border-green-500' : 'border-gray-200 focus:border-brand-primary'}`}
+            min={ageMin}
+            max={ageMax}
+            className={`w-full rounded-lg border-2 bg-surface-muted px-4 py-3 transition-colors focus:bg-surface-base focus:outline-none ${
+              errors.oldest_traveler_age
+                ? "border-red-500"
+                : isAgeValid
+                  ? "border-green-500"
+                  : "border-gray-200 focus:border-brand-primary"
+            }`}
           />
-          {errors.dateOfBirth && (
-            <p className="text-red-500 text-sm mt-1">
-              {errors.dateOfBirth.message}
+          {errors.oldest_traveler_age && (
+            <p className="mt-1 text-sm text-red-500">
+              {errors.oldest_traveler_age.message}
+            </p>
+          )}
+          {matchedRange && !errors.oldest_traveler_age && (
+            <p className="mt-1 text-xs text-gray-500">
+              Tranche appliquée : {matchedRange.min_age} – {matchedRange.max_age} ans
             </p>
           )}
         </div>
-        <p className="text-sm text-gray-600">
-          Cette donnée sert à calculer <code>oldest_traveler_age</code> pour la
-          requête de devis EVO.
-        </p>
+
+        {/* Tranches disponibles pour cette destination */}
+        {ageRanges.length > 0 && (
+          <div className="rounded-lg border border-gray-100 bg-surface-muted px-4 py-3">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-main">
+              Tranches d'âge couvertes
+            </p>
+            <ul className="flex flex-wrap gap-2">
+              {ageRanges.map((r) => (
+                <li
+                  key={`${r.min_age}-${r.max_age}`}
+                  className={`rounded-full px-3 py-1 text-xs font-medium ${
+                    matchedRange?.min_age === r.min_age &&
+                    matchedRange?.max_age === r.max_age
+                      ? "bg-brand-primary text-text-inverse"
+                      : "bg-white text-text-main dark:bg-zinc-800"
+                  }`}
+                >
+                  {r.min_age} – {r.max_age} ans
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
 
-      <div className="flex justify-between mt-8">
+      <div className="mt-8 flex justify-between">
         <button
           type="button"
           onClick={onBack}
-          className="flex items-center gap-2 px-6 py-3 border-2 border-gray-300 text-text-main rounded-lg font-semibold hover:border-brand-secondary transition-colors"
+          className="flex items-center gap-2 rounded-lg border-2 border-gray-300 px-6 py-3 font-semibold text-text-main transition-colors hover:border-brand-secondary"
         >
-          <ChevronLeftIcon className="w-5 h-5" />
+          <ChevronLeftIcon className="h-5 w-5" />
           Retour
         </button>
         <button
           type="submit"
-          className="px-8 py-3 bg-brand-primary text-text-inverse rounded-lg font-semibold hover:bg-opacity-90 transition-opacity shadow-md"
+          className="rounded-lg bg-brand-primary px-8 py-3 font-semibold text-text-inverse shadow-md transition-opacity hover:bg-opacity-90"
         >
           Continuer
         </button>
       </div>
     </form>
-  )
+  );
 }

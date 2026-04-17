@@ -7,156 +7,163 @@ import {
   EVO_POLICY_ID_COOKIE,
   EVO_QUOTE_CODE_COOKIE,
   EVO_QUOTE_SESSION_COOKIE,
-  EVO_COOKIE_MAX_AGE_SEC,
 } from "@/lib/constants/cookies";
-import { evoCookieOptions } from "@/lib/http/client";
+import { EVO_QUOTE_NOT_FOUND_CODE } from "@/lib/constants/evo-api";
+import { actionFail, actionOk } from "@/lib/http/action-result";
+import { readAxiosErrorMessage, readAxiosFeCode } from "@/lib/http/axios-error-body";
 import { toError } from "@/lib/http/errors";
-import { buildTravelQuotesRequestBody } from "@/lib/travel/quote-request-mapper";
+import {
+  createQuoteSessionId,
+  peekTravelQuoteSession,
+} from "@/lib/server/travel-quote-cache";
+import { getTravelSessionCookieBase } from "@/lib/server/travel-session-cookie-base";
+import { subscribePolicyInputSchema } from "@/schemas/travel";
+import { travelService } from "@/services/travel.service";
 import {
   extractQuoteCodeAtIndex,
+  extractTravelQuoteContext,
   extractTravelQuoteProductSummaries,
 } from "@/lib/travel/evo-quote-response";
 import { extractTravelPolicyId } from "@/lib/travel/policy-response";
-import {
-  createTravelQuoteSessionId,
-  peekTravelQuoteSession,
-} from "@/lib/server/travel-quote-cache";
-import {
-  subscribePolicyInputSchema,
-  travelQuoteWizardInputSchema,
-} from "@/schemas/travel";
-import { travelService } from "@/services/travel.service";
+import type { ActionResult } from "@/types/action-result";
 import type {
-  SubscribePolicyInput,
-  TravelQuoteRequestResult,
-  TravelQuoteWizardInput,
+  IGetQuotePayload,
+  IGetQuoteResponseDto,
+  IPolicyData,
+  ISubscribePolicyRequestBody,
+  SubscribePolicyInputDto,
+  TravelQuoteActionData,
 } from "@/types/travel";
 
-const cookieBase = {
-  ...evoCookieOptions(),
-  maxAge: EVO_COOKIE_MAX_AGE_SEC,
-} as const;
+const cookieBase = getTravelSessionCookieBase();
 
 export async function requestTravelQuoteAction(
-  raw: TravelQuoteWizardInput,
-): Promise<TravelQuoteRequestResult> {
+  payload: IGetQuotePayload,
+): Promise<ActionResult<TravelQuoteActionData>> {
   try {
-    const parsed = travelQuoteWizardInputSchema.safeParse(raw);
-    if (!parsed.success) {
-      return {
-        ok: false,
-        error: {
-          message: parsed.error.issues[0]?.message ?? "Invalid quote input",
-        },
-      };
-    }
+    const result: IGetQuoteResponseDto = await travelService.getQuote(payload);
 
-    const body = buildTravelQuotesRequestBody(parsed.data);
+    const sessionId = createQuoteSessionId(result);
+    const cookieStore = await cookies();
+    cookieStore.set(EVO_QUOTE_SESSION_COOKIE, sessionId, cookieBase);
+    cookieStore.delete(EVO_QUOTE_CODE_COOKIE);
+    cookieStore.delete(EVO_POLICY_ID_COOKIE);
 
-    const apiJson = await travelService.getQuote(body);
-
-    // const sessionId = createTravelQuoteSessionId(apiJson);
-    // const cookieStore = await cookies();
-    // cookieStore.set(EVO_QUOTE_SESSION_COOKIE, sessionId, cookieBase);
-    // cookieStore.delete(EVO_QUOTE_CODE_COOKIE);
-    // cookieStore.delete(EVO_POLICY_ID_COOKIE);
-
-    const products = extractTravelQuoteProductSummaries(apiJson);
-    return { ok: true, sessionCookieSet: true, products };
+    return actionOk({
+      products: extractTravelQuoteProductSummaries(result),
+      quoteContext: extractTravelQuoteContext(result),
+    });
   } catch (e) {
-    if (axios.isAxiosError(e)) {
-      const feCode = (e.response?.data as { fe_code_error?: unknown } | undefined)
-        ?.fe_code_error;
-
-      if (
-        e.response?.status === 422 &&
-        feCode === "error.policy.data.quote.not_found"
-      ) {
-        return {
-          ok: false,
-          error: {
-            message:
-              "Aucune formule n'est disponible pour les informations saisies. Modifiez vos entrées puis réessayez.",
-          },
-        };
-      }
+    const feCode = readAxiosFeCode(e);
+    if (
+      axios.isAxiosError(e) &&
+      e.response?.status === 422 &&
+      feCode === EVO_QUOTE_NOT_FOUND_CODE
+    ) {
+      return actionFail<TravelQuoteActionData>(
+        EVO_QUOTE_NOT_FOUND_CODE,
+        "Aucune formule disponible. Modifiez vos entrées.",
+      );
     }
-
-    return { ok: false, error: { message: toError(e).message } };
+    return actionFail<TravelQuoteActionData>(feCode, readAxiosErrorMessage(e));
   }
 }
 
 export async function selectTravelQuoteProductAction(
   productIndex: number,
-): Promise<{ ok: true }> {
+): Promise<ActionResult<Record<string, never>>> {
   if (!Number.isInteger(productIndex) || productIndex < 0) {
-    throw new Error("Invalid product index");
+    return actionFail("INVALID_PRODUCT_INDEX", "Index de produit invalide.");
   }
 
   const cookieStore = await cookies();
   const sessionId = cookieStore.get(EVO_QUOTE_SESSION_COOKIE)?.value;
   if (!sessionId) {
-    throw new Error("Session expirée ou absente. Relancez une cotation.");
+    return actionFail(
+      "SESSION_MISSING",
+      "Session expirée ou absente. Relancez une cotation.",
+    );
   }
 
   const raw = peekTravelQuoteSession(sessionId);
   if (raw == null) {
-    throw new Error("Session de devis expirée. Relancez une cotation.");
+    return actionFail(
+      "SESSION_EXPIRED",
+      "Session de devis expirée. Relancez une cotation.",
+    );
   }
 
   const quoteCode = extractQuoteCodeAtIndex(raw, productIndex);
   if (!quoteCode) {
-    throw new Error("Produit de devis introuvable pour cet index.");
+    return actionFail(
+      "QUOTE_CODE_NOT_FOUND",
+      "Produit de devis introuvable pour cet index.",
+    );
   }
 
   cookieStore.set(EVO_QUOTE_CODE_COOKIE, quoteCode, cookieBase);
-  return { ok: true };
+  return actionOk({});
 }
 
-export type SubscribeTravelPolicyResult = {
-  policyId: string;
-};
-
 export async function subscribeTravelPolicyAction(
-  payload: SubscribePolicyInput,
-): Promise<SubscribeTravelPolicyResult> {
+  payload: SubscribePolicyInputDto,
+): Promise<ActionResult<{ policyId: string }>> {
   const parsed = subscribePolicyInputSchema.safeParse(payload);
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Invalid subscription payload");
+    return actionFail(
+      "VALIDATION_ERROR",
+      parsed.error.issues[0]?.message ?? "Données de souscription invalides.",
+    );
   }
 
   const cookieStore = await cookies();
   const quoteCode = cookieStore.get(EVO_QUOTE_CODE_COOKIE)?.value;
   if (!quoteCode) {
-    throw new Error(
+    return actionFail(
+      "QUOTE_CODE_COOKIE_MISSING",
       "Code de devis manquant. Sélectionnez un produit issu du tarif en ligne.",
     );
   }
 
-  const apiBody: Record<string, unknown> = {
-    quote_code: quoteCode,
+  const apiBody: ISubscribePolicyRequestBody = {
     ...parsed.data,
+    quote_code: quoteCode,
   };
 
-  let res: unknown;
+  let res: Awaited<ReturnType<typeof travelService.subscribePolicy>>;
   try {
     res = await travelService.subscribePolicy(apiBody);
   } catch (e) {
-    throw toError(e);
+    return actionFail(readAxiosFeCode(e), readAxiosErrorMessage(e));
   }
 
-  const policyId = extractTravelPolicyId(res);
-  cookieStore.set(EVO_POLICY_ID_COOKIE, policyId, cookieBase);
-
-  return { policyId };
+  try {
+    const policyId = extractTravelPolicyId(res);
+    cookieStore.set(EVO_POLICY_ID_COOKIE, policyId, cookieBase);
+    return actionOk({ policyId });
+  } catch (inner) {
+    return actionFail("POLICY_ID_EXTRACTION_FAILED", toError(inner).message);
+  }
 }
 
-/** Données publiques — lecture catalogue des plans (GET `travel/plans`). */
+export async function getTravelPolicyAction(
+  policyId: string,
+): Promise<ActionResult<IPolicyData>> {
+  if (!policyId) {
+    return actionFail("INVALID_POLICY_ID", "Identifiant de police invalide.");
+  }
+  try {
+    const data = await travelService.getPolicy(policyId);
+    return actionOk(data as IPolicyData);
+  } catch (e) {
+    return actionFail(readAxiosFeCode(e), readAxiosErrorMessage(e));
+  }
+}
+
 export async function getTravelPlansAction(): Promise<unknown> {
   return travelService.getPlans();
 }
 
-/** Recherche de polices par période — Postman « 08 ». */
 export async function getTravelPoliciesByDateAction(input: {
   start_date: string;
   end_date: string;

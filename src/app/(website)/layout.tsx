@@ -1,8 +1,10 @@
 // import LandingFooter from "@/components/website/LandingFooter";
 
 import type { Metadata } from "next";
+import React from "react";
 
 import LandingHeader from "@/components/website/header/LandingHeader";
+import { WebsiteShell } from "@/components/website/WebsiteShell";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { WebsiteToaster } from "@/components/providers/website-toaster";
 
@@ -20,9 +22,9 @@ export default function Layout({
   return (
     <div>
       <LandingHeader />
-      <div className="dark:bg-boxdark-2 dark:text-bodydark min-h-screen bg-blue-sky mt-28 mb-20">
+      <div className="dark:bg-boxdark-2 dark:text-bodydark bg-blue-sky mt-28 mb-20">
         <QueryProvider>
-          {children}
+          <WebsiteShell>{children}</WebsiteShell>
           <WebsiteToaster />
         </QueryProvider>
       </div>

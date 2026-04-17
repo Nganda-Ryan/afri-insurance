@@ -9,11 +9,15 @@ export type NormalizedHttpError = {
 function pickMessage(data: unknown): string | undefined {
   if (data == null) return undefined;
   if (typeof data === "string") return data;
-  if (typeof data === "object" && "message" in data) {
-    const m = (data as { message?: unknown }).message;
-    if (typeof m === "string") return m;
-    if (Array.isArray(m) && m.every((x) => typeof x === "string"))
-      return m.join(", ");
+  if (typeof data === "object") {
+    const d = data as Record<string, unknown>;
+    // EVO API: préférer error_description puis message puis error
+    if (typeof d.error_description === "string" && d.error_description.trim())
+      return d.error_description.trim();
+    if (typeof d.message === "string" && d.message.trim()) return d.message.trim();
+    if (Array.isArray(d.message) && d.message.every((x) => typeof x === "string"))
+      return (d.message as string[]).join(", ");
+    if (typeof d.error === "string" && d.error.trim()) return d.error.trim();
   }
   try {
     return JSON.stringify(data);

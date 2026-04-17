@@ -4,18 +4,25 @@ import type { AxiosResponse } from "axios";
 
 import { getEvoApiClient } from "@/lib/http/client";
 import { toError } from "@/lib/http/errors";
+import type {
+  IGetPlanResponseDto,
+  IGetQuotePayload,
+  IGetQuoteResponseDto,
+  ISubscribePolicyRequestBody,
+  ISubscribePolicyResponseDto,
+} from "@/types/travel";
 
 /** POST `travel/quotes_requests` — Postman « 02 - Get Quote » */
 export async function postTravelQuotesRequest(
-  body: Record<string, unknown>,
-): Promise<unknown> {
+  body: IGetQuotePayload,
+): Promise<IGetQuoteResponseDto> {
   const client = getEvoApiClient();
   try {
     const res: AxiosResponse<unknown> = await client.post(
       "travel/quotes_requests",
       body,
     );
-    return res.data;
+    return res.data as IGetQuoteResponseDto;
   } catch (e) {
     console.log("@@@ERROR postTravelQuotesRequest", e)
     throw toError(e);
@@ -24,11 +31,14 @@ export async function postTravelQuotesRequest(
 
 /** POST `travel/policies` — Postman « 03 - Subscribe Policy » */
 export async function postTravelPolicy(
-  body: Record<string, unknown>,
-): Promise<unknown> {
+  body: ISubscribePolicyRequestBody,
+): Promise<ISubscribePolicyResponseDto> {
   const client = getEvoApiClient();
   try {
-    const res = await client.post<unknown>("travel/policies", body);
+    const res = await client.post<ISubscribePolicyResponseDto>(
+      "travel/policies",
+      body,
+    );
     return res.data;
   } catch (e) {
     throw toError(e);
@@ -115,10 +125,10 @@ export async function postTravelPoliciesByDate(
 }
 
 /** GET `travel/plans` — Postman « 09 - Get Plans » */
-export async function getTravelPlans(): Promise<unknown> {
+export async function getTravelPlans(): Promise<IGetPlanResponseDto> {
   const client = getEvoApiClient();
   try {
-    const res = await client.get<unknown>("travel/plans");
+    const res = await client.get<IGetPlanResponseDto>("travel/plans");
     return res.data;
   } catch (e) {
     throw toError(e);

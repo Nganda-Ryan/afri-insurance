@@ -18,38 +18,47 @@ export const DESTINATION_AREA_SCHENGEN =
 export const DESTINATION_AREA_PILGRIMAGE =
   "Tous les lieux saints du monde entier, sans distinction de religion, expt ceux situés dans les pays Schengen";
 
-/** Options affichées dans le formulaire (libellé court + valeur API exacte). */
+/** Options affichées : libellé, valeur API exacte, code URL court. */
 export const DESTINATION_AREA_OPTIONS: ReadonlyArray<{
   label: string;
   value: string;
+  code: string;
 }> = [
   {
     label: "Afrique et îles périphériques (hors pays de résidence)",
     value: DESTINATION_AREA_AFRICA,
+    code: "afrique",
   },
   {
     label: "Europe et îles périphériques",
     value: DESTINATION_AREA_EUROPE,
+    code: "europe",
   },
-  { label: "Monde entier (hors pays de résidence)", value: DESTINATION_AREA_WORLD },
+  {
+    label: "Monde entier (hors pays de résidence)",
+    value: DESTINATION_AREA_WORLD,
+    code: "monde",
+  },
   {
     label: "Lieux saints (hors Schengen)",
     value: DESTINATION_AREA_PILGRIMAGE,
+    code: "pelerinage",
   },
-  { label: "Espace Schengen", value: DESTINATION_AREA_SCHENGEN },
+  { label: "Espace Schengen", value: DESTINATION_AREA_SCHENGEN, code: "schengen" },
 ];
 
-const KNOWN_AREAS = new Set(
-  DESTINATION_AREA_OPTIONS.map((o) => o.value),
-);
+export function destinationAreaValueFromCode(
+  code: string | null | undefined,
+): string | undefined {
+  if (!code) return undefined;
+  const c = code.trim().toLowerCase();
+  return DESTINATION_AREA_OPTIONS.find((o) => o.code === c)?.value;
+}
 
-export function mapDestinationToArea(destination: string): string {
-  const trimmed = destination.trim();
-  if (!KNOWN_AREAS.has(trimmed)) {
-    throw new Error(
-      "Zone de destination inconnue. Modifiez vos entrées puis réessayez.",
-    );
-  }
-
-  return trimmed;
+export function destinationAreaCodeFromValue(
+  value: string | null | undefined,
+): string | undefined {
+  if (!value) return undefined;
+  const v = value.trim();
+  return DESTINATION_AREA_OPTIONS.find((o) => o.value === v)?.code;
 }

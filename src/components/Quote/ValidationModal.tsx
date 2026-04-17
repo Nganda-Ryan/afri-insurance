@@ -1,75 +1,123 @@
 "use client";
 
-import React, { useState } from "react";
-import { XIcon, FileTextIcon, DownloadIcon, CreditCardIcon } from "lucide-react";
+import React from "react";
+import { CreditCardIcon, XIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import {
+  languageCodeFromQuoteContext,
+  subscriptionCountryFromQuoteContext,
+} from "@/lib/travel/quote-subscribe-context";
+import type {
   SelectedPlan,
-  TripDetailsData,
+  SubscribePolicyInputDto,
   TravelerInfoData,
+  TravelQuoteContext,
+  TripDetailsData,
 } from "@/types/travel";
 import { useSubscribeTravelPolicy } from "@/hooks/use-travel-quote-session";
-import { buildSubscribePolicyInput } from "@/lib/travel/subscribe-mapper";
 
 interface ValidationModalProps {
   selectedPlan: SelectedPlan;
   tripDetails: TripDetailsData;
   travelerInfo: TravelerInfoData;
+  quoteContext?: TravelQuoteContext;
   onClose: () => void;
+}
+
+interface SubscriberFormData {
+  title: "M" | "Mme";
+  first_name: string;
+  last_name: string;
+  birth_date: string;
+  email: string;
+  phone_number: string;
+  address: string;
+  city: string;
+  passport_number: string;
+  passeport_exp_date: string;
 }
 
 export function ValidationModal({
   selectedPlan,
   tripDetails,
   travelerInfo,
+  quoteContext,
   onClose,
 }: ValidationModalProps) {
-  const [isDownloading, setIsDownloading] = useState(false);
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const router = useRouter();
   const subscribe = useSubscribeTravelPolicy();
 
-  const handleDownload = () => {
-    setIsDownloading(true);
-    setTimeout(() => {
-      setIsDownloading(false);
-      toast.success("Document de devis préparé (aperçu).");
-    }, 1500);
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SubscriberFormData>({
+    mode: "onSubmit",
+    defaultValues: { title: "M" },
+  });
 
-  const handleSubscribe = () => {
-    if (!fullName.trim() || !email.trim() || !phone.trim()) {
-      toast.error("Le nom complet, l’e-mail et le téléphone sont obligatoires.");
-      return;
-    }
-    const payload = buildSubscribePolicyInput({
-      subscriptionCountry: "Cameroun",
-      languageCode: "fr",
-      travelerFullName: fullName,
-      travelerEmail: email,
-      travelerBirthDate: travelerInfo.oldestTravelerBirthDate,
-      travelerPhone: phone,
-      address: "Cameroun",
-      city: "Yaoundé",
-      passportNumber: "PENDING-REF",
-      passportExpiry: "2030/01/01",
-    });
+  const onSubmit = (data: SubscriberFormData) => {
+    const payload: SubscribePolicyInputDto = {
+      subscription_country: subscriptionCountryFromQuoteContext(quoteContext),
+      language_code: languageCodeFromQuoteContext(quoteContext),
+      agent_scope: "",
+      policy_holder: [
+        {
+          title: data.title,
+          first_name: data.first_name,
+          last_name: data.last_name,
+          birth_date: data.birth_date,
+          email: data.email,
+          address: data.address,
+          is_policy_beneficiary: 0,
+        },
+      ],
+      beneficiaries: [
+        {
+          title: data.title,
+          first_name: data.first_name,
+          last_name: data.last_name,
+          email: data.email,
+          passport_number: data.passport_number,
+          phone_number: data.phone_number,
+          birth_date: data.birth_date,
+          address: data.address,
+          passeport_exp_date: data.passeport_exp_date,
+          city: data.city,
+        },
+      ],
+      consents: [],
+      payment: { type: "MANAGED_BY_PARTNER" },
+      addons: [],
+    };
+    console.log("Subscribe payload", payload);
+
     subscribe.mutate(payload, {
       onSuccess: (res) => {
-        toast.success(`Police créée (référence ${res.policyId}).`);
-        onClose();
-      },
-      onError: (err) => {
-        toast.error(err instanceof Error ? err.message : String(err));
+        if (res.ok && res.data) {
+          router.push(`/quote/${res.data.policyId}`);
+          onClose();
+          return;
+        }
+        toast.error(res.error?.message ?? "Souscription impossible.");
       },
     });
   };
+
+  const fieldClass = (hasError: boolean) =>
+    [
+      "w-full rounded-lg border-2 bg-white px-4 py-3 text-gray-900 focus:outline-none dark:bg-zinc-950 dark:text-zinc-100",
+      hasError
+        ? "border-red-500 focus:border-red-500"
+        : "border-gray-200 focus:border-brand-primary dark:border-zinc-600",
+    ].join(" ");
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 p-4 backdrop-blur-[2px]"
       onClick={onClose}
       onKeyDown={(e) => e.key === "Escape" && onClose()}
       role="presentation"
@@ -80,9 +128,10 @@ export function ValidationModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="validation-modal-title"
-        className="bg-surface-base rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg border border-border bg-card text-card-foreground shadow-2xl"
       >
-        <div className="sticky top-0 bg-surface-base border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+        {/* ── En-tête ── */}
+        <div className="sticky top-0 flex items-center justify-between border-b border-border bg-card px-6 py-4">
           <h2
             id="validation-modal-title"
             className="text-2xl font-bold text-brand-secondary"
@@ -92,170 +141,280 @@ export function ValidationModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-2 hover:bg-surface-muted rounded-lg transition-colors"
+            className="rounded-lg p-2 transition-colors hover:bg-muted"
           >
-            <XIcon className="w-6 h-6 text-gray-600" />
+            <XIcon className="h-6 w-6 text-gray-600" />
           </button>
         </div>
 
         <div className="p-6">
-          <div className="flex justify-center mb-6">
-            <div className="relative">
-              <svg width="120" height="120" viewBox="0 0 120 120">
-                <circle
-                  cx="60"
-                  cy="60"
-                  r="54"
-                  stroke="#e74f1c"
-                  strokeWidth="4"
-                  fill="none"
-                />
-                <path
-                  d="M 35 60 L 52 77 L 85 44"
-                  stroke="#e74f1c"
-                  strokeWidth="6"
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
+          {/* ── Icône succès ── */}
+          <div className="mb-6 flex justify-center">
+            <svg width="120" height="120" viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="54" stroke="#e74f1c" strokeWidth="4" fill="none" />
+              <path
+                d="M 35 60 L 52 77 L 85 44"
+                stroke="#e74f1c"
+                strokeWidth="6"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </div>
 
-          <div className="bg-surface-muted rounded-lg p-6 mb-6">
-            <h3 className="text-lg font-bold text-brand-secondary mb-4">
+          {/* ── Récapitulatif plan ── */}
+          <div className="mb-6 rounded-lg bg-muted/50 p-6">
+            <h3 className="mb-4 text-lg font-bold text-brand-secondary">
               Récapitulatif du plan choisi
             </h3>
             <div className="space-y-3">
-              <div className="flex justify-between items-center pb-3 border-b border-gray-300">
-                <span className="font-semibold text-text-main">Type de plan</span>
-                <span className="text-brand-primary font-bold">
-                  {selectedPlan.name}
-                </span>
-              </div>
-              <div className="flex justify-between items-center pb-3 border-b border-gray-300">
-                <span className="font-semibold text-text-main">
-                  Prime totale
-                </span>
-                <span className="text-2xl font-bold text-text-main">
-                  {selectedPlan.source === "api"
-                    ? `${selectedPlan.price}`
-                    : `$${selectedPlan.price}`}
-                </span>
-              </div>
-              <div className="flex justify-between items-center pb-3 border-b border-gray-300">
-                <span className="font-semibold text-text-main">Destination</span>
-                <span className="text-text-main">{tripDetails.destination}</span>
-              </div>
-              <div className="flex justify-between items-center pb-3 border-b border-gray-300">
-                <span className="font-semibold text-text-main">
-                  Dates de couverture
-                </span>
-                <span className="text-text-main">
-                  {new Date(tripDetails.departureDate).toLocaleDateString()} -{" "}
-                  {new Date(tripDetails.returnDate).toLocaleDateString()}
-                </span>
-              </div>
-              <div className="flex justify-between items-center pb-3 border-b border-gray-300">
-                <span className="font-semibold text-text-main">
-                  Date de naissance du plus âgé
-                </span>
-                <span className="text-text-main">
-                  {new Date(
-                    travelerInfo.oldestTravelerBirthDate,
-                  ).toLocaleDateString()}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="font-semibold text-text-main">
-                  Nombre de voyageurs
-                </span>
-                <span className="text-text-main">
-                  {tripDetails.numberOfTravelers}
-                </span>
-              </div>
+              {[
+                { label: "Type de plan", value: selectedPlan.name, highlight: true },
+                {
+                  label: "Prime totale",
+                  value:
+                    selectedPlan.source === "api"
+                      ? `${selectedPlan.price}`
+                      : `$${selectedPlan.price}`,
+                  large: true,
+                },
+                { label: "Destination", value: tripDetails.destination_area },
+                {
+                  label: "Dates de couverture",
+                  value: `${new Date(tripDetails.start_date).toLocaleDateString()} – ${new Date(tripDetails.end_date).toLocaleDateString()}`,
+                },
+                { label: "Nombre de voyageurs", value: String(tripDetails.adult) },
+              ].map(({ label, value, highlight, large }) => (
+                <div
+                  key={label}
+                  className="flex items-center justify-between border-b border-gray-300 pb-3 last:border-0 last:pb-0"
+                >
+                  <span className="font-semibold text-text-main">{label}</span>
+                  <span
+                    className={
+                      highlight
+                        ? "font-bold text-brand-primary"
+                        : large
+                          ? "text-2xl font-bold text-text-main"
+                          : "text-text-main"
+                    }
+                  >
+                    {value}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
 
-          <div className="mb-6 rounded-lg border border-gray-200 bg-surface-base p-6">
+          {/* ── Formulaire souscripteur ── */}
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            noValidate
+            className="mb-6 rounded-lg border border-border bg-muted/40 p-6"
+          >
             <h3 className="mb-4 text-lg font-bold text-brand-secondary">
               Informations du souscripteur
             </h3>
+
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="md:col-span-2">
+              {/* Civilité */}
+              <div>
                 <label className="mb-2 block text-sm font-semibold text-text-main">
-                  Nom complet
+                  Civilité <span className="text-red-500">*</span>
+                </label>
+                <select
+                  {...register("title", { required: "Civilité obligatoire" })}
+                  className={fieldClass(!!errors.title)}
+                >
+                  <option value="M">M.</option>
+                  <option value="Mme">Mme</option>
+                </select>
+                {errors.title && (
+                  <p className="mt-1 text-sm text-red-500">{errors.title.message}</p>
+                )}
+              </div>
+
+              {/* Prénom */}
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-text-main">
+                  Prénom <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="John Doe"
-                  className="w-full rounded-lg border-2 border-gray-200 bg-white px-4 py-3 text-gray-900 focus:border-brand-primary focus:outline-none"
+                  placeholder="Jean"
+                  {...register("first_name", { required: "Prénom obligatoire" })}
+                  className={fieldClass(!!errors.first_name)}
                 />
+                {errors.first_name && (
+                  <p className="mt-1 text-sm text-red-500">{errors.first_name.message}</p>
+                )}
               </div>
+
+              {/* Nom */}
               <div>
                 <label className="mb-2 block text-sm font-semibold text-text-main">
-                  E-mail
+                  Nom <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="Dupont"
+                  {...register("last_name", { required: "Nom obligatoire" })}
+                  className={fieldClass(!!errors.last_name)}
+                />
+                {errors.last_name && (
+                  <p className="mt-1 text-sm text-red-500">{errors.last_name.message}</p>
+                )}
+              </div>
+
+              {/* Date de naissance */}
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-text-main">
+                  Date de naissance <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  {...register("birth_date", {
+                    required: "Date de naissance obligatoire",
+                    validate: (v) =>
+                      new Date(v) < new Date() || "La date doit être dans le passé",
+                  })}
+                  className={fieldClass(!!errors.birth_date)}
+                />
+                {errors.birth_date && (
+                  <p className="mt-1 text-sm text-red-500">{errors.birth_date.message}</p>
+                )}
+              </div>
+
+              {/* E-mail */}
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-text-main">
+                  E-mail <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="john.doe@example.com"
-                  className="w-full rounded-lg border-2 border-gray-200 bg-white px-4 py-3 text-gray-900 focus:border-brand-primary focus:outline-none"
+                  placeholder="jean.dupont@example.com"
+                  {...register("email", {
+                    required: "E-mail obligatoire",
+                    pattern: {
+                      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                      message: "Format e-mail invalide",
+                    },
+                  })}
+                  className={fieldClass(!!errors.email)}
                 />
+                {errors.email && (
+                  <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
+                )}
               </div>
+
+              {/* Téléphone */}
               <div>
                 <label className="mb-2 block text-sm font-semibold text-text-main">
-                  Numéro de téléphone
+                  Téléphone <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
                   placeholder="+237 6 00 00 00 00"
-                  className="w-full rounded-lg border-2 border-gray-200 bg-white px-4 py-3 text-gray-900 focus:border-brand-primary focus:outline-none"
+                  {...register("phone_number", {
+                    required: "Téléphone obligatoire",
+                  })}
+                  className={fieldClass(!!errors.phone_number)}
                 />
+                {errors.phone_number && (
+                  <p className="mt-1 text-sm text-red-500">{errors.phone_number.message}</p>
+                )}
+              </div>
+
+              {/* Adresse */}
+              <div className="md:col-span-2">
+                <label className="mb-2 block text-sm font-semibold text-text-main">
+                  Adresse postale <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="123 rue de la Paix"
+                  {...register("address", { required: "Adresse obligatoire" })}
+                  className={fieldClass(!!errors.address)}
+                />
+                {errors.address && (
+                  <p className="mt-1 text-sm text-red-500">{errors.address.message}</p>
+                )}
+              </div>
+
+              {/* Ville */}
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-text-main">
+                  Ville <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="Yaoundé"
+                  {...register("city", { required: "Ville obligatoire" })}
+                  className={fieldClass(!!errors.city)}
+                />
+                {errors.city && (
+                  <p className="mt-1 text-sm text-red-500">{errors.city.message}</p>
+                )}
+              </div>
+
+              {/* Numéro de passeport */}
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-text-main">
+                  Numéro de passeport <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="AB123456"
+                  {...register("passport_number", {
+                    required: "Numéro de passeport obligatoire",
+                  })}
+                  className={fieldClass(!!errors.passport_number)}
+                />
+                {errors.passport_number && (
+                  <p className="mt-1 text-sm text-red-500">
+                    {errors.passport_number.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Date d'expiration du passeport */}
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-text-main">
+                  Expiration du passeport <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  {...register("passeport_exp_date", {
+                    required: "Date d'expiration obligatoire",
+                    validate: (v) =>
+                      new Date(v) > new Date() ||
+                      "Le passeport doit être valide (date future)",
+                  })}
+                  className={fieldClass(!!errors.passeport_exp_date)}
+                />
+                {errors.passeport_exp_date && (
+                  <p className="mt-1 text-sm text-red-500">
+                    {errors.passeport_exp_date.message}
+                  </p>
+                )}
               </div>
             </div>
-          </div>
 
-          <div className="flex justify-center mb-6">
-            <div className="bg-surface-muted p-6 rounded-lg">
-              <FileTextIcon className="w-16 h-16 text-brand-primary" />
-              <p className="text-sm text-gray-600 mt-2 text-center">
-                Document de devis prêt
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <button
-              type="button"
-              onClick={handleDownload}
-              disabled={isDownloading}
-              className="flex items-center justify-center gap-2 px-6 py-4 bg-brand-primary text-text-inverse rounded-lg font-semibold hover:bg-opacity-90 transition-opacity shadow-md disabled:opacity-50"
-            >
-              <DownloadIcon className="w-5 h-5" />
-              {isDownloading ? "Téléchargement..." : "Télécharger le devis PDF"}
-            </button>
-            <button
-              type="button"
-              onClick={handleSubscribe}
+              type="submit"
               disabled={subscribe.isPending}
-              className="flex items-center justify-center gap-2 px-6 py-4 bg-brand-secondary text-text-inverse rounded-lg font-semibold hover:bg-opacity-90 transition-opacity shadow-md disabled:opacity-50"
+              className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-brand-secondary px-6 py-4 font-semibold text-text-inverse shadow-md transition-opacity hover:bg-opacity-90 disabled:opacity-50"
             >
-              <CreditCardIcon className="w-5 h-5" />
-              {subscribe.isPending
-                ? "Envoi…"
-                : "Passer au paiement sécurisé"}
+              <CreditCardIcon className="h-5 w-5" />
+              {subscribe.isPending ? "Envoi…" : "Passer au paiement sécurisé"}
             </button>
-          </div>
 
-          <p className="text-xs text-gray-600 text-center mt-6">
-            Votre devis est valable 30 jours. Aucun paiement n’est requis à ce stade.
-          </p>
+            <p className="mt-4 text-center text-xs text-gray-600">
+              En poursuivant, votre demande de police est transmise au partenaire avec le
+              paiement géré par le partenaire.
+            </p>
+          </form>
         </div>
       </div>
     </div>

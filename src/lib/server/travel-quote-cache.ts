@@ -2,9 +2,11 @@ import "server-only";
 
 import { randomBytes } from "crypto";
 
+import type { IGetQuoteResponseDto } from "@/types/travel";
+
 type CachedQuoteBundle = {
   expiresAtMs: number;
-  rawResponse: unknown;
+  rawResponse: IGetQuoteResponseDto;
 };
 
 const store = new Map<string, CachedQuoteBundle>();
@@ -16,8 +18,8 @@ function prune(now: number): void {
   }
 }
 
-export function createTravelQuoteSessionId(
-  rawResponse: unknown,
+export function createQuoteSessionId(
+  rawResponse: IGetQuoteResponseDto,
   ttlMs = DEFAULT_TTL_MS,
 ): string {
   const id = randomBytes(24).toString("hex");
@@ -27,7 +29,7 @@ export function createTravelQuoteSessionId(
   return id;
 }
 
-export function peekTravelQuoteSession(id: string): unknown | null {
+export function peekTravelQuoteSession(id: string): IGetQuoteResponseDto | null {
   const now = Date.now();
   prune(now);
   const hit = store.get(id);

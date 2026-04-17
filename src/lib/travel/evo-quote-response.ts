@@ -1,4 +1,8 @@
-import type { TravelQuoteProductSummary } from "@/types/travel";
+import type {
+  TravelQuoteContext,
+  TravelQuoteGuaranteeSummary,
+  TravelQuoteProductSummary,
+} from "@/types/travel";
 
 type EvoPriceBlock = {
   price_after_discount_incl_tax?: number;
@@ -11,6 +15,13 @@ type EvoProduct = {
   quote_code?: string;
   prices?: EvoPriceBlock;
   currency?: string;
+  duration?: number;
+  composition?: string | null;
+  guarantees?: unknown;
+  attachments?: unknown;
+  is_default_product?: number | boolean;
+  _start_date?: string;
+  _end_date?: string;
 };
 
 function isRecord(v: unknown): v is Record<string, unknown> {
@@ -30,15 +41,94 @@ function pickProductsRoot(data: unknown): EvoProduct[] {
   throw new Error("Réponse devis EVO invalide: champ `products` introuvable.");
 }
 
-function formatPriceLabel(p: EvoProduct): string {
-  const n =
-    p.prices?.price_after_discount_incl_tax ??
-    p.prices?.premium_after_discount_excl_tax ??
-    p.prices?.price_net;
-  if (typeof n === "number" && Number.isFinite(n)) {
-    return String(n);
+function pickContextCurrency(data: unknown): string | undefined {
+  if (!isRecord(data)) return undefined;
+  const ctx = data.context;
+  if (!isRecord(ctx)) return undefined;
+  const c = ctx.currency;
+  return typeof c === "string" && c.trim() ? c.trim() : undefined;
+}
+
+/**
+ * Priorité TTC / HT / net, en ignorant les 0 quand un autre champ est &gt; 0
+ * (l’API peut renvoyer `price_after_discount_incl_tax: 0` avec `price_net` renseigné).
+ */
+function pickDisplayPriceAmount(prices: EvoPriceBlock | undefined): number {
+  if (!prices) {
+    throw new Error("Bloc `prices` manquant dans la réponse devis EVO.");
+  }
+  const ordered: (number | undefined)[] = [
+    prices.price_after_discount_incl_tax,
+    prices.premium_after_discount_excl_tax,
+    prices.price_net,
+  ];
+  for (const n of ordered) {
+    if (typeof n === "number" && Number.isFinite(n) && n > 0) {
+      return n;
+    }
+  }
+  for (const n of ordered) {
+    if (typeof n === "number" && Number.isFinite(n)) {
+      return n;
+    }
   }
   throw new Error("Prix manquant ou invalide dans la réponse devis EVO.");
+}
+
+function extractGuaranteeSummaries(guarantees: unknown): TravelQuoteGuaranteeSummary[] {
+  if (!Array.isArray(guarantees)) return [];
+  const out: TravelQuoteGuaranteeSummary[] = [];
+  for (const g of guarantees) {
+    if (!isRecord(g)) continue;
+    const rawName = g.name ?? g.title ?? g.label;
+    if (typeof rawName !== "string" || !rawName.trim()) continue;
+    let limit: string | undefined;
+    if (typeof g.limit === "string" && g.limit.trim()) {
+      limit = g.limit.trim();
+    } else if (typeof g.description === "string" && g.description.trim()) {
+      limit = g.description.trim();
+    }
+    out.push({ name: rawName.trim(), limit });
+  }
+  return out;
+}
+
+function extractTermsUrl(attachments: unknown): string | undefined {
+  if (!Array.isArray(attachments)) return undefined;
+  for (const a of attachments) {
+    if (!isRecord(a)) continue;
+    if (a.is_terms_and_conditions !== true) continue;
+    const url = a.content_url;
+    if (typeof url === "string" && url.trim()) return url.trim();
+  }
+  return undefined;
+}
+
+function asDefaultProduct(v: unknown): boolean | undefined {
+  if (v === true || v === 1) return true;
+  if (v === false || v === 0) return false;
+  return undefined;
+}
+
+function asOptionalTrimmedString(v: unknown): string | undefined {
+  if (typeof v !== "string" || !v.trim()) return undefined;
+  return v.trim();
+}
+
+function asOptionalNumber(v: unknown): number | undefined {
+  if (typeof v !== "number" || !Number.isFinite(v)) return undefined;
+  return v;
+}
+
+export function extractTravelQuoteContext(data: unknown): TravelQuoteContext | undefined {
+  if (!isRecord(data)) return undefined;
+  const ctx = data.context;
+  if (!isRecord(ctx)) return undefined;
+  const currency = asOptionalTrimmedString(ctx.currency);
+  const country = asOptionalTrimmedString(ctx.country);
+  const language = asOptionalTrimmedString(ctx.language);
+  if (currency == null && country == null && language == null) return undefined;
+  return { currency, country, language };
 }
 
 /**
@@ -51,22 +141,44 @@ export function extractTravelQuoteProductSummaries(
   if (products.length === 0) {
     throw new Error("Aucune offre renvoyée par l'API devis EVO.");
   }
-  return products.map((p, index) => ({
-    index,
-    name:
-      typeof p.name === "string" && p.name.trim()
-        ? p.name
-        : (() => {
-            throw new Error(
-              `Nom de produit manquant pour l'offre #${index + 1}.`,
-            );
-          })(),
-    priceLabel: formatPriceLabel(p),
-    currency:
+  const contextCurrency = pickContextCurrency(data);
+  return products.map((p, index) => {
+    const productCurrency =
       typeof p.currency === "string" && p.currency.trim()
-        ? p.currency
-        : undefined,
-  }));
+        ? p.currency.trim()
+        : undefined;
+    const currency = productCurrency ?? contextCurrency;
+
+    const guaranteeSummaries = extractGuaranteeSummaries(p.guarantees);
+    const termsUrl = extractTermsUrl(p.attachments);
+
+    const composition = asOptionalTrimmedString(p.composition ?? undefined);
+    const tripStartLabel = asOptionalTrimmedString(p._start_date);
+    const tripEndLabel = asOptionalTrimmedString(p._end_date);
+    const duration = asOptionalNumber(p.duration);
+
+    return {
+      index,
+      name:
+        typeof p.name === "string" && p.name.trim()
+          ? p.name.trim()
+          : (() => {
+              throw new Error(
+                `Nom de produit manquant pour l'offre #${index + 1}.`,
+              );
+            })(),
+      price_label: String(pickDisplayPriceAmount(p.prices)),
+      currency,
+      duration,
+      trip_start_label: tripStartLabel,
+      trip_end_label: tripEndLabel,
+      composition: composition ?? undefined,
+      is_default_product: asDefaultProduct(p.is_default_product),
+      guarantee_summaries:
+        guaranteeSummaries.length > 0 ? guaranteeSummaries : undefined,
+      terms_url: termsUrl,
+    };
+  });
 }
 
 export function extractQuoteCodeAtIndex(

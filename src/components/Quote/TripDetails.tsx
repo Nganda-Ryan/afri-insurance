@@ -1,18 +1,22 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useMemo } from "react";
 import { ChevronDownIcon, MinusIcon, PlusIcon } from "lucide-react";
 import { useForm, useWatch } from "react-hook-form";
 
 import { DESTINATION_AREA_OPTIONS } from "@/lib/travel/destination-area";
+import { usePlanStore } from "@/store/planStore";
+import type { IFactorizedDestination } from "@/types/travel";
 import { TripDetailsData } from "@/types/travel";
+import { DAY_IN_MS, TRIP_PRODUCT_CATEGORY_STANDARD } from "@/lib/constants/constant";
 
 
 interface TripDetailsProps {
   onSubmit: (data: TripDetailsData) => void;
+  /** Données déjà validées (ex. retour depuis l'étape suivante). */
+  initialValues?: TripDetailsData | null;
 }
 
-const DAY_IN_MS = 24 * 60 * 60 * 1000;
 const initialDateValues = (() => {
   const now = Date.now();
   return {
@@ -22,41 +26,130 @@ const initialDateValues = (() => {
   };
 })();
 
-export function TripDetails({ onSubmit }: TripDetailsProps) {
+/** Nombre de jours entre deux dates ISO yyyy-mm-dd (inclusive du jour de départ). */
+function daysBetween(start: string, end: string): number {
+  const s = new Date(start).getTime();
+  const e = new Date(end).getTime();
+  return Math.round((e - s) / DAY_IN_MS);
+}
+
+/** Ajoute n jours à une date ISO et retourne la date ISO résultante. */
+function addDaysToIso(iso: string, days: number): string {
+  const d = new Date(iso);
+  d.setDate(d.getDate() + days);
+  return d.toISOString().split("T")[0];
+}
+
+/** Retrouve le label lisible d'une destination à partir de sa valeur API. */
+function destinationLabel(value: string): string {
+  return DESTINATION_AREA_OPTIONS.find((o) => o.value === value)?.label ?? value;
+}
+
+export function TripDetails({ onSubmit, initialValues }: TripDetailsProps) {
   const today = initialDateValues.today;
   const defaultDeparture = initialDateValues.defaultDeparture;
   const defaultReturn = initialDateValues.defaultReturn;
+
+  const plans = usePlanStore((s) => s.plans);
+  const loading = usePlanStore((s) => s.loading);
+
+  /** Options de catégorie dérivées du store. */
+  const categoryOptions = useMemo(
+    () => plans.map((c) => ({ label: c.name, value: c.name })),
+    [plans],
+  );
+
+  const resolvedDefaults = useMemo((): TripDetailsData => {
+    const defaultCategory =
+      categoryOptions.find((o) => o.value === TRIP_PRODUCT_CATEGORY_STANDARD)?.value ??
+      categoryOptions[0]?.value ??
+      TRIP_PRODUCT_CATEGORY_STANDARD;
+
+    return {
+      destination_area: "",
+      start_date: defaultDeparture,
+      end_date: defaultReturn,
+      adult: 2,
+      product_category: defaultCategory as TripDetailsData["product_category"],
+      ...(initialValues ?? {}),
+    };
+  }, [initialValues, defaultDeparture, defaultReturn, categoryOptions]);
+
   const {
     control,
     register,
     handleSubmit,
     setValue,
     trigger,
+    reset,
     formState: { errors, touchedFields },
   } = useForm<TripDetailsData>({
     mode: "onChange",
-    defaultValues: {
-      destination: "",
-      departureDate: defaultDeparture,
-      returnDate: defaultReturn,
-      numberOfTravelers: 2,
-      productCategory: "Standard",
-    },
+    defaultValues: resolvedDefaults,
   });
 
-  const destination = useWatch({ control, name: "destination" });
-  const departureDate = useWatch({ control, name: "departureDate" });
-  const returnDate = useWatch({ control, name: "returnDate" });
-  const numberOfTravelers = useWatch({ control, name: "numberOfTravelers" });
-  const departureDateField = register("departureDate", {
+  useEffect(() => {
+    reset(resolvedDefaults);
+  }, [resolvedDefaults, reset]);
+
+  const productCategory = useWatch({ control, name: "product_category" });
+  const destinationArea = useWatch({ control, name: "destination_area" });
+  const startDate = useWatch({ control, name: "start_date" });
+  const endDate = useWatch({ control, name: "end_date" });
+  const adult = useWatch({ control, name: "adult" });
+
+  /** Catégorie active dans le store. */
+  const activeCategory = useMemo(
+    () => plans.find((c) => c.name === productCategory),
+    [plans, productCategory],
+  );
+
+  /** Options de destination filtrées par catégorie sélectionnée. */
+  const destinationOptions = useMemo(
+    () => activeCategory?.destinations ?? [],
+    [activeCategory],
+  );
+
+  /** Destination active (pour les contraintes de date et de composition). */
+  const selectedDestination: IFactorizedDestination | undefined = useMemo(
+    () => destinationOptions.find((d) => d.destination === destinationArea),
+    [destinationOptions, destinationArea],
+  );
+
+  /** Reset la destination quand la catégorie change (sauf lors du chargement initial). */
+  useEffect(() => {
+    if (!initialValues || productCategory !== initialValues.product_category) {
+      setValue("destination_area", "", {
+        shouldTouch: false,
+        shouldDirty: false,
+        shouldValidate: false,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [productCategory, setValue]);
+
+  /** Re-valide end_date quand selectedDestination change. */
+  useEffect(() => {
+    if (destinationArea) void trigger("end_date");
+  }, [selectedDestination, trigger, destinationArea]);
+
+  const allowGroup = selectedDestination?.composition.includes("group") ?? true;
+  const maxAdults = allowGroup ? 99 : 1;
+
+  const endDateMax =
+    selectedDestination && startDate
+      ? addDaysToIso(startDate, selectedDestination.max_days)
+      : undefined;
+
+  const startDateField = register("start_date", {
     required: "La date de départ est obligatoire",
   });
-  const numberOfTravelersField = register("numberOfTravelers", {
+  const adultField = register("adult", {
     valueAsNumber: true,
-    min: {
-      value: 1,
-      message: "Au moins un voyageur est requis",
-    },
+    min: { value: 1, message: "Au moins un voyageur est requis" },
+    max: allowGroup
+      ? undefined
+      : { value: 1, message: "Cette catégorie n'accepte qu'un voyageur (solo)" },
     validate: (value) =>
       Number.isFinite(value) && value >= 1
         ? true
@@ -76,6 +169,7 @@ export function TripDetails({ onSubmit }: TripDetailsProps) {
       </h2>
 
       <div className="space-y-6">
+        {/* ── Catégorie ── */}
         <div>
           <label
             htmlFor="trip-product-category"
@@ -86,24 +180,28 @@ export function TripDetails({ onSubmit }: TripDetailsProps) {
           <div className="relative isolate">
             <select
               id="trip-product-category"
-              {...register("productCategory")}
-              className="w-full cursor-pointer appearance-none rounded-lg border-2 border-gray-200 bg-white py-3 pl-4 pr-11 text-gray-900 shadow-sm focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/25 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
+              {...register("product_category")}
+              disabled={loading || categoryOptions.length === 0}
+              className="w-full cursor-pointer appearance-none rounded-lg border-2 border-gray-200 bg-white py-3 pl-4 pr-11 text-gray-900 shadow-sm focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/25 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
             >
-              <option value="Standard">Standard</option>
-              <option value="Etudiant">Etudiant</option>
-              <option value="Pèlerinage">Pèlerinage</option>
+              {categoryOptions.length === 0 ? (
+                <option value="">Chargement…</option>
+              ) : (
+                categoryOptions.map((item) => (
+                  <option key={item.value} value={item.value}>
+                    {item.label}
+                  </option>
+                ))
+              )}
             </select>
             <ChevronDownIcon
               className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500 dark:text-zinc-400"
               aria-hidden
             />
           </div>
-          <p className="mt-1 text-xs text-gray-600">
-            Contexte et catalogue EVO utilises: currency EUR, country Cameroun,
-            language FR, reference 81TS0124, version 1.
-          </p>
         </div>
 
+        {/* ── Destination ── */}
         <div>
           <label
             htmlFor="trip-destination-area"
@@ -114,29 +212,35 @@ export function TripDetails({ onSubmit }: TripDetailsProps) {
           <div className="relative isolate">
             <select
               id="trip-destination-area"
-              {...register("destination", {
+              {...register("destination_area", {
                 validate: (value) =>
                   value.trim().length > 0 ||
                   "Veuillez choisir une zone de destination",
               })}
+              disabled={loading || destinationOptions.length === 0}
               className={[
                 "w-full cursor-pointer appearance-none rounded-lg border-2 py-3 pl-4 pr-11",
                 "bg-white text-gray-900 shadow-sm",
                 "dark:bg-zinc-950 dark:text-zinc-100",
                 "focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/25",
-                errors.destination
+                "disabled:cursor-not-allowed disabled:opacity-60",
+                errors.destination_area
                   ? "border-red-500"
-                  : isFieldValid("destination", destination)
+                  : isFieldValid("destination_area", destinationArea)
                     ? "border-green-600 dark:border-green-500"
                     : "border-gray-200 dark:border-zinc-600",
               ].join(" ")}
             >
               <option value="" disabled>
-                Choisir une zone…
+                {loading
+                  ? "Chargement…"
+                  : destinationOptions.length === 0
+                    ? "Choisir une catégorie d'abord…"
+                    : "Choisir une zone…"}
               </option>
-              {DESTINATION_AREA_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
+              {destinationOptions.map((d) => (
+                <option key={d.destination} value={d.destination}>
+                  {destinationLabel(d.destination)}
                 </option>
               ))}
             </select>
@@ -145,13 +249,19 @@ export function TripDetails({ onSubmit }: TripDetailsProps) {
               aria-hidden
             />
           </div>
-          {errors.destination && (
+          {errors.destination_area && (
             <p className="mt-1 text-sm text-red-500">
-              {errors.destination.message}
+              {errors.destination_area.message}
+            </p>
+          )}
+          {selectedDestination && (
+            <p className="mt-1 text-xs text-gray-500">
+              Durée couverte : {selectedDestination.min_days} – {selectedDestination.max_days} jours
             </p>
           )}
         </div>
 
+        {/* ── Dates ── */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <label className="mb-2 block text-sm font-semibold text-text-main">
@@ -159,17 +269,17 @@ export function TripDetails({ onSubmit }: TripDetailsProps) {
             </label>
             <input
               type="date"
-              {...departureDateField}
+              {...startDateField}
               min={today}
               onChange={(e) => {
-                departureDateField.onChange(e);
-                void trigger("returnDate");
+                startDateField.onChange(e);
+                void trigger("end_date");
               }}
-              className={`w-full rounded-lg border-2 bg-white px-4 py-3 text-gray-900 shadow-sm transition-colors focus:bg-white focus:outline-none dark:bg-zinc-950 dark:text-zinc-100 ${errors.departureDate ? "border-red-500" : isFieldValid("departureDate", departureDate) ? "border-green-600 dark:border-green-500" : "border-gray-200 focus:border-brand-primary dark:border-zinc-600"}`}
+              className={`w-full rounded-lg border-2 bg-white px-4 py-3 text-gray-900 shadow-sm transition-colors focus:bg-white focus:outline-none dark:bg-zinc-950 dark:text-zinc-100 ${errors.start_date ? "border-red-500" : isFieldValid("start_date", startDate) ? "border-green-600 dark:border-green-500" : "border-gray-200 focus:border-brand-primary dark:border-zinc-600"}`}
             />
-            {errors.departureDate && (
+            {errors.start_date && (
               <p className="mt-1 text-sm text-red-500">
-                {errors.departureDate.message}
+                {errors.start_date.message}
               </p>
             )}
           </div>
@@ -180,89 +290,102 @@ export function TripDetails({ onSubmit }: TripDetailsProps) {
             </label>
             <input
               type="date"
-              {...register("returnDate", {
+              {...register("end_date", {
                 required: "La date de retour est obligatoire",
-                validate: (value) =>
-                  !departureDate ||
-                  new Date(value) > new Date(departureDate) ||
-                  "La date de retour doit être postérieure au départ",
+                validate: (value) => {
+                  if (!startDate) return true;
+                  if (new Date(value) <= new Date(startDate)) {
+                    return "La date de retour doit être postérieure au départ";
+                  }
+                  if (selectedDestination) {
+                    const diff = daysBetween(startDate, value);
+                    if (diff < selectedDestination.min_days) {
+                      return `Durée minimum : ${selectedDestination.min_days} jour(s)`;
+                    }
+                    if (diff > selectedDestination.max_days) {
+                      return `Durée maximum : ${selectedDestination.max_days} jour(s)`;
+                    }
+                  }
+                  return true;
+                },
               })}
-              min={departureDate || today}
-              className={`w-full rounded-lg border-2 bg-white px-4 py-3 text-gray-900 shadow-sm transition-colors focus:bg-white focus:outline-none dark:bg-zinc-950 dark:text-zinc-100 ${errors.returnDate ? "border-red-500" : isFieldValid("returnDate", returnDate) ? "border-green-600 dark:border-green-500" : "border-gray-200 focus:border-brand-primary dark:border-zinc-600"}`}
+              min={startDate || today}
+              max={endDateMax}
+              className={`w-full rounded-lg border-2 bg-white px-4 py-3 text-gray-900 shadow-sm transition-colors focus:bg-white focus:outline-none dark:bg-zinc-950 dark:text-zinc-100 ${errors.end_date ? "border-red-500" : isFieldValid("end_date", endDate) ? "border-green-600 dark:border-green-500" : "border-gray-200 focus:border-brand-primary dark:border-zinc-600"}`}
             />
-            {errors.returnDate && (
+            {errors.end_date && (
               <p className="mt-1 text-sm text-red-500">
-                {errors.returnDate.message}
+                {errors.end_date.message}
               </p>
             )}
           </div>
         </div>
 
+        {/* ── Nombre de voyageurs ── */}
         <div>
-            <label className="mb-2 block text-sm font-semibold text-text-main">
-                Nombre de voyageurs
-            </label>
-            <div className="flex items-center gap-4">
-                <button
-                    type="button"
-                    onClick={() => {
-                      setValue(
-                        "numberOfTravelers",
-                        Math.max(1, (numberOfTravelers ?? 1) - 1),
-                        {
-                          shouldTouch: true,
-                          shouldDirty: true,
-                          shouldValidate: true,
-                        },
-                      );
-                    }}
-                    className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-gray-200 bg-surface-muted transition-all hover:border-brand-primary hover:bg-brand-primary hover:text-text-inverse dark:border-zinc-600"
-                    >
-                    <MinusIcon className="h-5 w-5" />
-                </button>
-                <div className="max-w-[100px] flex-1">
-                    <input
-                        type="number"
-                        {...numberOfTravelersField}
-                        onChange={(e) => {
-                          numberOfTravelersField.onChange(e);
-                          const nextValue = Math.max(
-                            1,
-                            Number.parseInt(e.target.value, 10) || 1,
-                          );
-                          setValue("numberOfTravelers", nextValue, {
-                            shouldTouch: true,
-                            shouldDirty: true,
-                            shouldValidate: true,
-                          });
-                        }}
-                        className={`w-full rounded-lg border-2 py-3 text-center text-2xl font-bold focus:border-brand-primary focus:outline-none dark:border-zinc-600 ${errors.numberOfTravelers ? "border-red-500" : isFieldValid("numberOfTravelers", numberOfTravelers) ? "border-green-600 dark:border-green-500" : "border-gray-200"}`}
-                    />
-                </div>
-                <button
-                    type="button"
-                    onClick={() => {
-                      setValue(
-                        "numberOfTravelers",
-                        (numberOfTravelers ?? 1) + 1,
-                        {
-                          shouldTouch: true,
-                          shouldDirty: true,
-                          shouldValidate: true,
-                        },
-                      );
-                      void trigger("numberOfTravelers");
-                    }}
-                    className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-gray-200 bg-surface-muted transition-all hover:border-brand-primary hover:bg-brand-primary hover:text-text-inverse dark:border-zinc-600"
-                >
-                    <PlusIcon className="h-5 w-5" />
-                </button>
+          <label className="mb-2 block text-sm font-semibold text-text-main">
+            Nombre de voyageurs
+          </label>
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => {
+                setValue("adult", Math.max(1, (adult ?? 1) - 1), {
+                  shouldTouch: true,
+                  shouldDirty: true,
+                  shouldValidate: true,
+                });
+              }}
+              className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-gray-200 bg-surface-muted transition-all hover:border-brand-primary hover:bg-brand-primary hover:text-text-inverse dark:border-zinc-600"
+            >
+              <MinusIcon className="h-5 w-5" />
+            </button>
+            <div className="max-w-[100px] flex-1">
+              <input
+                type="number"
+                {...adultField}
+                onChange={(e) => {
+                  adultField.onChange(e);
+                  const nextValue = Math.min(
+                    maxAdults,
+                    Math.max(1, Number.parseInt(e.target.value, 10) || 1),
+                  );
+                  setValue("adult", nextValue, {
+                    shouldTouch: true,
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  });
+                }}
+                min={1}
+                max={maxAdults}
+                className={`w-full rounded-lg border-2 py-3 text-center text-2xl font-bold focus:border-brand-primary focus:outline-none dark:border-zinc-600 ${errors.adult ? "border-red-500" : isFieldValid("adult", adult) ? "border-green-600 dark:border-green-500" : "border-gray-200"}`}
+              />
             </div>
-            {errors.numberOfTravelers && (
-                <p className="mt-1 text-sm text-red-500">
-                {errors.numberOfTravelers.message}
-                </p>
-            )}
+            <button
+              type="button"
+              onClick={() => {
+                if ((adult ?? 1) >= maxAdults) return;
+                setValue("adult", (adult ?? 1) + 1, {
+                  shouldTouch: true,
+                  shouldDirty: true,
+                  shouldValidate: true,
+                });
+                void trigger("adult");
+              }}
+              disabled={(adult ?? 1) >= maxAdults}
+              className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-gray-200 bg-surface-muted transition-all hover:border-brand-primary hover:bg-brand-primary hover:text-text-inverse disabled:cursor-not-allowed disabled:opacity-40 dark:border-zinc-600"
+            >
+              <PlusIcon className="h-5 w-5" />
+            </button>
+          </div>
+          {!allowGroup && (
+            <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">
+              Cette destination n'est disponible qu'en solo.
+            </p>
+          )}
+          {errors.adult && (
+            <p className="mt-1 text-sm text-red-500">{errors.adult.message}</p>
+          )}
         </div>
       </div>
 

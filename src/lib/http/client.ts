@@ -50,8 +50,6 @@ export function getEvoApiClient(): AxiosInstance {
         ? error.response?.status
         : undefined;
 
-      // Fail-fast: ne pas rejouer automatiquement la requête.
-      // En cas de 401, on invalide simplement le cache de token et on remonte l'erreur.
       if (status === 401) clearOAuthTokenCache();
       return Promise.reject(error);
     },

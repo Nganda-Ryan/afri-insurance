@@ -1,17 +1,15 @@
 import { z } from "zod";
 
-export const travelQuoteWizardInputSchema = z
-  .object({
-    destination: z.string().min(1),
-    departureDate: z.string().min(1),
-    returnDate: z.string().min(1),
-    numberOfTravelers: z.number().int().positive().max(50),
-    oldestTravelerBirthDate: z.string().min(1),
-    productCategory: z.enum(["Standard", "Etudiant", "Pèlerinage"]),
-    catalogReference: z.string().min(1),
-    catalogVersion: z.number().int().positive(),
-  })
-  ;
+export const travelQuoteWizardInputSchema = z.object({
+  destination_area: z.string().min(1),
+  start_date: z.string().min(1),
+  end_date: z.string().min(1),
+  adult: z.number().int().positive().max(50),
+  oldest_traveler_age: z.number().int().min(18).max(99),
+  product_category: z.enum(["Standard", "Etudiant", "Pèlerinage"]),
+  catalog_reference: z.string().min(1),
+  catalog_version: z.number().int().positive(),
+});
 
 export const policyPersonSchema = z.object({
   title: z.string().min(1),
@@ -42,13 +40,11 @@ export const subscribePolicyInputSchema = z.object({
   agent_scope: z.string(),
   policy_holder: z.array(policyPersonSchema).min(1),
   beneficiaries: z.array(beneficiarySchema).min(1),
-  consents: z.array(z.unknown()),
-  payment: z
-    .object({
-      type: z.string().min(1),
-    })
-  ,
-  addons: z.array(z.unknown()),
+  consents: z.array(z.string()),
+  payment: z.object({
+    type: z.string().min(1),
+  }),
+  addons: z.array(z.string()),
 });
 
 export const policiesByDateInputSchema = z.object({

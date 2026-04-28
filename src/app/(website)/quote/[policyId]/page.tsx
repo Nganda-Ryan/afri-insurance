@@ -59,7 +59,7 @@ export default function Page() {
       <PolicySuccessBanner policyNumber={policy.policy_number} />
       <PolicyOverviewCard policy={policy} />
       <PolicyBeneficiaryCard beneficiaries={policy.beneficiaries} />
-      <PolicyHolderCard policyHolder={policy.policy_holder} />
+      <PolicyHolderCard policyHolder={policy.policy_holder[0]} />
       {policy.attachments.length > 0 && (
         <PolicyDocumentsCard attachments={policy.attachments} />
       )}

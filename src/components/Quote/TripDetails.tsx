@@ -2,13 +2,18 @@
 
 import React, { useEffect, useMemo } from "react";
 import { ChevronDownIcon, MinusIcon, PlusIcon } from "lucide-react";
-import { useForm, useWatch } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 
 import { DESTINATION_AREA_OPTIONS } from "@/lib/travel/destination-area";
 import { usePlanStore } from "@/store/planStore";
 import type { IFactorizedDestination } from "@/types/travel";
 import { TripDetailsData } from "@/types/travel";
 import { DAY_IN_MS, TRIP_PRODUCT_CATEGORY_STANDARD } from "@/lib/constants/constant";
+import DatePicker from "@/components/form/date-picker";
+import Label from "@/components/form/Label";
+import Select from "@/components/form/Select";
+import InputField from "@/components/form/input/InputField";
+import Button from "@/components/ui/button/Button";
 
 
 interface TripDetailsProps {
@@ -141,9 +146,6 @@ export function TripDetails({ onSubmit, initialValues }: TripDetailsProps) {
       ? addDaysToIso(startDate, selectedDestination.max_days)
       : undefined;
 
-  const startDateField = register("start_date", {
-    required: "La date de départ est obligatoire",
-  });
   const adultField = register("adult", {
     valueAsNumber: true,
     min: { value: 1, message: "Au moins un voyageur est requis" },
@@ -162,7 +164,7 @@ export function TripDetails({ onSubmit, initialValues }: TripDetailsProps) {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="rounded-lg border border-gray-100 bg-surface-base p-6 shadow-sm lg:p-8"
+      className="rounded-lg border-gray-100 bg-surface-base p-6 lg:p-8"
     >
       <h2 className="mb-6 text-2xl font-bold text-brand-secondary">
         Détails du voyage
@@ -171,29 +173,27 @@ export function TripDetails({ onSubmit, initialValues }: TripDetailsProps) {
       <div className="space-y-6">
         {/* ── Catégorie ── */}
         <div>
-          <label
-            htmlFor="trip-product-category"
-            className="mb-2 block text-sm font-semibold text-text-main"
-          >
+          <Label htmlFor="trip-product-category" className="mb-2 font-semibold text-text-main">
             Catégorie de produit
-          </label>
+          </Label>
           <div className="relative isolate">
-            <select
-              id="trip-product-category"
-              {...register("product_category")}
-              disabled={loading || categoryOptions.length === 0}
-              className="w-full cursor-pointer appearance-none rounded-lg border-2 border-gray-200 bg-white py-3 pl-4 pr-11 text-gray-900 shadow-sm focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/25 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
-            >
-              {categoryOptions.length === 0 ? (
-                <option value="">Chargement…</option>
-              ) : (
-                categoryOptions.map((item) => (
-                  <option key={item.value} value={item.value}>
-                    {item.label}
-                  </option>
-                ))
+            <Controller
+              control={control}
+              name="product_category"
+              render={({ field }) => (
+                <Select
+                  id="trip-product-category"
+                  name={field.name}
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  disabled={loading || categoryOptions.length === 0}
+                  placeholder={categoryOptions.length === 0 ? "Chargement…" : "Choisir une catégorie…"}
+                  options={categoryOptions}
+                  className="border border-gray-200 bg-white py-3 pl-4 pr-11 text-gray-900 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/25 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
+                />
               )}
-            </select>
+            />
             <ChevronDownIcon
               className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500 dark:text-zinc-400"
               aria-hidden
@@ -203,47 +203,42 @@ export function TripDetails({ onSubmit, initialValues }: TripDetailsProps) {
 
         {/* ── Destination ── */}
         <div>
-          <label
-            htmlFor="trip-destination-area"
-            className="mb-2 block text-sm font-semibold text-text-main"
-          >
+          <Label htmlFor="trip-destination-area" className="mb-2 font-semibold text-text-main">
             Zone de destination (couverture)
-          </label>
+          </Label>
           <div className="relative isolate">
-            <select
-              id="trip-destination-area"
-              {...register("destination_area", {
+            <Controller
+              control={control}
+              name="destination_area"
+              rules={{
                 validate: (value) =>
                   value.trim().length > 0 ||
                   "Veuillez choisir une zone de destination",
-              })}
-              disabled={loading || destinationOptions.length === 0}
-              className={[
-                "w-full cursor-pointer appearance-none rounded-lg border-2 py-3 pl-4 pr-11",
-                "bg-white text-gray-900 shadow-sm",
-                "dark:bg-zinc-950 dark:text-zinc-100",
-                "focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/25",
-                "disabled:cursor-not-allowed disabled:opacity-60",
-                errors.destination_area
-                  ? "border-red-500"
-                  : isFieldValid("destination_area", destinationArea)
-                    ? "border-green-600 dark:border-green-500"
-                    : "border-gray-200 dark:border-zinc-600",
-              ].join(" ")}
-            >
-              <option value="" disabled>
-                {loading
-                  ? "Chargement…"
-                  : destinationOptions.length === 0
-                    ? "Choisir une catégorie d'abord…"
-                    : "Choisir une zone…"}
-              </option>
-              {destinationOptions.map((d) => (
-                <option key={d.destination} value={d.destination}>
-                  {destinationLabel(d.destination)}
-                </option>
-              ))}
-            </select>
+              }}
+              render={({ field }) => (
+                <Select
+                  id="trip-destination-area"
+                  name={field.name}
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  disabled={loading || destinationOptions.length === 0}
+                  placeholder={
+                    loading
+                      ? "Chargement…"
+                      : destinationOptions.length === 0
+                        ? "Choisir une catégorie d&apos;abord…"
+                        : "Choisir une zone…"
+                  }
+                  options={destinationOptions.map((d) => ({
+                    value: d.destination,
+                    label: destinationLabel(d.destination),
+                  }))}
+                  error={!!errors.destination_area}
+                  className="border border-gray-200 bg-white py-3 pl-4 pr-11 text-gray-900 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/25 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
+                />
+              )}
+            />
             <ChevronDownIcon
               className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500 dark:text-zinc-400"
               aria-hidden
@@ -264,18 +259,27 @@ export function TripDetails({ onSubmit, initialValues }: TripDetailsProps) {
         {/* ── Dates ── */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
-            <label className="mb-2 block text-sm font-semibold text-text-main">
-              Date de départ
-            </label>
-            <input
-              type="date"
-              {...startDateField}
-              min={today}
-              onChange={(e) => {
-                startDateField.onChange(e);
-                void trigger("end_date");
-              }}
-              className={`w-full rounded-lg border-2 bg-white px-4 py-3 text-gray-900 shadow-sm transition-colors focus:bg-white focus:outline-none dark:bg-zinc-950 dark:text-zinc-100 ${errors.start_date ? "border-red-500" : isFieldValid("start_date", startDate) ? "border-green-600 dark:border-green-500" : "border-gray-200 focus:border-brand-primary dark:border-zinc-600"}`}
+            <Controller
+              control={control}
+              name="start_date"
+              rules={{ required: "La date de départ est obligatoire" }}
+              render={({ field }) => (
+                <DatePicker
+                  id="trip-start-date"
+                  name={field.name}
+                  label="Date de départ"
+                  value={field.value}
+                  min={today}
+                  onChange={(nextValue: string) => {
+                    field.onChange(nextValue);
+                    void trigger("end_date");
+                  }}
+                  onBlur={field.onBlur}
+                  error={!!errors.start_date}
+                  success={isFieldValid("start_date", startDate)}
+                  className="border bg-white dark:bg-zinc-950 dark:text-zinc-100"
+                />
+              )}
             />
             {errors.start_date && (
               <p className="mt-1 text-sm text-red-500">
@@ -285,12 +289,10 @@ export function TripDetails({ onSubmit, initialValues }: TripDetailsProps) {
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-semibold text-text-main">
-              Date de retour
-            </label>
-            <input
-              type="date"
-              {...register("end_date", {
+            <Controller
+              control={control}
+              name="end_date"
+              rules={{
                 required: "La date de retour est obligatoire",
                 validate: (value) => {
                   if (!startDate) return true;
@@ -308,10 +310,22 @@ export function TripDetails({ onSubmit, initialValues }: TripDetailsProps) {
                   }
                   return true;
                 },
-              })}
-              min={startDate || today}
-              max={endDateMax}
-              className={`w-full rounded-lg border-2 bg-white px-4 py-3 text-gray-900 shadow-sm transition-colors focus:bg-white focus:outline-none dark:bg-zinc-950 dark:text-zinc-100 ${errors.end_date ? "border-red-500" : isFieldValid("end_date", endDate) ? "border-green-600 dark:border-green-500" : "border-gray-200 focus:border-brand-primary dark:border-zinc-600"}`}
+              }}
+              render={({ field }) => (
+                <DatePicker
+                  id="trip-end-date"
+                  name={field.name}
+                  label="Date de retour"
+                  value={field.value}
+                  min={startDate || today}
+                  max={endDateMax}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  error={!!errors.end_date}
+                  success={isFieldValid("end_date", endDate)}
+                  className="border bg-white dark:bg-zinc-950 dark:text-zinc-100"
+                />
+              )}
             />
             {errors.end_date && (
               <p className="mt-1 text-sm text-red-500">
@@ -323,12 +337,13 @@ export function TripDetails({ onSubmit, initialValues }: TripDetailsProps) {
 
         {/* ── Nombre de voyageurs ── */}
         <div>
-          <label className="mb-2 block text-sm font-semibold text-text-main">
+          <Label htmlFor="trip-adult-count" className="mb-2 font-semibold text-text-main">
             Nombre de voyageurs
-          </label>
+          </Label>
           <div className="flex items-center gap-4">
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={() => {
                 setValue("adult", Math.max(1, (adult ?? 1) - 1), {
                   shouldTouch: true,
@@ -336,12 +351,14 @@ export function TripDetails({ onSubmit, initialValues }: TripDetailsProps) {
                   shouldValidate: true,
                 });
               }}
-              className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-gray-200 bg-surface-muted transition-all hover:border-brand-primary hover:bg-brand-primary hover:text-text-inverse dark:border-zinc-600"
+              className="h-12 w-12 rounded-lg  border-gray-200 bg-surface-muted p-0 hover:border-brand-primary hover:bg-brand-primary hover:text-text-inverse dark:border-zinc-600"
+              startIcon={<MinusIcon className="h-5 w-5" />}
             >
-              <MinusIcon className="h-5 w-5" />
-            </button>
+              <span className="sr-only">Diminuer</span>
+            </Button>
             <div className="max-w-[100px] flex-1">
-              <input
+              <InputField
+                id="trip-adult-count"
                 type="number"
                 {...adultField}
                 onChange={(e) => {
@@ -358,11 +375,14 @@ export function TripDetails({ onSubmit, initialValues }: TripDetailsProps) {
                 }}
                 min={1}
                 max={maxAdults}
-                className={`w-full rounded-lg border-2 py-3 text-center text-2xl font-bold focus:border-brand-primary focus:outline-none dark:border-zinc-600 ${errors.adult ? "border-red-500" : isFieldValid("adult", adult) ? "border-green-600 dark:border-green-500" : "border-gray-200"}`}
+                error={!!errors.adult}
+                success={isFieldValid("adult", adult)}
+                className="bg-white dark:bg-zinc-950 dark:text-zinc-100 pl-10"
               />
             </div>
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={() => {
                 if ((adult ?? 1) >= maxAdults) return;
                 setValue("adult", (adult ?? 1) + 1, {
@@ -373,14 +393,15 @@ export function TripDetails({ onSubmit, initialValues }: TripDetailsProps) {
                 void trigger("adult");
               }}
               disabled={(adult ?? 1) >= maxAdults}
-              className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-gray-200 bg-surface-muted transition-all hover:border-brand-primary hover:bg-brand-primary hover:text-text-inverse disabled:cursor-not-allowed disabled:opacity-40 dark:border-zinc-600"
+              className="h-12 w-12 rounded-lg  border-gray-200 bg-surface-muted p-0 hover:border-brand-primary hover:bg-brand-primary hover:text-text-inverse dark:border-zinc-600"
+              startIcon={<PlusIcon className="h-5 w-5" />}
             >
-              <PlusIcon className="h-5 w-5" />
-            </button>
+              <span className="sr-only">Augmenter</span>
+            </Button>
           </div>
           {!allowGroup && (
             <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">
-              Cette destination n'est disponible qu'en solo.
+              Cette destination n&apos;est disponible qu&apos;en solo.
             </p>
           )}
           {errors.adult && (
@@ -390,12 +411,13 @@ export function TripDetails({ onSubmit, initialValues }: TripDetailsProps) {
       </div>
 
       <div className="mt-8 flex justify-end">
-        <button
+        <Button
           type="submit"
-          className="rounded-lg bg-brand-primary px-8 py-3 font-semibold text-text-inverse shadow-md transition-opacity hover:bg-opacity-90"
+          variant="primary"
+          className="px-8"
         >
           Continuer
-        </button>
+        </Button>
       </div>
     </form>
   );

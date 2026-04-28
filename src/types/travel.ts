@@ -295,70 +295,131 @@ export type IGetPlanResponseDtoFactorize = IFactorizedCategory[];
    GET travel/policies/:policyId  (04 - Get Policy Data)
 ───────────────────────────────────────────────────────────── */
 
-export interface IPolicyProduct {
-  code: number;
-  name: string;
-  category: string;
+export interface IPolicyData {
+  policy_id: number;
+  policy_status: string;
+  status: {
+    value: string;
+  };
+  start_date: string;
+  end_date: string;
+  pays: string | null;
+  company: string;
+  company_id: number;
+  traveler_type: string;
+  cancel_date: string | null;
+  beneficiary_count: number;
+  catalog: ICatalog;
+  created_at: string;
+  updated_at: string;
+  product: IProduct;
+  addons: any[];
+  payment: any[];
+  policy_holder: IPolicyHolder[];
+  beneficiaries: IBeneficiary[];
+  attachments: IAttachment[];
+  other_fields: IOtherFields;
+  group: any[];
+  vehicles: any[];
+  imported: any | null;
+  coverage_period: ICoveragePeriod;
+  type: string;
+  quoting_criteria: IQuotingCriterion[];
+  attachments_generated: number;
+  policy_number: string;
+  tarification_saham: number;
+  scope_id: number;
 }
 
-export interface IPolicyCatalog {
+export interface ICatalog {
   code: string;
   version: string;
   currency: string;
 }
 
-export interface IPolicyHolder {
-  title: string;
-  first_name: string;
-  last_name: string;
-  email: string;
+export interface IProduct {
+  code: number;
+  name: string;
+  total_taxes: number;
+  price_after_discount_inc_tax: number;
+  premium_after_discount_excl_tax: number;
+  price_after_discount_exl_addon: number;
+  category: string;
+  child_max_age: number;
+  spouse_max_age: number;
+  adultsupp_max_age: number;
+  vehicule_max_age: number;
 }
 
-export interface IPolicyBeneficiary {
+export interface IPolicyHolder {
+  policy_holder_id: number;
+  policy_holder_title: string;
+  policy_holder_first_name: string;
+  policy_holder_last_name: string;
+  policy_holder_birth_date: string | null;
+  policy_holder_email: string;
+  policy_holder_passport_number: string | null;
+  policy_holder_phone_number: string | null;
+  policy_holder_residence_country: string | null;
+  policy_holder_nationality: string | null;
+  policy_holder_address: string | null;
+  policy_holder_rib: string | null;
+  policy_holder_destination_country: string | null;
+  policy_holder_city: string | null;
+  policy_id: number;
+}
+
+export interface IBeneficiary {
   id: number;
   title: string;
   first_name: string;
   last_name: string;
   email: string;
-  birth_date: string;
-  passport_number: string;
-  phone_number: string;
+  birth_date: string | null;
+  passport_number: string | null;
+  phone_number: string | null;
+  residence_country: string | null;
+  nationality: string | null;
+  address: string | null;
+  destination_country: string | null;
+  cin: string | null;
+  profession: string | null;
+  status: number;
+  passeport_delivrance_date: string | null;
+  passeport_exp_date: string | null;
+  other_countries: string | null;
+  city: string | null;
+  policy_id: number;
+  num_bank_account: string | null;
+  account_manager_name: string | null;
 }
 
-export interface IPolicyQuotingCriteria {
-  destination: string;
-  trip_duration: number;
-  party_composition: string;
-  number_of_travelers: number;
-  beneficiary_age: number;
-}
-
-export interface IPolicyAttachment {
+export interface IAttachment {
   file_name: string;
+  name: string;
   type: string;
   created_at: string;
   content_url: string;
 }
 
-export interface IPolicyCoveragePeriod {
+export interface IOtherFields {
+  beneficiaire_obseque: string;
+  label_autres_contrats: string;
+  entreprise_assurance: string;
+  circonstances_susceptibles: string;
+  frais_funeraires: string;
+  contract_number: string;
+  date_first_subscription: string;
+  date_renouvellement: string;
+  date_resiliation: string;
+}
+
+export interface ICoveragePeriod {
   start_date: string;
   end_date: string;
 }
 
-export interface IPolicyData {
-  policy_id: number;
-  policy_number: string;
-  policy_status: string;
-  start_date: string;
-  end_date: string;
-  company: string;
-  type: string;
-  created_at: string;
-  product: IPolicyProduct;
-  catalog: IPolicyCatalog;
-  policy_holder: IPolicyHolder;
-  beneficiaries: IPolicyBeneficiary[];
-  quoting_criteria: IPolicyQuotingCriteria;
-  attachments: IPolicyAttachment[];
-  coverage_period: IPolicyCoveragePeriod;
+export interface IQuotingCriterion {
+  code: string;
+  value: string | number | null;
 }

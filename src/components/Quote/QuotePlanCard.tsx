@@ -3,6 +3,7 @@
 import { CheckIcon, ChevronDownIcon } from "lucide-react";
 
 import type { PlanDetails } from "@/types/travel";
+import Button from "@/components/ui/button/Button";
 
 function formatQuoteMoney(value: number): string {
   return value.toLocaleString("fr-FR", {
@@ -33,10 +34,10 @@ export function QuotePlanCard({
 
   return (
     <article
-      className={`relative flex flex-col rounded-xl border bg-surface-base p-4 shadow-sm transition-all hover:shadow-md ${highlighted ? "border-2 border-brand-secondary md:scale-[1.02]" : "border-gray-200 dark:border-gray-700"}`}
+      className={`relative bg-white dark:bg-zinc-950 dark:text-zinc-100 flex flex-col rounded-xl border bg-surface-base p-4 transition-all hover:shadow-md ${highlighted ? "border border-brand-secondary md:scale-[1.02]" : "border-gray-200 dark:border-gray-700"}`}
     >
       {plan.is_default_product && (
-        <div className="absolute -top-3 left-1/2 z-10 -translate-x-1/2 rounded-full bg-brand-primary px-4 py-1 text-sm font-bold text-text-inverse shadow-md">
+        <div className="absolute -top-3 left-1/2 z-10 -translate-x-1/2 rounded-full bg-brand-primary px-4 py-1 text-sm font-semibold text-text-inverse bg-orange-500 text-white">
           Recommandée
         </div>
       )}
@@ -46,7 +47,7 @@ export function QuotePlanCard({
         </div>
       )}
 
-      <div className="mb-4 text-center">
+      <div className="mb-4 mt-2 text-center">
         <h3 className="mb-2 text-xl font-bold text-brand-secondary">
           {plan.name}
         </h3>
@@ -63,7 +64,7 @@ export function QuotePlanCard({
         </div>
       </div>
 
-      <div className="mb-4 flex-1">
+      <div className="mb-4 flex-1 text-center">
         {hasGuarantees ? (
           <>
             <button
@@ -105,14 +106,15 @@ export function QuotePlanCard({
         ) : null}
       </div>
 
-      <button
+      <Button
         type="button"
         disabled={isSelecting}
         onClick={onChoose}
-        className={`mt-auto w-full rounded-lg py-3 font-semibold transition-all disabled:opacity-60 ${highlighted ? "bg-brand-primary text-text-inverse shadow-md hover:bg-opacity-90" : "border-2 border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-text-inverse"}`}
+        variant={highlighted ? "primary" : "outline"}
+        className={`mt-auto w-full font-semibold transition-all disabled:opacity-60! ${highlighted ? "shadow-md" : "border! border-brand-primary! bg-transparent! text-brand-primary! ring-0! hover:bg-brand-primary! hover:text-text-inverse! dark:border-brand-primary! dark:text-brand-primary! dark:hover:bg-brand-primary! dark:hover:text-text-inverse!"}`}
       >
         {isSelecting ? "Sélection…" : `Choisir ${plan.name}`}
-      </button>
+      </Button>
     </article>
   );
 }

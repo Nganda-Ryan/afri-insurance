@@ -5,7 +5,6 @@ import React from "react";
 
 import LandingHeader from "@/components/website/header/LandingHeader";
 import { WebsiteShell } from "@/components/website/WebsiteShell";
-import { QueryProvider } from "@/components/providers/query-provider";
 import { WebsiteToaster } from "@/components/providers/website-toaster";
 
 export const metadata: Metadata = {
@@ -22,11 +21,9 @@ export default function Layout({
   return (
     <div>
       <LandingHeader />
-      <div className="dark:bg-boxdark-2 dark:text-bodydark bg-blue-sky mt-28 mb-20">
-        <QueryProvider>
-          <WebsiteShell>{children}</WebsiteShell>
-          <WebsiteToaster />
-        </QueryProvider>
+      <div className="dark:bg-boxdark-2 dark:text-bodydark bg-blue-sky mt-15 mb-20">
+        <WebsiteShell>{children}</WebsiteShell>
+        <WebsiteToaster />
       </div>
       {/* <LandingFooter /> */}
     </div>

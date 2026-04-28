@@ -28,24 +28,19 @@ export function QuotationWizardSidebar({ currentProduct, onProductChange }: Side
     },
     {
       id: 'home',
-      label: 'Home Insurance',
+      label: 'Assurance maladie',
       icon: <HomeIcon className="w-5 h-5" />,
     },
     {
       id: 'auto',
-      label: 'Auto Insurance',
+      label: 'Assurance auto',
       icon: <CarIcon className="w-5 h-5" />,
-    },
-    {
-      id: 'pet',
-      label: 'Pet Insurance',
-      icon: <PawPrintIcon className="w-5 h-5" />,
     },
   ]
   return (
-    <>
+    <div className='bg-white'>
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:block w-64 bg-brand-secondary min-h-screen sticky top-0">
+      <aside className="hidden lg:block w-64 bg-brand-secondary min-h-screen sticky top-0 border-r border-r-gray-300">
         <div className="p-6">
           <h2 className="text-text-inverse text-xl font-bold mb-8">
             Insurance Portal
@@ -60,10 +55,12 @@ export function QuotationWizardSidebar({ currentProduct, onProductChange }: Side
                     onClick={() => onProductChange(item.id)}
                     onMouseEnter={() => setHoveredItem(item.id)}
                     onMouseLeave={() => setHoveredItem(null)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${isActive ? 'bg-brand-secondary text-text-inverse border-l-4 border-brand-primary' : 'text-text-inverse text-opacity-70 hover:text-opacity-100 hover:bg-white hover:bg-opacity-10'}`}
+                    className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-all ${isActive ? 'bg-orange-500/15 text-text-inverse border-l-4 border-orange-500' : 'text-text-inverse text-opacity-70 hover:text-opacity-100 hover:bg-white hover:bg-opacity-10'}`}
                   >
-                    {item.icon}
-                    <span className="font-medium">{item.label}</span>
+                    <span className="flex items-center gap-3">
+                      {item.icon}
+                      <span className="font-medium">{item.label}</span>
+                    </span>
                   </button>
 
                   {!isActive && isHovered && (
@@ -88,7 +85,7 @@ export function QuotationWizardSidebar({ currentProduct, onProductChange }: Side
               <button
                 key={item.id}
                 onClick={() => onProductChange(item.id)}
-                className={`flex items-center gap-2 px-6 py-4 whitespace-nowrap transition-all ${isActive ? 'text-text-inverse border-b-4 border-brand-primary bg-white bg-opacity-10' : 'text-text-inverse text-opacity-70'}`}
+                className={`flex items-center gap-2 px-6 py-4 whitespace-nowrap transition-all ${isActive ? 'text-text-inverse border-b-4 border-orange-500 bg-orange-500/15' : 'text-text-inverse text-opacity-70'}`}
               >
                 {item.icon}
                 <span className="font-medium text-sm">{item.label}</span>
@@ -97,6 +94,6 @@ export function QuotationWizardSidebar({ currentProduct, onProductChange }: Side
           })}
         </div>
       </div>
-    </>
+    </div>
   )
 }

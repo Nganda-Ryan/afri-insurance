@@ -6,6 +6,9 @@ import { useForm, useWatch } from "react-hook-form";
 
 import { usePlanStore } from "@/store/planStore";
 import type { TravelerInfoData, TripDetailsData } from "@/types/travel";
+import InputField from "@/components/form/input/InputField";
+import Label from "@/components/form/Label";
+import Button from "@/components/ui/button/Button";
 
 interface TravelerInfoProps {
   onSubmit: (data: TravelerInfoData) => void;
@@ -89,7 +92,7 @@ export function TravelerInfo({
       onSubmit={handleSubmit((data) =>
         onSubmit({ oldest_traveler_age: data.oldest_traveler_age }),
       )}
-      className="rounded-lg border border-gray-100 bg-surface-base p-6 shadow-sm lg:p-8"
+      className="rounded-lg bg-surface-base p-6 lg:p-8"
     >
       <h2 className="mb-6 text-2xl font-bold text-brand-secondary">
         Voyageur le plus âgé
@@ -97,10 +100,10 @@ export function TravelerInfo({
 
       <div className="space-y-6">
         <div>
-          <label className="mb-2 block text-sm font-semibold text-text-main">
+          <Label className="mb-2 font-semibold text-text-main">
             Âge du voyageur le plus âgé
-          </label>
-          <input
+          </Label>
+          <InputField
             type="number"
             {...register("oldest_traveler_age", {
               valueAsNumber: true,
@@ -116,13 +119,9 @@ export function TravelerInfo({
             })}
             min={ageMin}
             max={ageMax}
-            className={`w-full rounded-lg border-2 bg-surface-muted px-4 py-3 transition-colors focus:bg-surface-base focus:outline-none ${
-              errors.oldest_traveler_age
-                ? "border-red-500"
-                : isAgeValid
-                  ? "border-green-500"
-                  : "border-gray-200 focus:border-brand-primary"
-            }`}
+            error={!!errors.oldest_traveler_age}
+            success={isAgeValid}
+            className="w-full border bg-surface-muted px-4 py-3 transition-colors focus:bg-surface-base bg-white dark:bg-zinc-950 dark:text-zinc-100"
           />
           {errors.oldest_traveler_age && (
             <p className="mt-1 text-sm text-red-500">
@@ -138,9 +137,9 @@ export function TravelerInfo({
 
         {/* Tranches disponibles pour cette destination */}
         {ageRanges.length > 0 && (
-          <div className="rounded-lg border border-gray-100 bg-surface-muted px-4 py-3">
+          <div className="rounded-lg border bg-white dark:bg-zinc-950 dark:text-zinc-100 px-4 py-3">
             <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-main">
-              Tranches d'âge couvertes
+              Tranches d&apos;âge couvertes
             </p>
             <ul className="flex flex-wrap gap-2">
               {ageRanges.map((r) => (
@@ -162,20 +161,22 @@ export function TravelerInfo({
       </div>
 
       <div className="mt-8 flex justify-between">
-        <button
+        <Button
           type="button"
+          variant="outline"
           onClick={onBack}
-          className="flex items-center gap-2 rounded-lg border-2 border-gray-300 px-6 py-3 font-semibold text-text-main transition-colors hover:border-brand-secondary"
+          className="rounded-lg px-6 py-3 font-semibold text-text-main hover:border-brand-secondary"
+          startIcon={<ChevronLeftIcon className="h-5 w-5" />}
         >
-          <ChevronLeftIcon className="h-5 w-5" />
           Retour
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
-          className="rounded-lg bg-brand-primary px-8 py-3 font-semibold text-text-inverse shadow-md transition-opacity hover:bg-opacity-90"
+          variant="primary"
+          className="px-8"
         >
           Continuer
-        </button>
+        </Button>
       </div>
     </form>
   );

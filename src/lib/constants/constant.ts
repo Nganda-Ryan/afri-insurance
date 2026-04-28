@@ -33,6 +33,21 @@ export const QUOTE_PRODUCT_CODE_HOME = "habitation";
 export const QUOTE_PRODUCT_CODE_AUTO = "auto";
 export const QUOTE_PRODUCT_CODE_PET = "animaux";
 
+/* POLICY TYPES (source de vérité DB) */
+export const POLICY_TYPE_TRAVEL = "travel";
+export const POLICY_TYPE_HOME = "home";
+export const POLICY_TYPE_AUTO = "auto";
+export const POLICY_TYPE_PET = "pet";
+
+export const POLICY_TYPE_VALUES = [
+  POLICY_TYPE_TRAVEL,
+  POLICY_TYPE_HOME,
+  POLICY_TYPE_AUTO,
+  POLICY_TYPE_PET,
+] as const;
+
+export type PolicyType = (typeof POLICY_TYPE_VALUES)[number];
+
 /** Codes URL pour chaque étape du wizard devis voyage. */
 export const QUOTE_WIZARD_STEP_CODE_TRIP = "voyage";
 export const QUOTE_WIZARD_STEP_CODE_TRAVELER = "voyageur";

@@ -17,7 +17,11 @@ import {
   peekTravelQuoteSession,
 } from "@/lib/server/travel-quote-cache";
 import { getTravelSessionCookieBase } from "@/lib/server/travel-session-cookie-base";
-import { subscribePolicyInputSchema } from "@/schemas/travel";
+import {
+  cancelPolicyInputSchema,
+  subscribePolicyInputSchema,
+  updatePolicyInputSchema,
+} from "@/schemas/travel";
 import { travelService } from "@/services/travel.service";
 import {
   extractQuoteCodeAtIndex,
@@ -155,6 +159,82 @@ export async function getTravelPolicyAction(
   try {
     const data = await travelService.getPolicy(policyId);
     return actionOk(data as IPolicyData);
+  } catch (e) {
+    return actionFail(readAxiosFeCode(e), readAxiosErrorMessage(e));
+  }
+}
+
+export async function getTravelPolicyCertificateAction(
+  policyId: string,
+): Promise<
+  ActionResult<{
+    fileName: string;
+    contentType: string;
+    base64: string;
+  }>
+> {
+  if (!policyId) {
+    return actionFail("INVALID_POLICY_ID", "Identifiant de police invalide.");
+  }
+
+  try {
+    const certificate = await travelService.getPolicyCertificate(policyId);
+    const base64 = Buffer.from(certificate).toString("base64");
+    return actionOk({
+      fileName: `police-${policyId}.pdf`,
+      contentType: "application/pdf",
+      base64,
+    });
+  } catch (e) {
+    return actionFail(readAxiosFeCode(e), readAxiosErrorMessage(e));
+  }
+}
+
+export async function cancelTravelPolicyAction(input: {
+  policyId: string;
+  cancellation_reason: string;
+}): Promise<ActionResult<Record<string, never>>> {
+  if (!input.policyId) {
+    return actionFail("INVALID_POLICY_ID", "Identifiant de police invalide.");
+  }
+
+  const parsed = cancelPolicyInputSchema.safeParse({
+    cancellation_reason: input.cancellation_reason,
+  });
+  if (!parsed.success) {
+    return actionFail(
+      "VALIDATION_ERROR",
+      parsed.error.issues[0]?.message ?? "Données d'annulation invalides.",
+    );
+  }
+
+  try {
+    await travelService.cancelPolicy(input.policyId, parsed.data);
+    return actionOk({});
+  } catch (e) {
+    return actionFail(readAxiosFeCode(e), readAxiosErrorMessage(e));
+  }
+}
+
+export async function updateTravelPolicyAction(input: {
+  policyId: string;
+  payload: Record<string, unknown>;
+}): Promise<ActionResult<Record<string, never>>> {
+  if (!input.policyId) {
+    return actionFail("INVALID_POLICY_ID", "Identifiant de police invalide.");
+  }
+  const parsed = updatePolicyInputSchema.safeParse(input.payload);
+  if (!parsed.success) {
+    return actionFail(
+      "VALIDATION_ERROR",
+      parsed.error.issues[0]?.message ??
+        "Le payload de mise à jour est invalide.",
+    );
+  }
+
+  try {
+    await travelService.updatePolicy(input.policyId, parsed.data);
+    return actionOk({});
   } catch (e) {
     return actionFail(readAxiosFeCode(e), readAxiosErrorMessage(e));
   }

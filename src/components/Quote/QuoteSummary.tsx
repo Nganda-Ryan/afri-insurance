@@ -22,6 +22,7 @@ import { buildGetQuotePayload } from "@/lib/travel/build-get-quote-payload";
 import { PLAN_TYPE_ELITE, PLAN_TYPE_PREMIUM, PLAN_TYPE_STANDARD } from "@/lib/constants/constant";
 import { QuoteErrorCard } from "./QuoteErrorCard";
 import { QuotePlanCard } from "./QuotePlanCard";
+import Button from "@/components/ui/button/Button";
 
 interface QuoteSummaryProps {
   tripDetails: TripDetailsData;
@@ -185,14 +186,15 @@ export function QuoteSummary({
                 <h2 className="text-2xl font-bold text-brand-secondary">
                     Vos options de devis
                 </h2>
-                <button
+                <Button
                     type="button"
+                    variant="outline"
                     onClick={onBack}
-                    className="flex items-center gap-2 px-4 py-2 text-sm border-2 border-gray-300 text-text-main rounded-lg font-semibold hover:border-brand-secondary transition-colors"
+                    className="rounded-lg px-4 py-2 text-text-main hover:border-brand-secondary"
+                    startIcon={<ChevronLeftIcon className="w-4 h-4" />}
                 >
-                <ChevronLeftIcon className="w-4 h-4" />
                     Modifier
-                </button>
+                </Button>
             </div>
 
             {quoteContext &&
@@ -237,7 +239,7 @@ export function QuoteSummary({
                 </div>
             )}
 
-            <div className="mt-8 bg-surface-muted rounded-lg p-6">
+            <div className="mt-8 bg-surface-muted rounded-lg p-6 border bg-white dark:bg-zinc-950 dark:text-zinc-100">
                 <h3 className="font-semibold text-brand-secondary mb-3">
                     Récapitulatif du voyage
                 </h3>

@@ -3,10 +3,13 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import {
+  cancelTravelPolicyAction,
+  getTravelPolicyCertificateAction,
   getTravelPolicyAction,
   requestTravelQuoteAction,
   selectTravelQuoteProductAction,
   subscribeTravelPolicyAction,
+  updateTravelPolicyAction,
 } from "@/actions/travel-session.actions";
 import { actionFail } from "@/lib/http/action-result";
 import { toError } from "@/lib/http/errors";
@@ -85,4 +88,24 @@ export function useTravelPolicy(policyId: string) {
     isLoading: query.isLoading,
     refetch: query.refetch,
   };
+}
+
+export function useTravelPolicyCertificate() {
+  return useMutation({
+    mutationFn: (policyId: string) => getTravelPolicyCertificateAction(policyId),
+  });
+}
+
+export function useCancelTravelPolicy() {
+  return useMutation({
+    mutationFn: (input: { policyId: string; cancellation_reason: string }) =>
+      cancelTravelPolicyAction(input),
+  });
+}
+
+export function useUpdateTravelPolicy() {
+  return useMutation({
+    mutationFn: (input: { policyId: string; payload: Record<string, unknown> }) =>
+      updateTravelPolicyAction(input),
+  });
 }

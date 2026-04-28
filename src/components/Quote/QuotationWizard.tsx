@@ -158,7 +158,7 @@ export function QuotationWizard({ onWizardStateChange }: QuotationWizardProps) {
       {currentStep < 2 && (
         <ProgressBar
           currentStep={currentStep}
-          totalSteps={2}
+          totalSteps={stepLabels.length}
           stepLabels={stepLabels}
         />
       )}

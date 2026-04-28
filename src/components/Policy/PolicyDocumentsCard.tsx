@@ -3,17 +3,18 @@
 import { DownloadIcon, FileTextIcon } from "lucide-react";
 import React, { useState } from "react";
 
-import type { IPolicyAttachment } from "@/types/travel";
+import Button from "@/components/ui/button/Button";
+import type { IAttachment } from "@/types/travel";
 import { formatDate } from "./utils";
 
 interface PolicyDocumentsCardProps {
-  attachments: IPolicyAttachment[];
+  attachments: IAttachment[];
 }
 
 export function PolicyDocumentsCard({ attachments }: PolicyDocumentsCardProps) {
   const [downloadingIndex, setDownloadingIndex] = useState<number | null>(null);
 
-  const handleDownload = (attachment: IPolicyAttachment, index: number) => {
+  const handleDownload = (attachment: IAttachment, index: number) => {
     setDownloadingIndex(index);
     setTimeout(() => {
       window.open(attachment.content_url, "_blank");
@@ -22,12 +23,12 @@ export function PolicyDocumentsCard({ attachments }: PolicyDocumentsCardProps) {
   };
 
   return (
-    <div className="bg-surface-base border border-gray-200 rounded-lg shadow-sm overflow-hidden mb-6">
+    <div className="border border-gray-200 rounded-lg overflow-hidden mb-6 bg-white">
       <div className="bg-brand-secondary bg-opacity-10 px-6 py-4 flex items-center gap-3 border-b border-gray-200">
         <FileTextIcon className="w-5 h-5 text-brand-secondary" />
         <h2 className="text-lg font-bold text-brand-secondary">Documents</h2>
       </div>
-      <div className="p-6 space-y-3">
+      <div className=" space-y-3">
         {attachments.map((attachment, index) => (
           <div
             key={attachment.file_name}
@@ -47,17 +48,16 @@ export function PolicyDocumentsCard({ attachments }: PolicyDocumentsCardProps) {
                 </p>
               </div>
             </div>
-            <button
-              type="button"
+            <Button
               onClick={() => handleDownload(attachment, index)}
               disabled={downloadingIndex === index}
-              className="flex items-center gap-2 px-5 py-3 bg-brand-primary text-text-inverse rounded-lg font-semibold hover:bg-opacity-90 transition-opacity shadow-md disabled:opacity-50 min-w-[180px] justify-center"
+              startIcon={<DownloadIcon className="w-5 h-5" />}
+              className="min-w-[180px]"
             >
-              <DownloadIcon className="w-5 h-5" />
               {downloadingIndex === index
                 ? "Téléchargement..."
                 : "Télécharger le certificat"}
-            </button>
+            </Button>
           </div>
         ))}
       </div>

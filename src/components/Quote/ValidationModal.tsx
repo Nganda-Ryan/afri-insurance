@@ -3,7 +3,7 @@
 import React from "react";
 import { CreditCardIcon, XIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import {
@@ -18,6 +18,18 @@ import type {
   TripDetailsData,
 } from "@/types/travel";
 import { useSubscribeTravelPolicy } from "@/hooks/use-travel-quote-session";
+import { processInsuranceCheckout } from "@/actions/checkout.actions";
+import {
+  POLICY_TYPE_AUTO,
+  POLICY_TYPE_HOME,
+  POLICY_TYPE_PET,
+  POLICY_TYPE_TRAVEL,
+} from "@/lib/constants/constant";
+import DatePicker from "@/components/form/date-picker";
+import InputField from "@/components/form/input/InputField";
+import Label from "@/components/form/Label";
+import Select from "@/components/form/Select";
+import Button from "@/components/ui/button/Button";
 
 interface ValidationModalProps {
   selectedPlan: SelectedPlan;
@@ -40,6 +52,20 @@ interface SubscriberFormData {
   passeport_exp_date: string;
 }
 
+function policyTypeLabel(type: string): string {
+  switch (type) {
+    case POLICY_TYPE_AUTO:
+      return "Assurance auto";
+    case POLICY_TYPE_HOME:
+      return "Assurance habitation";
+    case POLICY_TYPE_PET:
+      return "Assurance animaux";
+    case POLICY_TYPE_TRAVEL:
+    default:
+      return "Assistance voyage";
+  }
+}
+
 export function ValidationModal({
   selectedPlan,
   tripDetails,
@@ -49,8 +75,14 @@ export function ValidationModal({
 }: ValidationModalProps) {
   const router = useRouter();
   const subscribe = useSubscribeTravelPolicy();
+  const [isCheckingOut, setIsCheckingOut] = React.useState(false);
+  const isSubmitting = subscribe.isPending || isCheckingOut;
+  const insuranceTypeLabel = policyTypeLabel(POLICY_TYPE_TRAVEL);
+  const currencyLabel = quoteContext?.currency?.trim();
+  const totalPremiumLabel = `${selectedPlan.price.toLocaleString("fr-FR")}${currencyLabel ? ` ${currencyLabel}` : ""}`;
 
   const {
+    control,
     register,
     handleSubmit,
     formState: { errors },
@@ -96,24 +128,45 @@ export function ValidationModal({
     console.log("Subscribe payload", payload);
 
     subscribe.mutate(payload, {
-      onSuccess: (res) => {
+      onSuccess: async (res) => {
         if (res.ok && res.data) {
-          router.push(`/quote/${res.data.policyId}`);
+          const externalPolicyId = res.data.policyId;
+          setIsCheckingOut(true);
+          try {
+            const checkoutResult = await processInsuranceCheckout({
+              email: data.email,
+              firstName: data.first_name,
+              lastName: data.last_name,
+              phone: data.phone_number,
+              planCategory: selectedPlan.name,
+              destination: tripDetails.destination_area,
+              externalPolicyId,
+              policyType: POLICY_TYPE_TRAVEL,
+            });
+            if (!checkoutResult.ok) {
+              // Non-fatal : la police EVO est créée, on continue.
+              console.error("[checkout] processInsuranceCheckout failed:", {
+                code: checkoutResult.error?.code ?? "CHECKOUT_UNKNOWN_ERROR",
+                message:
+                  checkoutResult.error?.message ??
+                  "Erreur inconnue pendant le checkout.",
+              });
+            }
+          } catch (err) {
+            // Non-fatal : la police EVO est créée, on continue.
+            console.error("[checkout] processInsuranceCheckout failed:", err);
+          } finally {
+            setIsCheckingOut(false);
+          }
+          router.push(`/quote/${externalPolicyId}`);
           onClose();
           return;
         }
+        console.log("Subscribe error", res.error);
         toast.error(res.error?.message ?? "Souscription impossible.");
       },
     });
   };
-
-  const fieldClass = (hasError: boolean) =>
-    [
-      "w-full rounded-lg border-2 bg-white px-4 py-3 text-gray-900 focus:outline-none dark:bg-zinc-950 dark:text-zinc-100",
-      hasError
-        ? "border-red-500 focus:border-red-500"
-        : "border-gray-200 focus:border-brand-primary dark:border-zinc-600",
-    ].join(" ");
 
   return (
     <div
@@ -136,35 +189,23 @@ export function ValidationModal({
             id="validation-modal-title"
             className="text-2xl font-bold text-brand-secondary"
           >
-            Devis validé
+            Devis validé - {insuranceTypeLabel}
           </h2>
-          <button
+          <Button
             type="button"
+            variant="outline"
             onClick={onClose}
-            className="rounded-lg p-2 transition-colors hover:bg-muted"
+            className="h-10 w-10 border-transparent bg-transparent p-0 shadow-none ring-0 hover:bg-muted"
+            startIcon={<XIcon className="h-6 w-6 text-gray-600" />}
           >
-            <XIcon className="h-6 w-6 text-gray-600" />
-          </button>
+            <span className="sr-only">Fermer</span>
+          </Button>
         </div>
 
-        <div className="p-6">
-          {/* ── Icône succès ── */}
-          <div className="mb-6 flex justify-center">
-            <svg width="120" height="120" viewBox="0 0 120 120">
-              <circle cx="60" cy="60" r="54" stroke="#e74f1c" strokeWidth="4" fill="none" />
-              <path
-                d="M 35 60 L 52 77 L 85 44"
-                stroke="#e74f1c"
-                strokeWidth="6"
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
+        <div className="p-4 md:p-6">
 
           {/* ── Récapitulatif plan ── */}
-          <div className="mb-6 rounded-lg bg-muted/50 p-6">
+          <div className="mb-6 border rounded-lg bg-muted/50 p-6">
             <h3 className="mb-4 text-lg font-bold text-brand-secondary">
               Récapitulatif du plan choisi
             </h3>
@@ -173,10 +214,7 @@ export function ValidationModal({
                 { label: "Type de plan", value: selectedPlan.name, highlight: true },
                 {
                   label: "Prime totale",
-                  value:
-                    selectedPlan.source === "api"
-                      ? `${selectedPlan.price}`
-                      : `$${selectedPlan.price}`,
+                  value: totalPremiumLabel,
                   large: true,
                 },
                 { label: "Destination", value: tripDetails.destination_area },
@@ -188,7 +226,7 @@ export function ValidationModal({
               ].map(({ label, value, highlight, large }) => (
                 <div
                   key={label}
-                  className="flex items-center justify-between border-b border-gray-300 pb-3 last:border-0 last:pb-0"
+                  className="flex items-start gap-2 justify-between border-b border-gray-300 pb-3 last:border-0 last:pb-0"
                 >
                   <span className="font-semibold text-text-main">{label}</span>
                   <span
@@ -220,16 +258,29 @@ export function ValidationModal({
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {/* Civilité */}
               <div>
-                <label className="mb-2 block text-sm font-semibold text-text-main">
+                <Label className="mb-2 font-semibold text-text-main">
                   Civilité <span className="text-red-500">*</span>
-                </label>
-                <select
-                  {...register("title", { required: "Civilité obligatoire" })}
-                  className={fieldClass(!!errors.title)}
-                >
-                  <option value="M">M.</option>
-                  <option value="Mme">Mme</option>
-                </select>
+                </Label>
+                <Controller
+                  control={control}
+                  name="title"
+                  rules={{ required: "Civilité obligatoire" }}
+                  render={({ field }) => (
+                    <Select
+                      id="subscriber-title"
+                      name={field.name}
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      options={[
+                        { value: "M", label: "M." },
+                        { value: "Mme", label: "Mme" },
+                      ]}
+                      error={!!errors.title}
+                      className="border bg-white py-3 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
+                    />
+                  )}
+                />
                 {errors.title && (
                   <p className="mt-1 text-sm text-red-500">{errors.title.message}</p>
                 )}
@@ -237,14 +288,15 @@ export function ValidationModal({
 
               {/* Prénom */}
               <div>
-                <label className="mb-2 block text-sm font-semibold text-text-main">
+                <Label className="mb-2 font-semibold text-text-main">
                   Prénom <span className="text-red-500">*</span>
-                </label>
-                <input
+                </Label>
+                <InputField
                   type="text"
                   placeholder="Jean"
                   {...register("first_name", { required: "Prénom obligatoire" })}
-                  className={fieldClass(!!errors.first_name)}
+                  error={!!errors.first_name}
+                  className="border bg-white dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
                 />
                 {errors.first_name && (
                   <p className="mt-1 text-sm text-red-500">{errors.first_name.message}</p>
@@ -253,14 +305,15 @@ export function ValidationModal({
 
               {/* Nom */}
               <div>
-                <label className="mb-2 block text-sm font-semibold text-text-main">
+                <Label className="mb-2 font-semibold text-text-main">
                   Nom <span className="text-red-500">*</span>
-                </label>
-                <input
+                </Label>
+                <InputField
                   type="text"
                   placeholder="Dupont"
                   {...register("last_name", { required: "Nom obligatoire" })}
-                  className={fieldClass(!!errors.last_name)}
+                  error={!!errors.last_name}
+                  className="border bg-white dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
                 />
                 {errors.last_name && (
                   <p className="mt-1 text-sm text-red-500">{errors.last_name.message}</p>
@@ -269,17 +322,29 @@ export function ValidationModal({
 
               {/* Date de naissance */}
               <div>
-                <label className="mb-2 block text-sm font-semibold text-text-main">
+                <Label className="mb-2 font-semibold text-text-main">
                   Date de naissance <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="date"
-                  {...register("birth_date", {
+                </Label>
+                <Controller
+                  control={control}
+                  name="birth_date"
+                  rules={{
                     required: "Date de naissance obligatoire",
                     validate: (v) =>
                       new Date(v) < new Date() || "La date doit être dans le passé",
-                  })}
-                  className={fieldClass(!!errors.birth_date)}
+                  }}
+                  render={({ field }) => (
+                    <DatePicker
+                      id="subscriber-birth-date"
+                      name={field.name}
+                      value={field.value}
+                      appendToBody
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      error={!!errors.birth_date}
+                      className="border bg-white dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
+                    />
+                  )}
                 />
                 {errors.birth_date && (
                   <p className="mt-1 text-sm text-red-500">{errors.birth_date.message}</p>
@@ -288,10 +353,10 @@ export function ValidationModal({
 
               {/* E-mail */}
               <div>
-                <label className="mb-2 block text-sm font-semibold text-text-main">
+                <Label className="mb-2 font-semibold text-text-main">
                   E-mail <span className="text-red-500">*</span>
-                </label>
-                <input
+                </Label>
+                <InputField
                   type="email"
                   placeholder="jean.dupont@example.com"
                   {...register("email", {
@@ -301,7 +366,8 @@ export function ValidationModal({
                       message: "Format e-mail invalide",
                     },
                   })}
-                  className={fieldClass(!!errors.email)}
+                  error={!!errors.email}
+                  className="border bg-white dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
                 />
                 {errors.email && (
                   <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
@@ -310,16 +376,17 @@ export function ValidationModal({
 
               {/* Téléphone */}
               <div>
-                <label className="mb-2 block text-sm font-semibold text-text-main">
+                <Label className="mb-2 font-semibold text-text-main">
                   Téléphone <span className="text-red-500">*</span>
-                </label>
-                <input
+                </Label>
+                <InputField
                   type="tel"
                   placeholder="+237 6 00 00 00 00"
                   {...register("phone_number", {
                     required: "Téléphone obligatoire",
                   })}
-                  className={fieldClass(!!errors.phone_number)}
+                  error={!!errors.phone_number}
+                  className="border bg-white dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
                 />
                 {errors.phone_number && (
                   <p className="mt-1 text-sm text-red-500">{errors.phone_number.message}</p>
@@ -328,14 +395,15 @@ export function ValidationModal({
 
               {/* Adresse */}
               <div className="md:col-span-2">
-                <label className="mb-2 block text-sm font-semibold text-text-main">
+                <Label className="mb-2 font-semibold text-text-main">
                   Adresse postale <span className="text-red-500">*</span>
-                </label>
-                <input
+                </Label>
+                <InputField
                   type="text"
                   placeholder="123 rue de la Paix"
                   {...register("address", { required: "Adresse obligatoire" })}
-                  className={fieldClass(!!errors.address)}
+                  error={!!errors.address}
+                  className="border bg-white dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
                 />
                 {errors.address && (
                   <p className="mt-1 text-sm text-red-500">{errors.address.message}</p>
@@ -344,14 +412,15 @@ export function ValidationModal({
 
               {/* Ville */}
               <div>
-                <label className="mb-2 block text-sm font-semibold text-text-main">
+                <Label className="mb-2 font-semibold text-text-main">
                   Ville <span className="text-red-500">*</span>
-                </label>
-                <input
+                </Label>
+                <InputField
                   type="text"
                   placeholder="Yaoundé"
                   {...register("city", { required: "Ville obligatoire" })}
-                  className={fieldClass(!!errors.city)}
+                  error={!!errors.city}
+                  className="border bg-white dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
                 />
                 {errors.city && (
                   <p className="mt-1 text-sm text-red-500">{errors.city.message}</p>
@@ -360,16 +429,17 @@ export function ValidationModal({
 
               {/* Numéro de passeport */}
               <div>
-                <label className="mb-2 block text-sm font-semibold text-text-main">
+                <Label className="mb-2 font-semibold text-text-main">
                   Numéro de passeport <span className="text-red-500">*</span>
-                </label>
-                <input
+                </Label>
+                <InputField
                   type="text"
                   placeholder="AB123456"
                   {...register("passport_number", {
                     required: "Numéro de passeport obligatoire",
                   })}
-                  className={fieldClass(!!errors.passport_number)}
+                  error={!!errors.passport_number}
+                  className="border bg-white dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
                 />
                 {errors.passport_number && (
                   <p className="mt-1 text-sm text-red-500">
@@ -380,18 +450,30 @@ export function ValidationModal({
 
               {/* Date d'expiration du passeport */}
               <div>
-                <label className="mb-2 block text-sm font-semibold text-text-main">
+                <Label className="mb-2 font-semibold text-text-main">
                   Expiration du passeport <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="date"
-                  {...register("passeport_exp_date", {
+                </Label>
+                <Controller
+                  control={control}
+                  name="passeport_exp_date"
+                  rules={{
                     required: "Date d'expiration obligatoire",
                     validate: (v) =>
                       new Date(v) > new Date() ||
                       "Le passeport doit être valide (date future)",
-                  })}
-                  className={fieldClass(!!errors.passeport_exp_date)}
+                  }}
+                  render={({ field }) => (
+                    <DatePicker
+                      id="subscriber-passport-exp-date"
+                      name={field.name}
+                      value={field.value}
+                      appendToBody
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      error={!!errors.passeport_exp_date}
+                      className="border bg-white dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
+                    />
+                  )}
                 />
                 {errors.passeport_exp_date && (
                   <p className="mt-1 text-sm text-red-500">
@@ -401,19 +483,15 @@ export function ValidationModal({
               </div>
             </div>
 
-            <button
+            <Button
               type="submit"
-              disabled={subscribe.isPending}
-              className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-brand-secondary px-6 py-4 font-semibold text-text-inverse shadow-md transition-opacity hover:bg-opacity-90 disabled:opacity-50"
+              variant="primary"
+              disabled={isSubmitting}
+              className="mt-6 w-full rounded-lg px-6 py-4"
+              startIcon={!isSubmitting ? <CreditCardIcon className="h-5 w-5" /> : undefined}
             >
-              <CreditCardIcon className="h-5 w-5" />
-              {subscribe.isPending ? "Envoi…" : "Passer au paiement sécurisé"}
-            </button>
-
-            <p className="mt-4 text-center text-xs text-gray-600">
-              En poursuivant, votre demande de police est transmise au partenaire avec le
-              paiement géré par le partenaire.
-            </p>
+              {isSubmitting ? "Traitement en cours..." : "Passer au paiement sécurisé"}
+            </Button>
           </form>
         </div>
       </div>

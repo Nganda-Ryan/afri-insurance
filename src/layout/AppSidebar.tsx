@@ -1,24 +1,16 @@
 "use client";
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
 import {
-  BoxCubeIcon,
-  CalenderIcon,
   ChevronDownIcon,
+  DollarLineIcon,
+  FileIcon,
   GridIcon,
   HorizontaLDots,
-  ListIcon,
-  PageIcon,
-  PieChartIcon,
-  PlugInIcon,
-  TableIcon,
   UserCircleIcon,
 } from "../icons/index";
-import SidebarWidget from "./SidebarWidget";
-import { CreditCardIcon, KeyIcon, SettingsIcon, UserIcon, WebhookIcon } from "lucide-react";
 
 type NavItem = {
   name: string;
@@ -28,47 +20,21 @@ type NavItem = {
 };
 
 const navItems: NavItem[] = [
-  
   {
     icon: <GridIcon />,
     name: "Dashboard",
-    path: "/",
+    path: "/dashboard",
   },
   {
-    icon: <KeyIcon />,
-    name: "API Credentials",
-    path: "/api-credential",
-  },
-  {
-    icon: <UserIcon />,
-    name: "User Management",
-    path: "/user-management",
-  },
-  {
-    icon: <CreditCardIcon />,
+    icon: <DollarLineIcon />,
     name: "Transactions",
     path: "/transactions",
   },
   {
-    icon: <WebhookIcon />,
-    name: "Webhooks",
-    path: "/webhooks",
+    icon: <UserCircleIcon />,
+    name: "Profil",
+    path: "/profil",
   },
-  {
-    icon: <SettingsIcon />,
-    name: "Settings",
-    path: "/settings",
-  },
-
-
-  // {
-  //   name: "Pages",
-  //   icon: <PageIcon />,
-  //   subItems: [
-  //     { name: "Blank Page", path: "/blank", pro: false },
-  //     { name: "404 Error", path: "/error-404", pro: false },
-  //   ],
-  // },
 ];
 
 function findSubmenuForPath(
@@ -263,7 +229,7 @@ const AppSidebar: React.FC = () => {
 
   return (
     <aside
-      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
+      className={`fixed top-16 flex flex-col px-5 left-0 dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-[calc(100vh-4rem)] transition-all duration-300 ease-in-out z-50 lg:z-10 border-r border-gray-200 bg-white
         ${
           isExpanded || isMobileOpen
             ? "w-[290px]"
@@ -276,39 +242,6 @@ const AppSidebar: React.FC = () => {
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div
-        className={`py-8 flex  ${
-          !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
-        }`}
-      >
-        <Link href="/">
-          {isExpanded || isHovered || isMobileOpen ? (
-            <>
-              <Image
-                className="dark:hidden"
-                src="/images/logo/logo.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-              <Image
-                className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-            </>
-          ) : (
-            <Image
-              src="/images/logo/logo-icon.svg"
-              alt="Logo"
-              width={32}
-              height={32}
-            />
-          )}
-        </Link>
-      </div>
       <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
         <nav className="mb-6">
           <div className="flex flex-col gap-4">

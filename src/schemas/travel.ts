@@ -55,3 +55,9 @@ export const policiesByDateInputSchema = z.object({
 export const cancelPolicyInputSchema = z.object({
   cancellation_reason: z.string().min(1),
 });
+
+export const updatePolicyInputSchema = z
+  .record(z.string(), z.unknown())
+  .refine((payload) => Object.keys(payload).length > 0, {
+    message: "Le payload de mise à jour ne peut pas être vide.",
+  });

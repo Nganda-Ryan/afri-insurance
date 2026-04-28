@@ -1,0 +1,95 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// ─────────────────────────────────────────────
+// NextAuth required models (Prisma Adapter)
+// ─────────────────────────────────────────────
+
+model Account {
+  id                String  @id @default(cuid()) @db.VarChar(191)
+  userId            String  @db.VarChar(191)
+  type              String  @db.VarChar(191)
+  provider          String  @db.VarChar(191)
+  providerAccountId String  @db.VarChar(191)
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String? @db.VarChar(191)
+  scope             String? @db.VarChar(191)
+  id_token          String? @db.Text
+  session_state     String? @db.VarChar(191)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid()) @db.VarChar(191)
+  sessionToken String   @unique @db.VarChar(191)
+  userId       String   @db.VarChar(191)
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid()) @db.VarChar(191)
+  name          String?   @db.VarChar(191)
+  email         String?   @unique @db.VarChar(191)
+  emailVerified DateTime?
+  image         String?   @db.VarChar(191)
+
+  // Business-specific fields
+  firstName    String? @db.VarChar(191)
+  lastName     String? @db.VarChar(191)
+  phone        String? @db.VarChar(191)
+  isGuest      Boolean @default(true)
+  passwordHash String? @db.VarChar(255)
+
+  accounts Account[]
+  sessions Session[]
+  policies Policy[]
+}
+
+model VerificationToken {
+  identifier String @db.VarChar(191)
+  token      String @unique @db.VarChar(191)
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model PasswordResetToken {
+  id      String   @id @default(cuid()) @db.VarChar(191)
+  email   String   @db.VarChar(191)
+  token   String   @unique @db.VarChar(191)
+  expires DateTime
+
+  @@index([email])
+}
+
+// ─────────────────────────────────────────────
+// Business models
+// ─────────────────────────────────────────────
+
+model Policy {
+  id           String   @id @default(cuid()) @db.VarChar(191)
+  userId       String   @db.VarChar(191)
+  externalPolicyId String? @db.VarChar(191)
+  policyType   String?  @db.VarChar(191)
+  planCategory String   @db.VarChar(191)
+  destination  String   @db.VarChar(191)
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

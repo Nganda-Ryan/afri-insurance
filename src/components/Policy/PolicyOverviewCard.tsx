@@ -20,7 +20,7 @@ interface PolicyOverviewCardProps {
 
 export function PolicyOverviewCard({ policy }: PolicyOverviewCardProps) {
   return (
-    <div className="bg-surface-base border border-gray-200 rounded-lg shadow-sm overflow-hidden mb-6">
+    <div className="border border-gray-200 rounded-lg overflow-hidden mb-6 bg-white">
       <div className="bg-brand-secondary px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <ShieldCheckIcon className="w-6 h-6 text-text-inverse" />
@@ -64,12 +64,12 @@ export function PolicyOverviewCard({ policy }: PolicyOverviewCardProps) {
           />
           <InfoRow
             label="Destination"
-            value={policy.quoting_criteria.destination}
+            value={policy.quoting_criteria.find(criterion => criterion.code === "Destination area")?.value as string ?? ""}
             icon={<MapPinIcon className="w-4 h-4" />}
           />
           <InfoRow
             label="Durée du voyage"
-            value={`${policy.quoting_criteria.trip_duration} jours`}
+            value={`${policy.quoting_criteria.find(criterion => criterion.code === "Trip Duration")?.value ?? ""} jours`}
             icon={<CalendarIcon className="w-4 h-4" />}
           />
         </div>

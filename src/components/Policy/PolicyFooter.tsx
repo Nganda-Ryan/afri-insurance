@@ -1,10 +1,10 @@
 import React from "react";
 
-import type { IPolicyCatalog } from "@/types/travel";
 import { formatDate } from "./utils";
+import { ICatalog } from "@/types/travel";
 
 interface PolicyFooterProps {
-  catalog: IPolicyCatalog;
+  catalog: ICatalog;
   createdAt: string;
 }
 

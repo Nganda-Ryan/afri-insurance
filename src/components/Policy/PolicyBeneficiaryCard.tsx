@@ -1,17 +1,17 @@
 import { UserIcon } from "lucide-react";
 import React from "react";
 
-import type { IPolicyBeneficiary } from "@/types/travel";
+import type { IBeneficiary } from "@/types/travel";
 import { calculateAge, formatDate } from "./utils";
 import { InfoRow } from "./InfoRow";
 
 interface PolicyBeneficiaryCardProps {
-  beneficiaries: IPolicyBeneficiary[];
+  beneficiaries: IBeneficiary[];
 }
 
 export function PolicyBeneficiaryCard({ beneficiaries }: PolicyBeneficiaryCardProps) {
   return (
-    <div className="bg-surface-base border border-gray-200 rounded-lg shadow-sm overflow-hidden mb-6">
+    <div className="border border-gray-200 rounded-lg overflow-hidden mb-6 bg-white">
       <div className="bg-brand-secondary bg-opacity-10 px-6 py-4 flex items-center gap-3 border-b border-gray-200">
         <UserIcon className="w-5 h-5 text-brand-secondary" />
         <h2 className="text-lg font-bold text-brand-secondary">
@@ -27,17 +27,17 @@ export function PolicyBeneficiaryCard({ beneficiaries }: PolicyBeneficiaryCardPr
             />
             <InfoRow
               label="Date de naissance"
-              value={formatDate(beneficiary.birth_date)}
+              value={formatDate(beneficiary.birth_date ?? "")}
             />
             <InfoRow label="Email" value={beneficiary.email} />
-            <InfoRow label="Téléphone" value={beneficiary.phone_number} />
+            <InfoRow label="Téléphone" value={beneficiary.phone_number ?? ""} />
             <InfoRow
               label="Numéro de passeport"
-              value={beneficiary.passport_number}
+              value={beneficiary.passport_number ?? ""}
             />
             <InfoRow
               label="Âge"
-              value={`${calculateAge(beneficiary.birth_date)} ans`}
+              value={`${calculateAge(beneficiary.birth_date ?? "")} ans`}
             />
           </div>
         </div>

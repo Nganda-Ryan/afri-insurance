@@ -27,14 +27,23 @@ function createTransporter() {
 export async function sendPasswordResetLink(
   email: string,
 ): Promise<ActionResult<null>> {
-  if (!email) {
+  const normalizedEmail = email.trim().toLowerCase();
+
+  if (!normalizedEmail) {
     return actionFail("INVALID_INPUT", "L'adresse email est requise.");
   }
 
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.user.findFirst({
+    where: {
+      email: {
+        equals: normalizedEmail,
+        mode: "insensitive",
+      },
+    },
+  });
 
   // Réponse identique qu'il existe ou non (évite l'énumération d'emails).
-  if (!user) {
+  if (!user?.email) {
     return actionOk(null);
   }
 
@@ -43,8 +52,10 @@ export async function sendPasswordResetLink(
   const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 heure
 
   // Supprime tout token existant pour cet email, puis sauvegarde le nouveau
-  await prisma.passwordResetToken.deleteMany({ where: { email } });
-  await prisma.passwordResetToken.create({ data: { email, token, expires } });
+  await prisma.passwordResetToken.deleteMany({ where: { email: user.email } });
+  await prisma.passwordResetToken.create({
+    data: { email: user.email, token, expires },
+  });
 
   const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
   const resetLink = `${baseUrl}/auth/reset-password?token=${token}`;
@@ -53,7 +64,7 @@ export async function sendPasswordResetLink(
     const transporter = createTransporter();
     await transporter.sendMail({
       from: process.env.EMAIL_FROM,
-      to: email,
+      to: user.email,
       subject: "Réinitialisation de votre mot de passe – Afri Insurance",
       text: [
         "Bonjour,",

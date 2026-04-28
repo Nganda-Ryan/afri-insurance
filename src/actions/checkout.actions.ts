@@ -34,38 +34,41 @@ export async function processInsuranceCheckout(
   let policyId: string;
 
   try {
-    const result = await prisma.$transaction(async (tx) => {
-      // 1. Find or create the user
-      let user = await tx.user.findUnique({ where: { email } });
-
-      if (!user) {
-        user = await tx.user.create({
-          data: { email, firstName, lastName, phone, isGuest: true },
-        });
-      }
-
-      // 2. Create the policy
-      const policy = await tx.policy.create({
-        data: {
-          userId: user.id,
-          externalPolicyId,
-          policyType,
-          planCategory,
-          destination,
-        },
-      });
-
-      // 3. Upsert the VerificationToken (NextAuth stores the hashed token)
-      //    Delete any existing token for this email first to avoid unique conflicts.
-      await tx.verificationToken.deleteMany({ where: { identifier: email } });
-      await tx.verificationToken.create({
-        data: { identifier: email, token: hashedToken, expires: tokenExpires },
-      });
-
-      return { policyId: policy.id };
+    // With Supabase pooler, interactive transactions can timeout unexpectedly.
+    // Keep DB operations short and explicit to improve reliability.
+    const user = await prisma.user.upsert({
+      where: { email },
+      update: {
+        firstName,
+        lastName,
+        phone,
+      },
+      create: {
+        email,
+        firstName,
+        lastName,
+        phone,
+        isGuest: true,
+      },
     });
 
-    policyId = result.policyId;
+    const policy = await prisma.policy.create({
+      data: {
+        userId: user.id,
+        externalPolicyId,
+        policyType,
+        planCategory,
+        destination,
+      },
+    });
+
+    // NextAuth stores hashed email tokens; keep only latest token per identifier.
+    await prisma.verificationToken.deleteMany({ where: { identifier: email } });
+    await prisma.verificationToken.create({
+      data: { identifier: email, token: hashedToken, expires: tokenExpires },
+    });
+
+    policyId = policy.id;
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Erreur lors de l'enregistrement.";

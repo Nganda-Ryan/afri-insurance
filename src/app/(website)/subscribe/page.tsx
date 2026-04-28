@@ -10,6 +10,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import { processInsuranceCheckout } from "@/actions/checkout.actions";
 import DatePicker from "@/components/form/date-picker";
 import InputField from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
@@ -17,6 +18,7 @@ import Select from "@/components/form/Select";
 import Button from "@/components/ui/button/Button";
 import { ProgressBar } from "@/components/Quote/ProgressBar";
 import { useSubscribeTravelPolicy } from "@/hooks/use-travel-quote-session";
+import { POLICY_TYPE_TRAVEL } from "@/lib/constants/constant";
 import {
   languageCodeFromQuoteContext,
   subscriptionCountryFromQuoteContext,
@@ -312,8 +314,9 @@ export default function SubscribePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const subscribe = useSubscribeTravelPolicy();
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [currentStep, setCurrentStep] = useState<Step>(1);
-  const isSubmitting = subscribe.isPending;
+  const isSubmitting = subscribe.isPending || isCheckingOut;
 
   const planName = searchParams.get("planName") ?? "";
   const planPrice = Number(searchParams.get("planPrice") ?? "0");
@@ -503,6 +506,33 @@ export default function SubscribePage() {
           return;
         }
         const policyId = res.data.policyId;
+        setIsCheckingOut(true);
+        try {
+          const checkoutResult = await processInsuranceCheckout({
+            email: data.email,
+            firstName: data.first_name,
+            lastName: data.last_name,
+            phone: data.phone_number,
+            planCategory: planName,
+            destination,
+            externalPolicyId: policyId,
+            policyType: POLICY_TYPE_TRAVEL,
+          });
+
+          if (!checkoutResult.ok) {
+            const detail =
+              checkoutResult.error?.message ??
+              "Une etape technique post-souscription a echoue.";
+            toast.warning(`Souscription creee, mais traitement incomplet: ${detail}`);
+          }
+        } catch (err) {
+          console.error("[subscribe] processInsuranceCheckout failed", err);
+          toast.warning(
+            "Souscription creee, mais une erreur serveur est survenue apres creation.",
+          );
+        } finally {
+          setIsCheckingOut(false);
+        }
         toast.success("Souscription effectuee avec succes.");
         router.push(`/quote/${policyId}`);
       },

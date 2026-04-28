@@ -27,7 +27,6 @@ import { ProgressBar } from "./ProgressBar";
 import { QuoteSummary } from "./QuoteSummary";
 import { TravelerInfo } from "./TravelerInfo";
 import { TripDetails } from "./TripDetails";
-import { ValidationModal } from "./ValidationModal";
 
 interface QuotationWizardProps {
   onWizardStateChange: (inProgress: boolean) => void;
@@ -39,11 +38,6 @@ export function QuotationWizard({ onWizardStateChange }: QuotationWizardProps) {
   const searchParams = useSearchParams();
 
   const [travelerDraft, setTravelerDraft] = useState<TravelerInfoData | null>(null);
-  const [selectedPlan, setSelectedPlan] = useState<SelectedPlan | null>(null);
-  const [modalQuoteContext, setModalQuoteContext] = useState<
-    TravelQuoteContext | undefined
-  >(undefined);
-  const [showValidationModal, setShowValidationModal] = useState(false);
 
   const stepLabels = ["Détails du voyage", "Âge du voyageur", "Devis"];
 
@@ -124,9 +118,19 @@ export function QuotationWizard({ onWizardStateChange }: QuotationWizardProps) {
     plan: SelectedPlan,
     ctx?: TravelQuoteContext,
   ) => {
-    setSelectedPlan(plan);
-    setModalQuoteContext(ctx);
-    setShowValidationModal(true);
+    if (!tripDetails || !travelerInfo) return;
+    const sp = new URLSearchParams();
+    sp.set("planName", plan.name);
+    sp.set("planPrice", String(plan.price));
+    sp.set("destination", tripDetails.destination_area);
+    sp.set("startDate", tripDetails.start_date);
+    sp.set("endDate", tripDetails.end_date);
+    sp.set("adult", String(tripDetails.adult));
+    sp.set("oldestTravelerAge", String(travelerInfo.oldest_traveler_age));
+    if (ctx?.currency) sp.set("currency", ctx.currency);
+    if (ctx?.country) sp.set("country", ctx.country);
+    if (ctx?.language) sp.set("language", ctx.language);
+    router.push(`/subscribe?${sp.toString()}`);
   };
 
   const handleBack = () => {
@@ -137,11 +141,6 @@ export function QuotationWizard({ onWizardStateChange }: QuotationWizardProps) {
       trip: tripDetails,
       traveler: nextStep >= 1 ? travelerInfo : null,
     });
-  };
-
-  const handleCloseModal = () => {
-    setShowValidationModal(false);
-    setModalQuoteContext(undefined);
   };
 
   return (
@@ -188,16 +187,6 @@ export function QuotationWizard({ onWizardStateChange }: QuotationWizardProps) {
           />
         )}
       </div>
-
-      {showValidationModal && selectedPlan && tripDetails && travelerInfo && (
-        <ValidationModal
-          selectedPlan={selectedPlan}
-          tripDetails={tripDetails}
-          travelerInfo={travelerInfo}
-          quoteContext={modalQuoteContext}
-          onClose={handleCloseModal}
-        />
-      )}
     </div>
   );
 }

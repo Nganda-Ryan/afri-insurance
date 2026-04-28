@@ -1,7 +1,7 @@
 "use client";
 
+import React, { Suspense, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import React, { useEffect, useMemo } from "react";
 
 import { QuotationWizard } from "@/components/Quote/QuotationWizard";
 import {
@@ -11,7 +11,7 @@ import {
 import { usePlanStore } from "@/store/planStore";
 import { useWizardStore } from "@/store/wizardStore";
 
-export default function HomeQuotationPage() {
+function HomeQuotationPageContent() {
   const searchParams = useSearchParams();
   const fetchPlans = usePlanStore((s) => s.fetchPlans);
   const setWizardInProgress = useWizardStore((s) => s.setWizardInProgress);
@@ -55,5 +55,13 @@ export default function HomeQuotationPage() {
         </div>
       )}
     </main>
+  );
+}
+
+export default function HomeQuotationPage() {
+  return (
+    <Suspense fallback={<main className="mx-auto max-w-[900px] px-4 py-8 lg:py-12" />}>
+      <HomeQuotationPageContent />
+    </Suspense>
   );
 }

@@ -1,7 +1,7 @@
 // import LandingFooter from "@/components/website/LandingFooter";
 
 import type { Metadata } from "next";
-import React from "react";
+import React, { Suspense } from "react";
 
 import LandingHeader from "@/components/website/header/LandingHeader";
 import { WebsiteShell } from "@/components/website/WebsiteShell";
@@ -22,7 +22,9 @@ export default function Layout({
     <div>
       <LandingHeader />
       <div className="dark:bg-boxdark-2 dark:text-bodydark bg-blue-sky mt-15 mb-20">
-        <WebsiteShell>{children}</WebsiteShell>
+        <Suspense fallback={<div className="min-h-screen" />}>
+          <WebsiteShell>{children}</WebsiteShell>
+        </Suspense>
         <WebsiteToaster />
       </div>
       {/* <LandingFooter /> */}

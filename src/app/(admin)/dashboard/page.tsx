@@ -29,6 +29,7 @@ export default async function DashboardPage() {
     "utilisateur";
 
   const policies = user?.policies ?? [];
+  console.log("policies", policies);
 
   return (
     <div className="space-y-6">

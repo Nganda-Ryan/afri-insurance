@@ -54,7 +54,7 @@ export default function AdminPolicyDetailPage() {
         </div>
       </div>
 
-      <PolicySuccessBanner policyNumber={policy.policy_number} />
+      {/* <PolicySuccessBanner policyNumber={policy.policy_number} /> */}
       <PolicyOverviewCard policy={policy} />
       <PolicyBeneficiaryCard beneficiaries={policy.beneficiaries} />
       <PolicyHolderCard policyHolder={policy.policy_holder[0]} />

@@ -32,7 +32,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   useCancelTravelPolicy,
-  useUpdateTravelPolicy,
 } from "@/hooks/use-travel-quote-session";
 import { getTravelPolicyAction } from "@/actions/travel-session.actions";
 
@@ -55,17 +54,7 @@ export function PoliciesTableWithFilters({ policies }: PoliciesTableWithFiltersP
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [cancelDialogPolicy, setCancelDialogPolicy] = useState<Policy | null>(null);
   const [cancelReason, setCancelReason] = useState("");
-  const [updateDialogPolicy, setUpdateDialogPolicy] = useState<Policy | null>(null);
-  const [updateForm, setUpdateForm] = useState({
-    start_date: "",
-    end_date: "",
-    status: "",
-    payment_type: "",
-    address: "",
-    city: "",
-  });
   const cancelPolicy = useCancelTravelPolicy();
-  const updatePolicy = useUpdateTravelPolicy();
   const [downloadingPolicyId, setDownloadingPolicyId] = useState<string | null>(null);
   const [downloadingAttachmentIndex, setDownloadingAttachmentIndex] = useState<number | null>(
     null,
@@ -129,6 +118,15 @@ export function PoliciesTableWithFilters({ policies }: PoliciesTableWithFiltersP
       return;
     }
     router.push(`/dashboard/policies/${externalPolicyId}`);
+  };
+
+  const handleNavigateUpdate = (policy: Policy) => {
+    const externalPolicyId = resolveExternalPolicyId(policy);
+    if (!externalPolicyId) {
+      toast.error("Mise à jour impossible: référence externe manquante.");
+      return;
+    }
+    router.push(`/dashboard/policies/${externalPolicyId}/update`);
   };
 
   const handleDownloadCertificate = async (policy: Policy) => {
@@ -202,6 +200,7 @@ export function PoliciesTableWithFilters({ policies }: PoliciesTableWithFiltersP
       policyId: externalPolicyId,
       cancellation_reason: cancelReason.trim(),
     });
+    console.log("res", res);
     if (!res.ok) {
       toast.error(res.error?.message ?? "Annulation impossible.");
       return;
@@ -209,63 +208,6 @@ export function PoliciesTableWithFilters({ policies }: PoliciesTableWithFiltersP
     setCancelDialogPolicy(null);
     setCancelReason("");
     toast.success("Demande d'annulation envoyée.");
-    router.refresh();
-  };
-
-  const openUpdateDialog = (policy: Policy) => {
-    if (!resolveExternalPolicyId(policy)) {
-      toast.error("Mise à jour impossible: référence externe manquante.");
-      return;
-    }
-    setUpdateForm({
-      start_date: "",
-      end_date: "",
-      status: "",
-      payment_type: "",
-      address: "",
-      city: "",
-    });
-    setUpdateDialogPolicy(policy);
-  };
-
-  const handleConfirmUpdate = async () => {
-    if (!updateDialogPolicy) return;
-    const externalPolicyId = resolveExternalPolicyId(updateDialogPolicy);
-    if (!externalPolicyId) {
-      toast.error("Mise à jour impossible: référence externe manquante.");
-      return;
-    }
-
-    const payload: Record<string, unknown> = {};
-    if (updateForm.start_date) payload.start_date = updateForm.start_date;
-    if (updateForm.end_date) payload.end_date = updateForm.end_date;
-    if (updateForm.status) payload.status = { value: updateForm.status };
-    if (updateForm.payment_type) payload.payment = { type: updateForm.payment_type };
-
-    if (updateForm.address || updateForm.city) {
-      payload.beneficiaries = [
-        {
-          ...(updateForm.address ? { address: updateForm.address } : {}),
-          ...(updateForm.city ? { city: updateForm.city } : {}),
-        },
-      ];
-    }
-
-    if (Object.keys(payload).length === 0) {
-      toast.error("Renseignez au moins un champ à mettre à jour.");
-      return;
-    }
-
-    const res = await updatePolicy.mutateAsync({
-      policyId: externalPolicyId,
-      payload,
-    });
-    if (!res.ok) {
-      toast.error(res.error?.message ?? "Mise à jour impossible.");
-      return;
-    }
-    setUpdateDialogPolicy(null);
-    toast.success("Police mise à jour.");
     router.refresh();
   };
 
@@ -386,10 +328,7 @@ export function PoliciesTableWithFilters({ policies }: PoliciesTableWithFiltersP
                           return (
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button type="button" variant="outline" size="sm">
-                                  <MoreHorizontal className="h-4 w-4" />
-                                  Actions
-                                </Button>
+                              <MoreHorizontal className="h-4 w-4" />
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-52">
                                 <DropdownMenuItem
@@ -414,8 +353,8 @@ export function PoliciesTableWithFilters({ policies }: PoliciesTableWithFiltersP
                                     : "Télécharger"}
                                 </DropdownMenuItem> */}
                                 <DropdownMenuItem
-                                  onClick={() => openUpdateDialog(policy)}
-                                  disabled={!hasExternalPolicyId || updatePolicy.isPending}
+                                  onClick={() => handleNavigateUpdate(policy)}
+                                  disabled={!hasExternalPolicyId}
                                 >
                                   <RefreshCcw className="mr-2 h-3.5 w-3.5" />
                                   Mettre à jour
@@ -493,148 +432,6 @@ export function PoliciesTableWithFilters({ policies }: PoliciesTableWithFiltersP
               disabled={cancelPolicy.isPending}
             >
               {cancelPolicy.isPending ? "Annulation..." : "Confirmer l'annulation"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog
-        open={updateDialogPolicy !== null}
-        onOpenChange={(open) => {
-          if (!open) {
-            setUpdateDialogPolicy(null);
-          }
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Mettre à jour la police</DialogTitle>
-            <DialogDescription>
-              Renseignez uniquement les champs à modifier pour la police{" "}
-              <span className="font-medium text-foreground">
-                {updateDialogPolicy?.externalPolicyId ?? updateDialogPolicy?.id}
-              </span>
-              .
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="space-y-1">
-              <label htmlFor="update-start-date" className="text-sm font-medium text-foreground">
-                Date de début
-              </label>
-              <input
-                id="update-start-date"
-                type="date"
-                value={updateForm.start_date}
-                onChange={(event) =>
-                  setUpdateForm((prev) => ({ ...prev, start_date: event.target.value }))
-                }
-                className="w-full border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label htmlFor="update-end-date" className="text-sm font-medium text-foreground">
-                Date de fin
-              </label>
-              <input
-                id="update-end-date"
-                type="date"
-                value={updateForm.end_date}
-                onChange={(event) =>
-                  setUpdateForm((prev) => ({ ...prev, end_date: event.target.value }))
-                }
-                className="w-full border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label htmlFor="update-status" className="text-sm font-medium text-foreground">
-                Statut
-              </label>
-              <select
-                id="update-status"
-                value={updateForm.status}
-                onChange={(event) =>
-                  setUpdateForm((prev) => ({ ...prev, status: event.target.value }))
-                }
-                className="w-full border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="">Ne pas modifier</option>
-                <option value="active">Actif</option>
-                <option value="suspended">Suspendu</option>
-                <option value="cancelled">Annulé</option>
-              </select>
-            </div>
-
-            <div className="space-y-1">
-              <label htmlFor="update-payment-type" className="text-sm font-medium text-foreground">
-                Type de paiement
-              </label>
-              <select
-                id="update-payment-type"
-                value={updateForm.payment_type}
-                onChange={(event) =>
-                  setUpdateForm((prev) => ({ ...prev, payment_type: event.target.value }))
-                }
-                className="w-full border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="">Ne pas modifier</option>
-                <option value="MANAGED_BY_PARTNER">MANAGED_BY_PARTNER</option>
-                <option value="CARD">CARD</option>
-                <option value="BANK_TRANSFER">BANK_TRANSFER</option>
-              </select>
-            </div>
-
-            <div className="space-y-1">
-              <label htmlFor="update-address" className="text-sm font-medium text-foreground">
-                Adresse bénéficiaire
-              </label>
-              <input
-                id="update-address"
-                type="text"
-                value={updateForm.address}
-                onChange={(event) =>
-                  setUpdateForm((prev) => ({ ...prev, address: event.target.value }))
-                }
-                placeholder="Ex: 123 rue de la Paix"
-                className="w-full border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label htmlFor="update-city" className="text-sm font-medium text-foreground">
-                Ville bénéficiaire
-              </label>
-              <input
-                id="update-city"
-                type="text"
-                value={updateForm.city}
-                onChange={(event) =>
-                  setUpdateForm((prev) => ({ ...prev, city: event.target.value }))
-                }
-                placeholder="Ex: Douala"
-                className="w-full border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setUpdateDialogPolicy(null)}
-            >
-              Fermer
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => void handleConfirmUpdate()}
-              disabled={updatePolicy.isPending}
-            >
-              {updatePolicy.isPending ? "Mise à jour..." : "Enregistrer les changements"}
             </Button>
           </DialogFooter>
         </DialogContent>

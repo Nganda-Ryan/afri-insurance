@@ -31,7 +31,7 @@ export default function AdminLayout({
         className={`flex-1 pt-16 transition-all duration-300 ease-in-out ${mainContentMargin}`}
       >
         {/* Page Content */}
-        <div className="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">{children}</div>
+        <div className="p-4 mx-auto md:p-6">{children}</div>
       </div>
     </div>
   );

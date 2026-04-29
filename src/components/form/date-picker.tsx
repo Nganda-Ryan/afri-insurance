@@ -25,6 +25,24 @@ type PropsType = {
   className?: string;
 };
 
+function toIsoDate(value: DateOption | undefined): string | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (value instanceof Date) {
+    const year = value.getFullYear();
+    const month = String(value.getMonth() + 1).padStart(2, '0');
+    const day = String(value.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+  if (typeof value === 'number') {
+    return toIsoDate(new Date(value));
+  }
+  if (typeof value === 'string') {
+    if (value === 'today') return toIsoDate(new Date());
+    return value;
+  }
+  return undefined;
+}
+
 export default function DatePicker({
   id,
   name,
@@ -42,6 +60,8 @@ export default function DatePicker({
   success,
   className,
 }: PropsType) {
+  const desktopId = `${id}-desktop`;
+
   const normalizedOnChange = useMemo<Hook | Hook[] | undefined>(() => {
     if (!onChange) return undefined;
 
@@ -59,12 +79,13 @@ export default function DatePicker({
   }, [onChange]);
 
   useEffect(() => {
-    const inputElement = document.getElementById(id) as HTMLInputElement | null;
+    const inputElement = document.getElementById(desktopId) as HTMLInputElement | null;
     if (!inputElement) return;
 
     const flatPickr = flatpickr(inputElement, {
       mode: mode || 'single',
       static: true,
+      disableMobile: true,
       monthSelectorType: 'static',
       dateFormat: 'Y-m-d',
       defaultDate: value || defaultDate,
@@ -79,23 +100,39 @@ export default function DatePicker({
         flatPickr.destroy();
       }
     };
-  }, [mode, normalizedOnChange, id, defaultDate, min, max, appendToBody, value]);
+  }, [mode, normalizedOnChange, desktopId, defaultDate, min, max, appendToBody, value]);
 
   useEffect(() => {
-    const inputElement = document.getElementById(id) as (HTMLInputElement & {
+    const inputElement = document.getElementById(desktopId) as (HTMLInputElement & {
       _flatpickr?: Instance;
     }) | null;
 
     if (!inputElement?._flatpickr) return;
 
     inputElement._flatpickr.setDate(value || '', false);
-  }, [id, value]);
+  }, [desktopId, value]);
+
+  const handleNativeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!onChange) return;
+    const next = event.target.value;
+    if (Array.isArray(onChange)) {
+      onChange.forEach((hook) => hook([], next, undefined as unknown as Instance));
+      return;
+    }
+    if (onChange.length <= 1) {
+      (onChange as (nextValue: string) => void)(next);
+      return;
+    }
+    (onChange as Hook)([], next, undefined as unknown as Instance);
+  };
 
   const inputStateClasses = error
     ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
     : success
       ? 'border-green-500 focus:border-green-500 focus:ring-green-500/20'
       : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700 dark:focus:border-brand-800';
+
+  const sharedClasses = `h-11 w-full appearance-none rounded-lg border bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 ${inputStateClasses} ${className || ''}`;
 
   return (
     <div>
@@ -105,11 +142,24 @@ export default function DatePicker({
         <input
           id={id}
           name={name}
+          type="date"
+          value={value || ''}
+          onChange={handleNativeChange}
+          onBlur={onBlur}
+          min={toIsoDate(min)}
+          max={toIsoDate(max)}
+          placeholder={placeholder}
+          className={`block md:hidden ${sharedClasses}`}
+        />
+
+        <input
+          id={desktopId}
+          name={name ? `${name}-desktop` : undefined}
           value={value || ''}
           onBlur={onBlur}
           readOnly
           placeholder={placeholder}
-          className={`hidden md:block h-11 w-full appearance-none rounded-lg border bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 ${inputStateClasses} ${className || ''}`}
+          className={`hidden md:block ${sharedClasses}`}
           autoComplete="off"
         />
 

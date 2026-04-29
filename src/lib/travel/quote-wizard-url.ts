@@ -138,7 +138,8 @@ export function parseTravelerInfoFromSearchParams(
   const ageRaw = sp.get(URL_PARAM_AGE);
   if (ageRaw == null) return null;
   const n = Number.parseInt(ageRaw, 10);
-  if (!Number.isFinite(n) || n < 18 || n > 99) return null;
+  // Aligner sur les bornes UI (TravelerInfo : tranches produit ou 0–99 par défaut).
+  if (!Number.isFinite(n) || n < 0 || n > 99) return null;
   return { oldest_traveler_age: n };
 }
 

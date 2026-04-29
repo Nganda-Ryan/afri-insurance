@@ -5,7 +5,7 @@ export const travelQuoteWizardInputSchema = z.object({
   start_date: z.string().min(1),
   end_date: z.string().min(1),
   adult: z.number().int().positive().max(50),
-  oldest_traveler_age: z.number().int().min(18).max(99),
+  oldest_traveler_age: z.number().int().min(0).max(99),
   product_category: z.enum(["Standard", "Etudiant", "Pèlerinage"]),
   catalog_reference: z.string().min(1),
   catalog_version: z.number().int().positive(),

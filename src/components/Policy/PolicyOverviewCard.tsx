@@ -19,13 +19,9 @@ interface PolicyOverviewCardProps {
 }
 
 export function PolicyOverviewCard({ policy }: PolicyOverviewCardProps) {
-  const normalizedStatus = policy.policy_status.trim().toLowerCase();
-  const isDisabled = normalizedStatus === "disabled";
-  const headerClassName = isDisabled ? "bg-gray-600" : "bg-brand-secondary";
-
   return (
     <div className="border border-gray-200 rounded-lg overflow-hidden mb-6 bg-white">
-      <div className={`${headerClassName} px-6 py-4 flex items-center justify-between`}>
+      <div className={`bg-brand-secondary px-6 py-4 flex items-center justify-between`}>
         <div className="flex items-center gap-3">
           <ShieldCheckIcon className="w-6 h-6 text-text-inverse" />
           <h2 className="text-lg font-bold text-text-inverse">

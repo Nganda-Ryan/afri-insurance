@@ -35,9 +35,6 @@ export function PolicyDocumentsCard({ attachments }: PolicyDocumentsCardProps) {
             className="flex items-center justify-between p-4 bg-surface-muted rounded-lg"
           >
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-brand-primary bg-opacity-10 rounded-lg flex items-center justify-center">
-                <FileTextIcon className="w-6 h-6 text-brand-primary" />
-              </div>
               <div>
                 <p className="font-semibold text-text-main text-sm">
                   {attachment.file_name}
@@ -56,7 +53,7 @@ export function PolicyDocumentsCard({ attachments }: PolicyDocumentsCardProps) {
             >
               {downloadingIndex === index
                 ? "Téléchargement..."
-                : "Télécharger le certificat"}
+                : "Télécharger"}
             </Button>
           </div>
         ))}

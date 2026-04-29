@@ -15,6 +15,7 @@ export function PolicyDocumentsCard({ attachments }: PolicyDocumentsCardProps) {
   const [downloadingIndex, setDownloadingIndex] = useState<number | null>(null);
 
   const handleDownload = (attachment: IAttachment, index: number) => {
+    console.log("handleDownload", attachment, index);
     setDownloadingIndex(index);
     setTimeout(() => {
       window.open(attachment.content_url, "_blank");

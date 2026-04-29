@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Download,
@@ -32,7 +32,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   useCancelTravelPolicy,
-  useTravelPolicyCertificate,
   useUpdateTravelPolicy,
 } from "@/hooks/use-travel-quote-session";
 import { getTravelPolicyAction } from "@/actions/travel-session.actions";
@@ -65,9 +64,13 @@ export function PoliciesTableWithFilters({ policies }: PoliciesTableWithFiltersP
     address: "",
     city: "",
   });
-  const downloadCertificate = useTravelPolicyCertificate();
   const cancelPolicy = useCancelTravelPolicy();
   const updatePolicy = useUpdateTravelPolicy();
+  const [downloadingPolicyId, setDownloadingPolicyId] = useState<string | null>(null);
+  const [downloadingAttachmentIndex, setDownloadingAttachmentIndex] = useState<number | null>(
+    null,
+  );
+  const downloadTimeoutsRef = useRef<number[]>([]);
 
   const categories = useMemo(
     () => Array.from(new Set(policies.map((policy) => policy.planCategory))),
@@ -129,46 +132,49 @@ export function PoliciesTableWithFilters({ policies }: PoliciesTableWithFiltersP
   };
 
   const handleDownloadCertificate = async (policy: Policy) => {
+    console.log("handleDownloadCertificate", policy);
     const externalPolicyId = resolveExternalPolicyId(policy);
     if (!externalPolicyId) {
       toast.error("Téléchargement impossible: référence externe manquante.");
       return;
     }
 
-    const certificateRes = await downloadCertificate.mutateAsync(externalPolicyId);
-    if (certificateRes.ok && certificateRes.data) {
-      const bytes = Uint8Array.from(atob(certificateRes.data.base64), (char) =>
-        char.charCodeAt(0),
-      );
-      const blob = new Blob([bytes], { type: certificateRes.data.contentType });
-      const url = URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
-      anchor.href = url;
-      anchor.download = certificateRes.data.fileName;
-      anchor.click();
-      URL.revokeObjectURL(url);
-      return;
-    }
-
-    // Fallback aligné avec la page détail: ouverture de l'attachment si disponible.
+    // Même séquence que `quote/[policyId]/page.tsx` (hook `useTravelPolicy`) :
+    // récupérer la police puis ouvrir les `attachments.content_url`.
     const policyRes = await getTravelPolicyAction(externalPolicyId);
     if (!policyRes.ok || !policyRes.data) {
-      toast.error(
-        certificateRes.error?.message ??
-          policyRes.error?.message ??
-          "Certificat indisponible.",
-      );
+      toast.error(policyRes.error?.message ?? "Police introuvable.");
       return;
     }
 
-    const attachment = policyRes.data.attachments.find(
+    const downloadableAttachments = (policyRes.data.attachments ?? []).filter(
       (item) => typeof item.content_url === "string" && item.content_url.length > 0,
     );
-    if (!attachment?.content_url) {
+    if (downloadableAttachments.length === 0) {
       toast.error("Aucun document téléchargeable disponible.");
       return;
     }
-    window.open(attachment.content_url, "_blank", "noopener,noreferrer");
+
+    // Empêche les doubles clics de laisser des setTimeout actifs.
+    downloadTimeoutsRef.current.forEach((t) => window.clearTimeout(t));
+    downloadTimeoutsRef.current = [];
+
+    setDownloadingPolicyId(externalPolicyId);
+    setDownloadingAttachmentIndex(0);
+
+    downloadableAttachments.forEach((attachment, index) => {
+      const timeoutId = window.setTimeout(() => {
+        setDownloadingAttachmentIndex(index);
+        window.open(attachment.content_url, "_blank");
+
+        if (index === downloadableAttachments.length - 1) {
+          setDownloadingPolicyId(null);
+          setDownloadingAttachmentIndex(null);
+        }
+      }, 800 * (index + 1));
+
+      downloadTimeoutsRef.current.push(timeoutId);
+    });
   };
 
   const openCancelDialog = (policy: Policy) => {
@@ -393,13 +399,20 @@ export function PoliciesTableWithFilters({ policies }: PoliciesTableWithFiltersP
                                   <Eye className="mr-2 h-3.5 w-3.5" />
                                   Détail
                                 </DropdownMenuItem>
-                                <DropdownMenuItem
+                                {/* <DropdownMenuItem
                                   onClick={() => void handleDownloadCertificate(policy)}
-                                  disabled={!hasExternalPolicyId || downloadCertificate.isPending}
+                                  disabled={
+                                    !hasExternalPolicyId ||
+                                    (downloadingPolicyId === resolveExternalPolicyId(policy) &&
+                                      downloadingAttachmentIndex !== null)
+                                  }
                                 >
                                   <Download className="mr-2 h-3.5 w-3.5" />
-                                  Télécharger
-                                </DropdownMenuItem>
+                                  {downloadingPolicyId === resolveExternalPolicyId(policy) &&
+                                  downloadingAttachmentIndex !== null
+                                    ? "Téléchargement..."
+                                    : "Télécharger"}
+                                </DropdownMenuItem> */}
                                 <DropdownMenuItem
                                   onClick={() => openUpdateDialog(policy)}
                                   disabled={!hasExternalPolicyId || updatePolicy.isPending}

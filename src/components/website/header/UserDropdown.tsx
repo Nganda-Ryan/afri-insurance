@@ -1,5 +1,6 @@
 "use client";
 
+import { MoreHorizontal } from "lucide-react";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 import React, { useState } from "react";
@@ -36,9 +37,10 @@ export default function UserDropdown() {
 
   return (
     <div className="relative">
+      {/* Desktop/full trigger */}
       <button
         onClick={toggleDropdown}
-        className="flex items-center text-gray-700 dark:text-gray-400 dropdown-toggle"
+        className="hidden lg:flex items-center text-gray-700 dark:text-gray-400 dropdown-toggle"
       >
         {/* Avatar initiale */}
         <span className="mr-3 flex h-11 w-11 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-bold text-lg select-none">
@@ -65,6 +67,15 @@ export default function UserDropdown() {
             strokeLinejoin="round"
           />
         </svg>
+      </button>
+
+      {/* Mobile trigger (3 points) */}
+      <button
+        onClick={toggleDropdown}
+        aria-label="Open profile menu"
+        className="flex lg:hidden items-center justify-center w-10 h-10 rounded-lg border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-400"
+      >
+        <MoreHorizontal className="h-5 w-5" />
       </button>
 
       <Dropdown

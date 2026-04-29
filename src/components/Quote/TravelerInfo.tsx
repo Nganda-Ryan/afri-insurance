@@ -92,7 +92,7 @@ export function TravelerInfo({
       onSubmit={handleSubmit((data) =>
         onSubmit({ oldest_traveler_age: data.oldest_traveler_age }),
       )}
-      className="rounded-lg bg-surface-base p-6 lg:p-8"
+      className="rounded-lg bg-surface-base lg:p-6"
     >
       <h2 className="mb-6 text-2xl font-bold text-brand-secondary">
         Voyageur le plus âgé

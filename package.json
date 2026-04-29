@@ -47,6 +47,7 @@
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^19.2.0",
     "react-dropzone": "^14.3.8",
+    "react-flatpickr": "^4.0.11",
     "react-hook-form": "^7.72.1",
     "react-resizable-panels": "^4.10.0",
     "recharts": "^3.8.1",

@@ -164,7 +164,7 @@ export function TripDetails({ onSubmit, initialValues }: TripDetailsProps) {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="rounded-lg border-gray-100 bg-surface-base p-6 lg:p-8"
+      className="rounded-lg border-gray-100 bg-surface-base lg:p-8"
     >
       <h2 className="mb-6 text-2xl font-bold text-brand-secondary">
         Détails du voyage

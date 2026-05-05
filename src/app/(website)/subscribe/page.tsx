@@ -498,6 +498,7 @@ export default function SubscribePage() {
       payment: { type: "MANAGED_BY_PARTNER" },
       addons: [],
     };
+    console.log(payload);
 
     subscribe.mutate(payload, {
       onSuccess: async (res) => {

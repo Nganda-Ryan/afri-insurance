@@ -103,17 +103,18 @@ export function isTripDetailsComplete(
 export function parseTripDetailsFromSearchParams(
   sp: URLSearchParams,
 ): TripDetailsData | null {
-  const catCode = sp.get(URL_PARAM_CATEGORY);
-  const dstCode = sp.get(URL_PARAM_DEST);
+  const catParam = sp.get(URL_PARAM_CATEGORY);
+  const dstParam = sp.get(URL_PARAM_DEST);
   const dep = sp.get(URL_PARAM_DEPART);
   const ret = sp.get(URL_PARAM_RETURN);
   const advRaw = sp.get(URL_PARAM_ADULTS);
 
-  const product_category = catCode
-    ? tripCategoryValueFromCode(catCode)
+  // Accept both short URL codes and raw API values for resilience.
+  const product_category = catParam
+    ? (tripCategoryValueFromCode(catParam) ?? catParam.trim())
     : undefined;
-  const destination_area = dstCode
-    ? destinationAreaValueFromCode(dstCode)
+  const destination_area = dstParam
+    ? (destinationAreaValueFromCode(dstParam) ?? dstParam.trim())
     : undefined;
 
   const adult =
@@ -157,8 +158,8 @@ export function buildQuoteWizardSearchParams(opts: {
   if (opts.trip && isTripDetailsComplete(opts.trip)) {
     const cat = tripCategoryCodeFromValue(opts.trip.product_category);
     const dst = destinationAreaCodeFromValue(opts.trip.destination_area);
-    if (cat) sp.set(URL_PARAM_CATEGORY, cat);
-    if (dst) sp.set(URL_PARAM_DEST, dst);
+    sp.set(URL_PARAM_CATEGORY, cat ?? opts.trip.product_category);
+    sp.set(URL_PARAM_DEST, dst ?? opts.trip.destination_area);
     sp.set(URL_PARAM_DEPART, opts.trip.start_date);
     sp.set(URL_PARAM_RETURN, opts.trip.end_date);
     sp.set(URL_PARAM_ADULTS, String(opts.trip.adult));

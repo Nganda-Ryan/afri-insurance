@@ -47,6 +47,22 @@ export const DESTINATION_AREA_OPTIONS: ReadonlyArray<{
   { label: "Espace Schengen", value: DESTINATION_AREA_SCHENGEN, code: "schengen" },
 ];
 
+function normalizeDestinationArea(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[.,]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+const DESTINATION_AREA_ALIASES_TO_CODE: Record<string, string> = {
+  [normalizeDestinationArea(
+    "Tous les pays du monde entier, expt le pays de résidence",
+  )]: "monde",
+};
+
 export function destinationAreaValueFromCode(
   code: string | null | undefined,
 ): string | undefined {
@@ -60,5 +76,14 @@ export function destinationAreaCodeFromValue(
 ): string | undefined {
   if (!value) return undefined;
   const v = value.trim();
-  return DESTINATION_AREA_OPTIONS.find((o) => o.value === v)?.code;
+  const exact = DESTINATION_AREA_OPTIONS.find((o) => o.value === v)?.code;
+  if (exact) return exact;
+
+  const normalized = normalizeDestinationArea(v);
+  const normalizedMatch = DESTINATION_AREA_OPTIONS.find(
+    (o) => normalizeDestinationArea(o.value) === normalized,
+  )?.code;
+  if (normalizedMatch) return normalizedMatch;
+
+  return DESTINATION_AREA_ALIASES_TO_CODE[normalized];
 }

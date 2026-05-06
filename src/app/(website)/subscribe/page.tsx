@@ -447,25 +447,32 @@ export default function SubscribePage() {
     if (ok) setCurrentStep(2);
   };
 
-  const onSubmit = (data: SubscriberFormData) => {
-    setPendingSubmission(data);
-    setIsReviewDialogOpen(true);
-  };
-
-  const onConfirmSubmit = (data: SubscriberFormData) => {
+  const hasValidOldestAge = (data: SubscriberFormData) => {
+    if (!Number.isFinite(expectedOldestAge)) return true;
     const ages = [
       ageFromBirthDate(data.birth_date),
       ...data.groupMembers.map((m) => ageFromBirthDate(m.birth_date)),
     ].filter((v): v is number => v != null);
     const currentOldestAge = ages.length ? Math.max(...ages) : null;
-    if (
-      Number.isFinite(expectedOldestAge) &&
-      currentOldestAge != null &&
-      currentOldestAge !== expectedOldestAge
-    ) {
-      toast.warning(
-        `Age le plus eleve : ${currentOldestAge} ans (attendu : ${expectedOldestAge} ans). Verifiez les dates de naissance.`,
+    if (currentOldestAge == null || currentOldestAge !== expectedOldestAge) {
+      toast.error(
+        `L'age du plus age doit etre ${expectedOldestAge} ans. Veuillez corriger les dates de naissance avant de continuer.`,
       );
+      return false;
+    }
+    return true;
+  };
+
+  const onSubmit = (data: SubscriberFormData) => {
+    if (!hasValidOldestAge(data)) return;
+    setPendingSubmission(data);
+    setIsReviewDialogOpen(true);
+  };
+
+  const onConfirmSubmit = (data: SubscriberFormData) => {
+    if (!hasValidOldestAge(data)) {
+      setIsReviewDialogOpen(false);
+      return;
     }
 
     const payload: SubscribePolicyInputDto = {

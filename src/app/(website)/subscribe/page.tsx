@@ -16,6 +16,14 @@ import InputField from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import Select from "@/components/form/Select";
 import Button from "@/components/ui/button/Button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { ProgressBar } from "@/components/Quote/ProgressBar";
 import { useSubscribeTravelPolicy } from "@/hooks/use-travel-quote-session";
 import { POLICY_TYPE_TRAVEL } from "@/lib/constants/constant";
@@ -315,6 +323,8 @@ export default function SubscribePage() {
   const searchParams = useSearchParams();
   const subscribe = useSubscribeTravelPolicy();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
+  const [pendingSubmission, setPendingSubmission] = useState<SubscriberFormData | null>(null);
   const [currentStep, setCurrentStep] = useState<Step>(1);
   const isSubmitting = subscribe.isPending || isCheckingOut;
 
@@ -438,6 +448,11 @@ export default function SubscribePage() {
   };
 
   const onSubmit = (data: SubscriberFormData) => {
+    setPendingSubmission(data);
+    setIsReviewDialogOpen(true);
+  };
+
+  const onConfirmSubmit = (data: SubscriberFormData) => {
     const ages = [
       ageFromBirthDate(data.birth_date),
       ...data.groupMembers.map((m) => ageFromBirthDate(m.birth_date)),
@@ -538,6 +553,12 @@ export default function SubscribePage() {
         router.push(`/quote/${policyId}`);
       },
     });
+  };
+
+  const formatDateDisplay = (value: string) => {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value || "-";
+    return date.toLocaleDateString("fr-FR");
   };
 
   if (!hasRequiredParams) {
@@ -719,6 +740,158 @@ export default function SubscribePage() {
                 </div>
               )}
           </form>
+
+          <Dialog
+            open={isReviewDialogOpen}
+            onOpenChange={(open) => {
+              if (isSubmitting) return;
+              setIsReviewDialogOpen(open);
+            }}
+          >
+            <DialogContent className="max-h-[85vh] max-w-3xl overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Synthese avant paiement</DialogTitle>
+                <DialogDescription>
+                  Verifiez les informations de votre devis avant de confirmer le paiement.
+                </DialogDescription>
+              </DialogHeader>
+
+              {pendingSubmission && (
+                <div className="space-y-5 text-sm text-text-main">
+                  <div className="rounded-lg border border-border bg-muted/40 p-4">
+                    <h3 className="mb-3 text-base font-semibold text-brand-secondary">
+                      Recapitulatif du devis
+                    </h3>
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      <p>
+                        <span className="font-semibold">Plan :</span> {planName}
+                      </p>
+                      <p>
+                        <span className="font-semibold">Prime totale :</span> {totalPremiumLabel}
+                      </p>
+                      <p>
+                        <span className="font-semibold">Destination :</span> {destination}
+                      </p>
+                      <p>
+                        <span className="font-semibold">Voyageurs :</span> {adult}
+                      </p>
+                      <p className="sm:col-span-2">
+                        <span className="font-semibold">Couverture :</span>{" "}
+                        {formatDateDisplay(startDate)} - {formatDateDisplay(endDate)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg border border-border bg-card p-4">
+                    <h3 className="mb-3 text-base font-semibold text-brand-secondary">
+                      Souscripteur principal
+                    </h3>
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      <p>
+                        <span className="font-semibold">Nom complet :</span>{" "}
+                        {pendingSubmission.title} {pendingSubmission.first_name}{" "}
+                        {pendingSubmission.last_name}
+                      </p>
+                      <p>
+                        <span className="font-semibold">Date de naissance :</span>{" "}
+                        {formatDateDisplay(pendingSubmission.birth_date)}
+                      </p>
+                      <p>
+                        <span className="font-semibold">Email :</span> {pendingSubmission.email}
+                      </p>
+                      <p>
+                        <span className="font-semibold">Telephone :</span>{" "}
+                        {pendingSubmission.phone_number}
+                      </p>
+                      <p>
+                        <span className="font-semibold">Passeport :</span>{" "}
+                        {pendingSubmission.passport_number}
+                      </p>
+                      <p>
+                        <span className="font-semibold">Expiration passeport :</span>{" "}
+                        {formatDateDisplay(pendingSubmission.passeport_exp_date)}
+                      </p>
+                      <p className="sm:col-span-2">
+                        <span className="font-semibold">Adresse :</span> {pendingSubmission.address}
+                        {", "}
+                        {pendingSubmission.city}
+                      </p>
+                    </div>
+                  </div>
+
+                  {pendingSubmission.groupMembers.length > 0 && (
+                    <div className="rounded-lg border border-border bg-card p-4">
+                      <h3 className="mb-3 text-base font-semibold text-brand-secondary">
+                        Membres du groupe
+                      </h3>
+                      <div className="space-y-3">
+                        {pendingSubmission.groupMembers.map((member, index) => (
+                          <div
+                            key={`${member.first_name}-${member.last_name}-${index}`}
+                            className="rounded-md border border-border p-3"
+                          >
+                            <p className="font-semibold text-brand-secondary">
+                              Membre {index + 2}
+                            </p>
+                            <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                              <p>
+                                <span className="font-semibold">Nom complet :</span> {member.title}{" "}
+                                {member.first_name} {member.last_name}
+                              </p>
+                              <p>
+                                <span className="font-semibold">Date de naissance :</span>{" "}
+                                {formatDateDisplay(member.birth_date)}
+                              </p>
+                              <p>
+                                <span className="font-semibold">Email :</span> {member.email}
+                              </p>
+                              <p>
+                                <span className="font-semibold">Telephone :</span>{" "}
+                                {member.phone_number}
+                              </p>
+                              <p>
+                                <span className="font-semibold">Passeport :</span>{" "}
+                                {member.passport_number}
+                              </p>
+                              <p>
+                                <span className="font-semibold">Expiration passeport :</span>{" "}
+                                {formatDateDisplay(member.passeport_exp_date)}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsReviewDialogOpen(false)}
+                  disabled={isSubmitting}
+                >
+                  Modifier
+                </Button>
+                <Button
+                  type="button"
+                  variant="primary"
+                  onClick={() => {
+                    if (!pendingSubmission) return;
+                    onConfirmSubmit(pendingSubmission);
+                  }}
+                  disabled={isSubmitting}
+                  startIcon={
+                    !isSubmitting ? <CreditCardIcon className="h-5 w-5" /> : undefined
+                  }
+                >
+                  {isSubmitting ? "Traitement en cours..." : "Confirmer et payer"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </section>
       </div>
     </main>

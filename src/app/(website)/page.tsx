@@ -4,10 +4,8 @@ import React, { Suspense, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 
 import { QuotationWizard } from "@/components/Quote/QuotationWizard";
-import {
-  URL_PARAM_PRODUCT,
-  quoteProductIdFromUrlCode,
-} from "@/lib/travel/quote-wizard-url";
+import { URL_PARAM_PRODUCT } from "@/lib/constants/constant";
+import { quoteProductIdFromUrlCode } from "@/lib/travel/quote-wizard-url";
 import { usePlanStore } from "@/store/planStore";
 import { useWizardStore } from "@/store/wizardStore";
 

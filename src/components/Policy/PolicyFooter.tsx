@@ -1,6 +1,6 @@
 import React from "react";
 
-import { formatDate } from "./utils";
+import { formatDate } from "@/lib/utils";
 import { ICatalog } from "@/types/travel";
 
 interface PolicyFooterProps {

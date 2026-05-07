@@ -6,10 +6,10 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   QUOTE_PRODUCT_CODE_TRAVEL,
   QUOTE_WIZARD_STEP_CODE_TRIP,
-} from "@/lib/constants/constant";
-import {
   URL_PARAM_PRODUCT,
   URL_PARAM_STEP,
+} from "@/lib/constants/constant";
+import {
   buildQuoteWizardSearchParams,
   parseTravelerInfoFromSearchParams,
   parseTripDetailsFromSearchParams,
@@ -119,11 +119,14 @@ export function QuotationWizard({ onWizardStateChange }: QuotationWizardProps) {
   const handlePlanSelection = (
     plan: SelectedPlan,
     ctx?: TravelQuoteContext,
+    quoteCode?: string,
   ) => {
     if (!tripDetails || !travelerInfo) return;
     const sp = new URLSearchParams();
     sp.set("planName", plan.name);
     sp.set("planPrice", String(plan.price));
+    sp.set("productIndex", String(plan.product_index));
+    if (quoteCode) sp.set("quoteCode", quoteCode);
     sp.set("destination", tripDetails.destination_area);
     sp.set("startDate", tripDetails.start_date);
     sp.set("endDate", tripDetails.end_date);

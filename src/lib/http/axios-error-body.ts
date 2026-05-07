@@ -36,6 +36,8 @@ export function readAxiosFeCode(e: unknown): string | null {
   const obj = d as Record<string, unknown>;
   if (typeof obj.fe_code_error === "string") return obj.fe_code_error;
   if (typeof obj.error === "string") return obj.error;
+  if (typeof obj.respCode === "string") return obj.respCode;
+  if (typeof obj.respCode === "number") return String(obj.respCode);
   return null;
 }
 
@@ -65,4 +67,44 @@ export function readAxiosErrorMessage(e: unknown): string {
   }
 
   return e instanceof Error ? e.message : toError(e).message;
+}
+
+export type S3pCustomerMsgLang = "fr" | "en";
+
+/** Corps d'erreur S3P (Smobilpay) : `customerMsg[]` avec language / content. */
+export function readS3pCustomerMessage(
+  e: unknown,
+  preferLang: S3pCustomerMsgLang = "fr",
+): string | null {
+  const ax = resolveAxiosError(e);
+  const d = ax?.response?.data;
+  if (d === null || typeof d !== "object" || Array.isArray(d)) return null;
+  const obj = d as Record<string, unknown>;
+  const msgs = obj.customerMsg;
+  if (!Array.isArray(msgs)) return null;
+  for (const item of msgs) {
+    if (
+      item !== null &&
+      typeof item === "object" &&
+      typeof (item as Record<string, unknown>).language === "string" &&
+      typeof (item as Record<string, unknown>).content === "string" &&
+      (item as Record<string, unknown>).language === preferLang
+    ) {
+      return String((item as Record<string, unknown>).content).trim();
+    }
+  }
+  const first = msgs[0];
+  if (first !== null && typeof first === "object") {
+    const c = (first as Record<string, unknown>).content;
+    if (typeof c === "string" && c.trim()) return c.trim();
+  }
+  return null;
+}
+
+export function readS3pOrAxiosErrorMessage(e: unknown): string {
+  return (
+    readS3pCustomerMessage(e, "fr") ??
+    readS3pCustomerMessage(e, "en") ??
+    readAxiosErrorMessage(e)
+  );
 }

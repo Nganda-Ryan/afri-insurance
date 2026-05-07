@@ -53,6 +53,16 @@ export const QUOTE_WIZARD_STEP_CODE_TRIP = "voyage";
 export const QUOTE_WIZARD_STEP_CODE_TRAVELER = "voyageur";
 export const QUOTE_WIZARD_STEP_CODE_QUOTE = "devis";
 
+/** Clés des query params pour le parcours devis (URL courte/lisible). */
+export const URL_PARAM_PRODUCT = "p";
+export const URL_PARAM_STEP = "e";
+export const URL_PARAM_CATEGORY = "cat";
+export const URL_PARAM_DEST = "dst";
+export const URL_PARAM_DEPART = "dep";
+export const URL_PARAM_RETURN = "ret";
+export const URL_PARAM_ADULTS = "adv";
+export const URL_PARAM_AGE = "age";
+
 /* PLAN TYPES */
 export const PLAN_TYPE_STANDARD = "standard";
 export const PLAN_TYPE_PREMIUM = "premium";

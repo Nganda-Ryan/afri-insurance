@@ -1,336 +1,81 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  ArrowLeftIcon,
-  ChevronLeftIcon,
-  CreditCardIcon
-} from "lucide-react";
+import { ArrowLeftIcon, ChevronLeftIcon } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { processInsuranceCheckout } from "@/actions/checkout.actions";
-import DatePicker from "@/components/form/date-picker";
-import InputField from "@/components/form/input/InputField";
-import Label from "@/components/form/Label";
-import Select from "@/components/form/Select";
 import Button from "@/components/ui/button/Button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { ProgressBar } from "@/components/Quote/ProgressBar";
-import { useSubscribeTravelPolicy } from "@/hooks/use-travel-quote-session";
+import {
+  useInitiateCashoutCollection,
+  useVerifyTravelPayment,
+} from "@/hooks/use-smobilpay";
+import {
+  useSelectTravelQuoteProduct,
+  useSubscribeTravelPolicy,
+} from "@/hooks/use-travel-quote-session";
 import { POLICY_TYPE_TRAVEL } from "@/lib/constants/constant";
 import {
   languageCodeFromQuoteContext,
   subscriptionCountryFromQuoteContext,
 } from "@/lib/travel/quote-subscribe-context";
+import { ageFromBirthDate, generatePaymentTrid, hasExpectedOldestAge } from "@/lib/utils";
+import { SubscribePaymentStep } from "@/components/Policy/SubscribePaymentStep";
+import { SubscribePersonFields } from "@/components/Policy/SubscribePersonFields";
+import { SubscribePlanSummaryAside } from "@/components/Policy/SubscribePlanSummaryAside";
+import { SubscribeRecapStep } from "@/components/Policy/SubscribeRecapStep";
+import {
+  HOLDER_FIELDS,
+  type FlowPhase,
+  type PersonFormData,
+  type Step,
+  type SubscriberFormData,
+} from "@/types/subscribe";
 import type { SubscribePolicyInputDto, TravelQuoteContext } from "@/types/travel";
-
-type Step = 1 | 2;
-
-interface PersonFormData {
-  title: "M" | "Mme";
-  first_name: string;
-  last_name: string;
-  birth_date: string;
-  email: string;
-  phone_number: string;
-  address: string;
-  city: string;
-  passport_number: string;
-  passeport_exp_date: string;
-}
-
-interface SubscriberFormData extends PersonFormData {
-  groupMembers: PersonFormData[];
-}
-
-function ageFromBirthDate(value: string): number | null {
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return null;
-  const today = new Date();
-  let age = today.getFullYear() - d.getFullYear();
-  const monthDelta = today.getMonth() - d.getMonth();
-  if (monthDelta < 0 || (monthDelta === 0 && today.getDate() < d.getDate())) age -= 1;
-  return age;
-}
-
-function PersonFields({
-  control,
-  register,
-  errors,
-  namePrefix,
-  title,
-}: {
-  control: any;
-  register: any;
-  errors: any;
-  namePrefix: "" | `groupMembers.${number}.`;
-  title: string;
-}) {
-  const fieldName = (key: keyof PersonFormData) => `${namePrefix}${key}` as const;
-  const fieldId = (key: keyof PersonFormData) =>
-    `${namePrefix}${key}`.replaceAll(".", "-");
-  const memberIndex =
-    namePrefix === "" ? null : Number.parseInt(namePrefix.split(".")[1] ?? "-1", 10);
-  const fieldError = (key: keyof PersonFormData) =>
-    memberIndex == null ? errors[key] : errors.groupMembers?.[memberIndex]?.[key];
-
-  return (
-    <div className="rounded-lg border border-border bg-card p-4 sm:p-5">
-      <h3 className="mb-3 text-base font-semibold text-brand-secondary sm:text-lg">
-        {title}
-      </h3>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div>
-          <Label className="mb-2 font-semibold text-text-main">
-            Civilite <span className="text-red-500">*</span>
-          </Label>
-          <Controller
-            control={control}
-            name={fieldName("title")}
-            rules={{ required: "Civilite obligatoire" }}
-            render={({ field }: { field: any }) => (
-              <Select
-                id={fieldId("title")}
-                name={field.name}
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                options={[{ value: "M", label: "M." }, { value: "Mme", label: "Mme" }]}
-                error={!!fieldError("title")}
-                className="border bg-white py-3 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
-              />
-            )}
-          />
-          {fieldError("title") && (
-            <p className="mt-1 text-sm text-red-500">
-              {String(fieldError("title")?.message ?? "")}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <Label className="mb-2 font-semibold text-text-main">
-            Prenom <span className="text-red-500">*</span>
-          </Label>
-          <InputField
-            type="text"
-            placeholder="Jean"
-            {...register(fieldName("first_name"), { required: "Prenom obligatoire" })}
-            error={!!fieldError("first_name")}
-            className="border bg-white dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
-          />
-          {fieldError("first_name") && (
-            <p className="mt-1 text-sm text-red-500">
-              {String(fieldError("first_name")?.message ?? "")}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <Label className="mb-2 font-semibold text-text-main">
-            Nom <span className="text-red-500">*</span>
-          </Label>
-          <InputField
-            type="text"
-            placeholder="Dupont"
-            {...register(fieldName("last_name"), { required: "Nom obligatoire" })}
-            error={!!fieldError("last_name")}
-            className="border bg-white dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
-          />
-          {fieldError("last_name") && (
-            <p className="mt-1 text-sm text-red-500">
-              {String(fieldError("last_name")?.message ?? "")}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <Label className="mb-2 font-semibold text-text-main">
-            Date de naissance <span className="text-red-500">*</span>
-          </Label>
-          <Controller
-            control={control}
-            name={fieldName("birth_date")}
-            rules={{
-              required: "Date de naissance obligatoire",
-              validate: (v: string) =>
-                new Date(v) < new Date() || "La date doit etre dans le passe",
-            }}
-            render={({ field }: { field: any }) => (
-              <DatePicker
-                id={fieldId("birth_date")}
-                name={field.name}
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                error={!!fieldError("birth_date")}
-                className="border bg-white dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
-              />
-            )}
-          />
-          {fieldError("birth_date") && (
-            <p className="mt-1 text-sm text-red-500">
-              {String(fieldError("birth_date")?.message ?? "")}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <Label className="mb-2 font-semibold text-text-main">
-            E-mail <span className="text-red-500">*</span>
-          </Label>
-          <InputField
-            type="email"
-            placeholder="jean.dupont@example.com"
-            {...register(fieldName("email"), {
-              required: "E-mail obligatoire",
-              pattern: {
-                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                message: "Format e-mail invalide",
-              },
-            })}
-            error={!!fieldError("email")}
-            className="border bg-white dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
-          />
-          {fieldError("email") && (
-            <p className="mt-1 text-sm text-red-500">
-              {String(fieldError("email")?.message ?? "")}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <Label className="mb-2 font-semibold text-text-main">
-            Telephone <span className="text-red-500">*</span>
-          </Label>
-          <InputField
-            type="tel"
-            placeholder="+237 6 00 00 00 00"
-            {...register(fieldName("phone_number"), { required: "Telephone obligatoire" })}
-            error={!!fieldError("phone_number")}
-            className="border bg-white dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
-          />
-          {fieldError("phone_number") && (
-            <p className="mt-1 text-sm text-red-500">
-              {String(fieldError("phone_number")?.message ?? "")}
-            </p>
-          )}
-        </div>
-
-        <div className="sm:col-span-2">
-          <Label className="mb-2 font-semibold text-text-main">
-            Adresse postale <span className="text-red-500">*</span>
-          </Label>
-          <InputField
-            type="text"
-            placeholder="123 rue de la Paix"
-            {...register(fieldName("address"), { required: "Adresse obligatoire" })}
-            error={!!fieldError("address")}
-            className="border bg-white dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
-          />
-          {fieldError("address") && (
-            <p className="mt-1 text-sm text-red-500">
-              {String(fieldError("address")?.message ?? "")}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <Label className="mb-2 font-semibold text-text-main">
-            Ville <span className="text-red-500">*</span>
-          </Label>
-          <InputField
-            type="text"
-            placeholder="Yaounde"
-            {...register(fieldName("city"), { required: "Ville obligatoire" })}
-            error={!!fieldError("city")}
-            className="border bg-white dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
-          />
-          {fieldError("city") && (
-            <p className="mt-1 text-sm text-red-500">
-              {String(fieldError("city")?.message ?? "")}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <Label className="mb-2 font-semibold text-text-main">
-            Numero de passeport <span className="text-red-500">*</span>
-          </Label>
-          <InputField
-            type="text"
-            placeholder="AB123456"
-            {...register(fieldName("passport_number"), {
-              required: "Numero de passeport obligatoire",
-            })}
-            error={!!fieldError("passport_number")}
-            className="border bg-white dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
-          />
-          {fieldError("passport_number") && (
-            <p className="mt-1 text-sm text-red-500">
-              {String(fieldError("passport_number")?.message ?? "")}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <Label className="mb-2 font-semibold text-text-main">
-            Expiration du passeport <span className="text-red-500">*</span>
-          </Label>
-          <Controller
-            control={control}
-            name={fieldName("passeport_exp_date")}
-            rules={{
-              required: "Date d'expiration obligatoire",
-              validate: (v: string) =>
-                new Date(v) > new Date() ||
-                "Le passeport doit etre valide (date future)",
-            }}
-            render={({ field }: { field: any }) => (
-              <DatePicker
-                id={fieldId("passeport_exp_date")}
-                name={field.name}
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                error={!!fieldError("passeport_exp_date")}
-                className="border bg-white dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
-              />
-            )}
-          />
-          {fieldError("passeport_exp_date") && (
-            <p className="mt-1 text-sm text-red-500">
-              {String(fieldError("passeport_exp_date")?.message ?? "")}
-            </p>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
+import type { S3pCashoutCollectResult } from "@/types/smobilpay";
 
 export default function SubscribePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const subscribe = useSubscribeTravelPolicy();
+  const selectQuoteProduct = useSelectTravelQuoteProduct();
+  const {
+    mutate: reselectionMutate,
+    mutateAsync: reselectionMutateAsync,
+    isPending: isReselecting,
+    isSuccess: reselectDone,
+  } =
+    selectQuoteProduct;
+  const initiateCashout = useInitiateCashoutCollection();
+  const verifyPayment = useVerifyTravelPayment();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
-  const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
-  const [pendingSubmission, setPendingSubmission] = useState<SubscriberFormData | null>(null);
+  const [flowPhase, setFlowPhase] = useState<FlowPhase>("form");
+  const [recapData, setRecapData] = useState<SubscriberFormData | null>(null);
+  const [walletPhone, setWalletPhone] = useState("");
+  const [payChannel, setPayChannel] = useState<"" | "om" | "momo">("");
+  const [paymentTrid, setPaymentTrid] = useState<string | null>(null);
+  const [collectResult, setCollectResult] = useState<S3pCashoutCollectResult | null>(
+    null,
+  );
+  const [paymentInitFeedback, setPaymentInitFeedback] = useState<{
+    tone: "success" | "error";
+    message: string;
+  } | null>(null);
   const [currentStep, setCurrentStep] = useState<Step>(1);
-  const isSubmitting = subscribe.isPending || isCheckingOut;
+  const isSubmitting =
+    subscribe.isPending ||
+    isCheckingOut ||
+    initiateCashout.isPending ||
+    verifyPayment.isPending;
 
   const planName = searchParams.get("planName") ?? "";
   const planPrice = Number(searchParams.get("planPrice") ?? "0");
   const destination = searchParams.get("destination") ?? "";
+  const productIndex = Number.parseInt(searchParams.get("productIndex") ?? "", 10);
+  const quoteCode = searchParams.get("quoteCode") ?? "";
   const startDate = searchParams.get("startDate") ?? "";
   const endDate = searchParams.get("endDate") ?? "";
   const adult = searchParams.get("adult") ?? "";
@@ -339,8 +84,7 @@ export default function SubscribePage() {
     10,
   );
   const travelerCount = Number.parseInt(adult, 10);
-  const additionalTravelerCount =
-    Number.isFinite(travelerCount) && travelerCount > 1 ? travelerCount - 1 : 0;
+  const additionalTravelerCount = Number.isFinite(travelerCount) && travelerCount > 1 ? travelerCount - 1 : 0;
   const hasGroup = additionalTravelerCount > 0;
 
   const quoteContext: TravelQuoteContext = {
@@ -431,30 +175,28 @@ export default function SubscribePage() {
         ? "border-amber-300 bg-amber-50 text-amber-800"
         : "border-border bg-card text-text-main";
 
+  useEffect(() => {
+    if (!Number.isInteger(productIndex) || productIndex < 0) return;
+    if (quoteCode.trim()) return;
+    if (isReselecting || reselectDone) return;
+    reselectionMutate(productIndex, {
+      onError: () => {},
+    });
+  }, [
+    productIndex,
+    quoteCode,
+    reselectionMutate,
+    isReselecting,
+    reselectDone,
+  ]);
+
   const onNextStep = async () => {
-    const ok = await trigger([
-      "title",
-      "first_name",
-      "last_name",
-      "birth_date",
-      "email",
-      "phone_number",
-      "address",
-      "city",
-      "passport_number",
-      "passeport_exp_date",
-    ]);
+    const ok = await trigger(HOLDER_FIELDS);
     if (ok) setCurrentStep(2);
   };
 
   const hasValidOldestAge = (data: SubscriberFormData) => {
-    if (!Number.isFinite(expectedOldestAge)) return true;
-    const ages = [
-      ageFromBirthDate(data.birth_date),
-      ...data.groupMembers.map((m) => ageFromBirthDate(m.birth_date)),
-    ].filter((v): v is number => v != null);
-    const currentOldestAge = ages.length ? Math.max(...ages) : null;
-    if (currentOldestAge == null || currentOldestAge !== expectedOldestAge) {
+    if (!hasExpectedOldestAge(data, expectedOldestAge)) {
       toast.error(
         `L'age du plus age doit etre ${expectedOldestAge} ans. Veuillez corriger les dates de naissance avant de continuer.`,
       );
@@ -465,13 +207,12 @@ export default function SubscribePage() {
 
   const onSubmit = (data: SubscriberFormData) => {
     if (!hasValidOldestAge(data)) return;
-    setPendingSubmission(data);
-    setIsReviewDialogOpen(true);
+    setRecapData(data);
+    setFlowPhase("recap");
   };
 
-  const onConfirmSubmit = (data: SubscriberFormData) => {
+  const completeSubscriptionAfterPayment = (data: SubscriberFormData) => {
     if (!hasValidOldestAge(data)) {
-      setIsReviewDialogOpen(false);
       return;
     }
 
@@ -479,6 +220,7 @@ export default function SubscribePage() {
       subscription_country: subscriptionCountryFromQuoteContext(quoteContext),
       language_code: languageCodeFromQuoteContext(quoteContext),
       agent_scope: "",
+      quote_code: quoteCode.trim() || undefined,
       policy_holder: [
         {
           title: data.title,
@@ -520,52 +262,135 @@ export default function SubscribePage() {
       payment: { type: "MANAGED_BY_PARTNER" },
       addons: [],
     };
-    console.log(payload);
-
-    subscribe.mutate(payload, {
-      onSuccess: async (res) => {
-        if (!res.ok || !res.data) {
-          toast.error(res.error?.message ?? "Souscription impossible.");
+    const runSubscription = async () => {
+      if (!quoteCode.trim() && Number.isInteger(productIndex) && productIndex >= 0) {
+        const reselectRes = await reselectionMutateAsync(productIndex);
+        if (!reselectRes.ok) {
+          toast.error(
+            reselectRes.error?.message ??
+              "Impossible de restaurer le devis sélectionné. Revenez à l'étape devis.",
+          );
           return;
         }
-        const policyId = res.data.policyId;
-        setIsCheckingOut(true);
-        try {
-          const checkoutResult = await processInsuranceCheckout({
-            email: data.email,
-            firstName: data.first_name,
-            lastName: data.last_name,
-            phone: data.phone_number,
-            planCategory: planName,
-            destination,
-            externalPolicyId: policyId,
-            policyType: POLICY_TYPE_TRAVEL,
-          });
-
-          if (!checkoutResult.ok) {
-            const detail =
-              checkoutResult.error?.message ??
-              "Une etape technique post-souscription a echoue.";
-            toast.warning(`Souscription creee, mais traitement incomplet: ${detail}`);
+      }
+      subscribe.mutate(payload, {
+        onSuccess: async (res) => {
+          if (!res.ok || !res.data) {
+            toast.error(res.error?.message ?? "Souscription impossible.");
+            return;
           }
-        } catch (err) {
-          console.error("[subscribe] processInsuranceCheckout failed", err);
-          toast.warning(
-            "Souscription creee, mais une erreur serveur est survenue apres creation.",
-          );
-        } finally {
-          setIsCheckingOut(false);
-        }
-        toast.success("Souscription effectuee avec succes.");
-        router.push(`/quote/${policyId}`);
-      },
-    });
+          const policyId = res.data.policyId;
+          setIsCheckingOut(true);
+          try {
+            const checkoutResult = await processInsuranceCheckout({
+              email: data.email,
+              firstName: data.first_name,
+              lastName: data.last_name,
+              phone: data.phone_number,
+              planCategory: planName,
+              destination,
+              externalPolicyId: policyId,
+              policyType: POLICY_TYPE_TRAVEL,
+            });
+
+            if (!checkoutResult.ok) {
+              const detail =
+                checkoutResult.error?.message ??
+                "Une etape technique post-souscription a echoue.";
+              toast.warning(`Souscription creee, mais traitement incomplet: ${detail}`);
+            }
+          } catch (err) {
+            console.error("[subscribe] processInsuranceCheckout failed", err);
+            toast.warning(
+              "Souscription creee, mais une erreur serveur est survenue apres creation.",
+            );
+          } finally {
+            setIsCheckingOut(false);
+          }
+          toast.success("Souscription effectuee avec succes.");
+          router.push(`/quote/${policyId}`);
+        },
+      });
+    };
+
+    void runSubscription();
   };
 
-  const formatDateDisplay = (value: string) => {
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return value || "-";
-    return date.toLocaleDateString("fr-FR");
+  const canInitierPaiement =
+    walletPhone.replace(/\D/g, "").length >= 8 &&
+    (payChannel === "om" || payChannel === "momo");
+
+  const handlePasserAuPaiement = () => {
+    setWalletPhone("");
+    setPayChannel("");
+    setCollectResult(null);
+    setPaymentInitFeedback(null);
+    setPaymentTrid(generatePaymentTrid());
+    setFlowPhase("payment");
+  };
+
+  const handleInitierPaiement = () => {
+    if (!recapData || !paymentTrid || !canInitierPaiement) {
+      return;
+    }
+    initiateCashout.mutate(
+      {
+        amount: planPrice,
+        channel: payChannel,
+        walletDestination: walletPhone,
+        customerPhonenumber: recapData.phone_number,
+        customerEmailaddress: recapData.email,
+        customerName: `${recapData.first_name} ${recapData.last_name}`.trim(),
+        customerAddress: `${recapData.address}, ${recapData.city}`,
+        trid: paymentTrid,
+      },
+      {
+        onSuccess: (res) => {
+          if (!res.ok || !res.data) {
+            setPaymentInitFeedback({
+              tone: "error",
+              message: res.error?.message ?? "Impossible d'initier le paiement.",
+            });
+            return;
+          }
+          setCollectResult(res.data);
+          setPaymentInitFeedback({
+            tone: "success",
+            message:
+              "Paiement initié. Suivez les instructions sur votre téléphone puis vérifiez le statut.",
+          });
+        },
+      },
+    );
+  };
+
+  const handleVerifierStatutPaiement = () => {
+    const trid = collectResult?.trid ?? paymentTrid;
+    if (!trid || !recapData) {
+      toast.error("Référence de transaction manquante.");
+      return;
+    }
+    verifyPayment.mutate(
+      { trid },
+      {
+        onSuccess: (res) => {
+          if (!res.ok) {
+            toast.error(res.error?.message ?? "Vérification impossible.");
+            return;
+          }
+          const st = res.data?.status;
+          if (st === "SUCCESS" || st === "DEBITED" || st === "ERRORED") {
+            completeSubscriptionAfterPayment(recapData);
+            return;
+          }
+          if (st) {
+            toast.message(`Statut du paiement : ${st}`);
+          } else {
+            toast.message("Aucune transaction trouvée pour le moment.");
+          }
+        },
+      },
+    );
   };
 
   if (!hasRequiredParams) {
@@ -590,12 +415,14 @@ export default function SubscribePage() {
     );
   }
 
-  const showStepOne = currentStep === 1;
-  const showStepTwo = hasGroup && currentStep === 2;
+  const showStepOne = flowPhase === "form" && currentStep === 1;
+  const showStepTwo = flowPhase === "form" && hasGroup && currentStep === 2;
   const stepperLabels = hasGroup
-    ? ["Souscripteur", "Membres du groupe"]
-    : ["Souscripteur"];
+    ? ["Souscripteur", "Membres du groupe", "Récapitulatif", "Paiement"]
+    : ["Souscripteur", "Récapitulatif", "Paiement"];
   const stepperIndex = (() => {
+    if (flowPhase === "recap") return hasGroup ? 2 : 1;
+    if (flowPhase === "payment") return hasGroup ? 3 : 2;
     if (hasGroup) {
       if (currentStep === 1) return 0;
       return 1;
@@ -616,43 +443,14 @@ export default function SubscribePage() {
       </Button>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-        <aside className="lg:col-span-4">
-          <div className="rounded-lg border border-border bg-muted/50 p-4 sm:p-5 lg:sticky lg:top-24">
-            <h2 className="mb-4 text-base font-bold text-brand-secondary sm:text-lg">
-              Recapitulatif du plan choisi
-            </h2>
-            <div className="space-y-3 text-sm">
-              {[
-                { label: "Type de plan", value: planName, highlight: true },
-                { label: "Prime totale", value: totalPremiumLabel, large: true },
-                { label: "Destination", value: destination },
-                {
-                  label: "Dates de couverture",
-                  value: `${new Date(startDate).toLocaleDateString()} - ${new Date(endDate).toLocaleDateString()}`,
-                },
-                { label: "Nombre de voyageurs", value: adult },
-              ].map(({ label, value, highlight, large }) => (
-                <div
-                  key={label}
-                  className="flex items-start justify-between gap-3 border-b border-gray-300 pb-3 last:border-0 last:pb-0"
-                >
-                  <span className="font-semibold text-text-main">{label}</span>
-                  <span
-                    className={
-                      highlight
-                        ? "text-right font-bold text-brand-primary"
-                        : large
-                          ? "text-right text-xl font-bold text-text-main sm:text-2xl"
-                          : "text-right text-text-main"
-                    }
-                  >
-                    {value}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </aside>
+        <SubscribePlanSummaryAside
+          planName={planName}
+          totalPremiumLabel={totalPremiumLabel}
+          destination={destination}
+          startDate={startDate}
+          endDate={endDate}
+          adult={adult}
+        />
 
         <section className="lg:col-span-8">
           <div className="mb-5 sm:mb-6">
@@ -663,16 +461,18 @@ export default function SubscribePage() {
             />
           </div>
 
-          {ageInfoMessage && (
+          {ageInfoMessage && flowPhase === "form" && (
             <div
               className={`mb-4 rounded-lg border p-3 text-sm ${ageBannerClasses}`}
             >
               {ageInfoMessage}
             </div>
           )}
-          <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
+
+          {flowPhase === "form" && (
+            <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
               {showStepOne && (
-                <PersonFields
+                <SubscribePersonFields
                   key="holder"
                   control={control}
                   register={register}
@@ -685,7 +485,7 @@ export default function SubscribePage() {
               {showStepTwo && (
                 <div className="space-y-4">
                   {Array.from({ length: additionalTravelerCount }).map((_, index) => (
-                    <PersonFields
+                    <SubscribePersonFields
                       key={`member-${index}`}
                       control={control}
                       register={register}
@@ -723,12 +523,9 @@ export default function SubscribePage() {
                     type="submit"
                     variant="primary"
                     disabled={isSubmitting}
-                    startIcon={
-                      !isSubmitting ? <CreditCardIcon className="h-5 w-5" /> : undefined
-                    }
                     className="w-full sm:w-auto"
                   >
-                    {isSubmitting ? "Traitement en cours..." : "Payer maintenant"}
+                    {isSubmitting ? "Traitement en cours..." : "Suivant"}
                   </Button>
                 </div>
               ) : (
@@ -737,168 +534,49 @@ export default function SubscribePage() {
                     type="submit"
                     variant="primary"
                     disabled={isSubmitting}
-                    startIcon={
-                      !isSubmitting ? <CreditCardIcon className="h-5 w-5" /> : undefined
-                    }
                     className="w-full sm:w-auto"
                   >
-                    {isSubmitting ? "Traitement en cours..." : "Payer maintenant"}
+                    {isSubmitting ? "Traitement en cours..." : "Suivant"}
                   </Button>
                 </div>
               )}
-          </form>
+            </form>
+          )}
 
-          <Dialog
-            open={isReviewDialogOpen}
-            onOpenChange={(open) => {
-              if (isSubmitting) return;
-              setIsReviewDialogOpen(open);
-            }}
-          >
-            <DialogContent className="max-h-[85vh] max-w-3xl overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Synthese avant paiement</DialogTitle>
-                <DialogDescription>
-                  Verifiez les informations de votre devis avant de confirmer le paiement.
-                </DialogDescription>
-              </DialogHeader>
+          {flowPhase === "recap" && recapData && (
+            <SubscribeRecapStep
+              recapData={recapData}
+              planName={planName}
+              totalPremiumLabel={totalPremiumLabel}
+              destination={destination}
+              adult={adult}
+              startDate={startDate}
+              endDate={endDate}
+              isSubmitting={isSubmitting}
+              onEdit={() => setFlowPhase("form")}
+              onContinueToPayment={handlePasserAuPaiement}
+            />
+          )}
 
-              {pendingSubmission && (
-                <div className="space-y-5 text-sm text-text-main">
-                  <div className="rounded-lg border border-border bg-muted/40 p-4">
-                    <h3 className="mb-3 text-base font-semibold text-brand-secondary">
-                      Recapitulatif du devis
-                    </h3>
-                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                      <p>
-                        <span className="font-semibold">Plan :</span> {planName}
-                      </p>
-                      <p>
-                        <span className="font-semibold">Prime totale :</span> {totalPremiumLabel}
-                      </p>
-                      <p>
-                        <span className="font-semibold">Destination :</span> {destination}
-                      </p>
-                      <p>
-                        <span className="font-semibold">Voyageurs :</span> {adult}
-                      </p>
-                      <p className="sm:col-span-2">
-                        <span className="font-semibold">Couverture :</span>{" "}
-                        {formatDateDisplay(startDate)} - {formatDateDisplay(endDate)}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="rounded-lg border border-border bg-card p-4">
-                    <h3 className="mb-3 text-base font-semibold text-brand-secondary">
-                      Souscripteur principal
-                    </h3>
-                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                      <p>
-                        <span className="font-semibold">Nom complet :</span>{" "}
-                        {pendingSubmission.title} {pendingSubmission.first_name}{" "}
-                        {pendingSubmission.last_name}
-                      </p>
-                      <p>
-                        <span className="font-semibold">Date de naissance :</span>{" "}
-                        {formatDateDisplay(pendingSubmission.birth_date)}
-                      </p>
-                      <p>
-                        <span className="font-semibold">Email :</span> {pendingSubmission.email}
-                      </p>
-                      <p>
-                        <span className="font-semibold">Telephone :</span>{" "}
-                        {pendingSubmission.phone_number}
-                      </p>
-                      <p>
-                        <span className="font-semibold">Passeport :</span>{" "}
-                        {pendingSubmission.passport_number}
-                      </p>
-                      <p>
-                        <span className="font-semibold">Expiration passeport :</span>{" "}
-                        {formatDateDisplay(pendingSubmission.passeport_exp_date)}
-                      </p>
-                      <p className="sm:col-span-2">
-                        <span className="font-semibold">Adresse :</span> {pendingSubmission.address}
-                        {", "}
-                        {pendingSubmission.city}
-                      </p>
-                    </div>
-                  </div>
-
-                  {pendingSubmission.groupMembers.length > 0 && (
-                    <div className="rounded-lg border border-border bg-card p-4">
-                      <h3 className="mb-3 text-base font-semibold text-brand-secondary">
-                        Membres du groupe
-                      </h3>
-                      <div className="space-y-3">
-                        {pendingSubmission.groupMembers.map((member, index) => (
-                          <div
-                            key={`${member.first_name}-${member.last_name}-${index}`}
-                            className="rounded-md border border-border p-3"
-                          >
-                            <p className="font-semibold text-brand-secondary">
-                              Membre {index + 2}
-                            </p>
-                            <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                              <p>
-                                <span className="font-semibold">Nom complet :</span> {member.title}{" "}
-                                {member.first_name} {member.last_name}
-                              </p>
-                              <p>
-                                <span className="font-semibold">Date de naissance :</span>{" "}
-                                {formatDateDisplay(member.birth_date)}
-                              </p>
-                              <p>
-                                <span className="font-semibold">Email :</span> {member.email}
-                              </p>
-                              <p>
-                                <span className="font-semibold">Telephone :</span>{" "}
-                                {member.phone_number}
-                              </p>
-                              <p>
-                                <span className="font-semibold">Passeport :</span>{" "}
-                                {member.passport_number}
-                              </p>
-                              <p>
-                                <span className="font-semibold">Expiration passeport :</span>{" "}
-                                {formatDateDisplay(member.passeport_exp_date)}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsReviewDialogOpen(false)}
-                  disabled={isSubmitting}
-                >
-                  Modifier
-                </Button>
-                <Button
-                  type="button"
-                  variant="primary"
-                  onClick={() => {
-                    if (!pendingSubmission) return;
-                    onConfirmSubmit(pendingSubmission);
-                  }}
-                  disabled={isSubmitting}
-                  startIcon={
-                    !isSubmitting ? <CreditCardIcon className="h-5 w-5" /> : undefined
-                  }
-                >
-                  {isSubmitting ? "Traitement en cours..." : "Confirmer et payer"}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          {flowPhase === "payment" && recapData && paymentTrid && (
+            <SubscribePaymentStep
+              paymentTrid={paymentTrid}
+              walletPhone={walletPhone}
+              payChannel={payChannel}
+              canInitierPaiement={canInitierPaiement}
+              isSubmitting={isSubmitting}
+              initiatePending={initiateCashout.isPending}
+              verifyPending={verifyPayment.isPending}
+              subscribePending={subscribe.isPending}
+              collectResult={collectResult}
+              paymentInitFeedback={paymentInitFeedback}
+              onWalletPhoneChange={setWalletPhone}
+              onPayChannelChange={setPayChannel}
+              onBack={() => setFlowPhase("recap")}
+              onInitiatePayment={() => void handleInitierPaiement()}
+              onVerifyPayment={() => void handleVerifierStatutPaiement()}
+            />
+          )}
         </section>
       </div>
     </main>

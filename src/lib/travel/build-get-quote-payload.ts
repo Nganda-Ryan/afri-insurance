@@ -1,10 +1,5 @@
+import { EVO_DEFAULT_CONTEXT } from "@/config/evo-api";
 import type { IGetQuotePayload, TravelQuoteWizardInput } from "@/types/travel";
-
-const DEFAULT_QUOTE_CONTEXT = {
-  currency: "EUR",
-  country: "Cameroun",
-  language: "FR",
-} as const satisfies IGetQuotePayload["context"];
 
 function resolveTravelerTypeFromAge(age: number): "children" | "adult" | "senior" {
   if (age <= 18) return "children";
@@ -30,8 +25,6 @@ export function buildGetQuotePayload(input: TravelQuoteWizardInput): IGetQuotePa
   const travelerType = resolveTravelerTypeFromAge(oldestTravelerAge);
   const remainingTravelers = Math.max(0, adults - 1);
   const types = {
-    // On connait seulement l'age max. On affecte ce voyageur a sa tranche,
-    // puis on répartit les autres selon l'information minimale disponible.
     adult:
       travelerType === "adult"
         ? adults
@@ -43,7 +36,7 @@ export function buildGetQuotePayload(input: TravelQuoteWizardInput): IGetQuotePa
   };
 
   return {
-    context: { ...DEFAULT_QUOTE_CONTEXT },
+    context: { ...EVO_DEFAULT_CONTEXT },
     product_criteria: {
       category: input.product_category,
       catalog: {

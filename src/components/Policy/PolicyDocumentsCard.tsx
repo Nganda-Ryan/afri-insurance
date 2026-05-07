@@ -5,7 +5,7 @@ import React, { useState } from "react";
 
 import Button from "@/components/ui/button/Button";
 import type { IAttachment } from "@/types/travel";
-import { formatDate } from "./utils";
+import { formatDate } from "@/lib/utils";
 
 interface PolicyDocumentsCardProps {
   attachments: IAttachment[];

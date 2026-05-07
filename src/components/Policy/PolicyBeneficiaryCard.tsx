@@ -2,7 +2,7 @@ import { UserIcon } from "lucide-react";
 import React from "react";
 
 import type { IBeneficiary } from "@/types/travel";
-import { calculateAge, formatDate } from "./utils";
+import { calculateAge, formatDate } from "@/lib/utils";
 import { InfoRow } from "./InfoRow";
 
 interface PolicyBeneficiaryCardProps {

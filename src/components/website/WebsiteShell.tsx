@@ -7,8 +7,8 @@ import {
   QuotationWizardSidebar,
   type ProductType,
 } from "@/components/Quote/QuotationWizardSidebar";
+import { URL_PARAM_PRODUCT } from "@/lib/constants/constant";
 import {
-  URL_PARAM_PRODUCT,
   quoteProductCodeFromId,
   quoteProductIdFromUrlCode,
 } from "@/lib/travel/quote-wizard-url";

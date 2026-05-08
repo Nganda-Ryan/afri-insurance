@@ -93,8 +93,6 @@ export function QuotationWizard({ onWizardStateChange }: QuotationWizardProps) {
   }, [currentStep, tripDetails, onWizardStateChange]);
 
   const handleTripDetailsSubmit = (data: TripDetailsData) => {
-    console.log("Trip details submitted:", data);
-    console.log("Traveler info at this point:", travelerInfo);
     replaceTravelWizardUrl({
       stepIndex: 1,
       trip: data,

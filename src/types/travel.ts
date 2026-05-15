@@ -7,7 +7,6 @@ import type {
 } from "@/schemas/travel";
 
 export type TravelQuoteWizardInput = z.input<typeof travelQuoteWizardInputSchema>;
-
 export type TravelQuoteWizardParsed = z.output<typeof travelQuoteWizardInputSchema>;
 
 /** Corps attendu par POST `travel/quotes_requests` (Get Quote). */

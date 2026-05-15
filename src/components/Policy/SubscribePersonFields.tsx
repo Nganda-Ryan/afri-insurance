@@ -1,6 +1,14 @@
 "use client";
 
-import { Controller, type Control, type FieldErrors, type UseFormRegister } from "react-hook-form";
+import {
+  Controller,
+  type Control,
+  type FieldErrors,
+  type UseFormGetValues,
+  type UseFormRegister,
+} from "react-hook-form";
+
+import { validateUniquePassportNumber } from "@/lib/utils";
 
 import DatePicker from "@/components/form/date-picker";
 import InputField from "@/components/form/input/InputField";
@@ -13,6 +21,7 @@ type PersonFieldPrefix = "" | `groupMembers.${number}.`;
 interface PersonFieldsProps {
   control: Control<SubscriberFormData>;
   register: UseFormRegister<SubscriberFormData>;
+  getValues: UseFormGetValues<SubscriberFormData>;
   errors: FieldErrors<SubscriberFormData>;
   namePrefix: PersonFieldPrefix;
   title: string;
@@ -21,6 +30,7 @@ interface PersonFieldsProps {
 export function SubscribePersonFields({
   control,
   register,
+  getValues,
   errors,
   namePrefix,
   title,
@@ -200,7 +210,10 @@ export function SubscribePersonFields({
           <InputField
             type="text"
             placeholder="AB123456"
-            {...register(fieldName("passport_number"), { required: "Numero de passeport obligatoire" })}
+            {...register(fieldName("passport_number"), {
+              required: "Numero de passeport obligatoire",
+              validate: (value) => validateUniquePassportNumber(value, getValues()),
+            })}
             error={!!fieldError("passport_number")}
             className="border bg-white dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
           />

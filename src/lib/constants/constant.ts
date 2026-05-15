@@ -1,3 +1,7 @@
+
+
+export const SAFETY_BUFFER_MS = 60_000;
+
 /* TRIP CATEGORIES — valeurs API + codes URL courts */
 
 export const TRIP_PRODUCT_CATEGORY_STANDARD = "Standard";

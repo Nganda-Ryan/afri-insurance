@@ -108,6 +108,7 @@ export default function SubscribePage() {
     register,
     handleSubmit,
     trigger,
+    getValues,
     watch,
     formState: { errors },
   } = useForm<SubscriberFormData>({
@@ -476,6 +477,7 @@ export default function SubscribePage() {
                   key="holder"
                   control={control}
                   register={register}
+                  getValues={getValues}
                   errors={errors}
                   namePrefix=""
                   title="Informations du souscripteur"
@@ -489,6 +491,7 @@ export default function SubscribePage() {
                       key={`member-${index}`}
                       control={control}
                       register={register}
+                      getValues={getValues}
                       errors={errors}
                       namePrefix={`groupMembers.${index}.`}
                       title={`Informations du membre ${index + 2}`}

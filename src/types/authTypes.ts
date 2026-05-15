@@ -88,4 +88,14 @@ export type ProfileDetail = {
   roles: string[];
   activeRole: string;
 }
-  
+
+
+export type CachedToken = {
+  accessToken: string;
+  expiresAtMs: number;
+};
+
+export type TokenResponse = {
+  access_token?: string;
+  expires_in?: number;
+};

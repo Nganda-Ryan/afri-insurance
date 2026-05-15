@@ -70,6 +70,31 @@ export function formatDateDisplay(value: string): string {
   return date.toLocaleDateString("fr-FR");
 }
 
+export const DUPLICATE_PASSPORT_MESSAGE =
+  "Ce numéro de passeport est déjà utilisé pour un autre voyageur";
+
+export function normalizePassportNumber(value: string): string {
+  return value.trim().toUpperCase();
+}
+
+export function validateUniquePassportNumber(
+  value: string,
+  data: SubscriberFormData,
+): true | string {
+  const normalized = normalizePassportNumber(value);
+  if (!normalized) return true;
+
+  const allNormalized = [
+    data.passport_number,
+    ...data.groupMembers.map((m) => m.passport_number),
+  ]
+    .map(normalizePassportNumber)
+    .filter(Boolean);
+
+  const occurrences = allNormalized.filter((p) => p === normalized).length;
+  return occurrences > 1 ? DUPLICATE_PASSPORT_MESSAGE : true;
+}
+
 export function hasExpectedOldestAge(
   data: SubscriberFormData,
   expectedOldestAge: number,

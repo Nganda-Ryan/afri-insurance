@@ -9,8 +9,7 @@ import { WebsiteToaster } from "@/components/providers/website-toaster";
 
 export const metadata: Metadata = {
   title: "Cotation assurance | Afri Insurance",
-  description:
-    "Demandez un devis en ligne : assistance voyage et autres produits à venir.",
+  description: "Demandez un devis en ligne",
 };
 
 export default function Layout({

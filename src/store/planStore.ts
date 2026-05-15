@@ -4,7 +4,6 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { getTravelPlansAction } from "@/actions/travel-session.actions";
 import { factorizePlans } from "@/lib/travel/factorize-plans";
 import type { IGetPlanResponseDto, IGetPlanResponseDtoFactorize } from "@/types/travel";
-import { PLANS_TTL_MS } from "@/lib/constants/constant";
 import { isCacheValid } from "@/lib/utils";
 
 
@@ -14,9 +13,7 @@ interface PlanStoreState {
   loading: boolean;
   error: string | null;
 
-  /** Fetch plans only if cache is absent or older than 10 min. */
   fetchPlans: () => Promise<void>;
-  /** Force a fresh fetch regardless of cache age. */
   forceRefreshPlans: () => Promise<void>;
   resetPlans: () => void;
 }
@@ -39,9 +36,8 @@ export const usePlanStore = create<PlanStoreState>()(
         set({ loading: true, error: null });
         try {
           const result = await getTravelPlansAction();
-          const raw = Array.isArray(result)
-            ? (result as IGetPlanResponseDto[])
-            : [result as IGetPlanResponseDto];
+          console.log('result', result);
+          const raw = Array.isArray(result) ? (result as IGetPlanResponseDto[]) : [result as IGetPlanResponseDto];
 
           set({ plans: factorizePlans(raw), fetchedAt: Date.now(), loading: false });
         } catch (err: unknown) {

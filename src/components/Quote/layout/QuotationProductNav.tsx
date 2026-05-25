@@ -28,7 +28,7 @@ export function QuotationProductNav({
 }: QuotationProductNavProps) {
   return (
     <nav
-      className="border-b border-white/10 bg-brand-secondary-dark shadow-md"
+      className="border-b border-white/10 bg-brand-primary-dark shadow-md"
       aria-label="Produits d'assurance"
     >
       <div className="mx-auto max-w-7xl overflow-x-auto px-4 sm:px-6">

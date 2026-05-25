@@ -1,6 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import {
+  AFRI_INSURANCE_LOGO_HREF,
+  AFRILIFE_LOGO_HREF,
+} from "@/lib/constants/constant";
+
 const MAP_EMBED_URL =
   "https://maps.google.com/maps?q=Cameroun%2C%20Littoral%2C%20Douala%2C%20AKWA%2C%20Boulevard%20de%20la%20Libert%C3%A9%2C%20h%C3%B4tel%20La%20Falaise&t=m&z=15&output=embed&iwloc=near";
 
@@ -41,8 +46,8 @@ const LandingFooter = () => {
           <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4 lg:gap-8">
             {/* Colonne logos */}
             <div className="flex flex-col items-start gap-6">
-              <Link
-                href="/afriinsurance-home"
+              <a
+                href={AFRI_INSURANCE_LOGO_HREF}
                 className="block transition-opacity hover:opacity-90"
               >
                 <Image
@@ -52,9 +57,9 @@ const LandingFooter = () => {
                   height={156}
                   className="h-auto w-full max-w-[120px] md:max-w-[160px]"
                 />
-              </Link>
-              <Link
-                href="/afrilife"
+              </a>
+              <a
+                href={AFRILIFE_LOGO_HREF}
                 className="block transition-opacity hover:opacity-90"
               >
                 <Image
@@ -64,7 +69,7 @@ const LandingFooter = () => {
                   height={250}
                   className="h-auto w-full max-w-[70px] md:max-w-[90px]"
                 />
-              </Link>
+              </a>
             </div>
 
             {/* Colonne Entreprise — masquée sur mobile comme sur WordPress */}

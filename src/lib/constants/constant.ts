@@ -71,6 +71,10 @@ export const URL_PARAM_RETURN = "ret";
 export const URL_PARAM_ADULTS = "adv";
 export const URL_PARAM_AGE = "age";
 
+/** Liens des logos Afri Insurance (1) et Afrilife (2). */
+export const AFRI_INSURANCE_LOGO_HREF = `https://afri-insurance.vercel.app/?${URL_PARAM_PRODUCT}=${QUOTE_PRODUCT_CODE_TRAVEL}&${URL_PARAM_STEP}=${QUOTE_WIZARD_STEP_CODE_FORM}`;
+export const AFRILIFE_LOGO_HREF = "https://afri-insurance.com/afrilife/";
+
 /* PLAN TYPES */
 export const PLAN_TYPE_STANDARD = "standard";
 export const PLAN_TYPE_PREMIUM = "premium";

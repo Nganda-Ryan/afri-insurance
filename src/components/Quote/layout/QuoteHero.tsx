@@ -3,11 +3,11 @@
 export function QuoteHero() {
   return (
     <section
-      className="bg-brand-secondary px-4 pb-10 pt-20 sm:px-6 sm:pb-8 sm:pt-20 lg:pb-10 lg:pt-24"
+      className="bg-brand-primary px-4 pb-10 pt-20 sm:px-6 sm:pb-8 sm:pt-20 lg:pb-10 lg:pt-24"
       aria-labelledby="quote-hero-title"
     >
       <div className="mx-auto max-w-7xl">
-        <p className="text-sm font-bold uppercase tracking-[0.2em] text-orange-500 sm:text-base">
+        <p className="text-sm font-bold uppercase tracking-[0.2em] text-white sm:text-base">
           Cotation en ligne
         </p>
         <h1

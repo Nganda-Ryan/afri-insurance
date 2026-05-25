@@ -6,6 +6,11 @@ import UserDropdown from "@/components/website/header/UserDropdown";
 import { useSidebar } from "@/context/SidebarContext";
 import Image from "next/image";
 import Link from "next/link";
+
+import {
+  AFRI_INSURANCE_LOGO_HREF,
+  AFRILIFE_LOGO_HREF,
+} from "@/lib/constants/constant";
 import React, { useEffect, useRef } from "react";
 
 const AppHeader: React.FC = () => {
@@ -82,24 +87,28 @@ const AppHeader: React.FC = () => {
           </div>
 
           <div className="flex items-center justify-center">
-            <Link href="/" className="flex items-center gap-3">
-              <Image
-                src="/images/logo/logo-afri-insurance.png"
-                alt="Logo Afri Insurance"
-                width={110}
-                height={40}
-                className="h-10 w-auto object-contain"
-                priority
-              />
-              <Image
-                src="/images/logo/logo-afri-life.png"
-                alt="Logo Afri Life"
-                width={40}
-                height={40}
-                className="h-10 w-auto object-contain"
-                priority
-              />
-            </Link>
+            <div className="flex items-center gap-3">
+              <a href={AFRI_INSURANCE_LOGO_HREF} className="transition-opacity hover:opacity-90">
+                <Image
+                  src="/images/logo/logo-afri-insurance.png"
+                  alt="Logo Afri Insurance"
+                  width={110}
+                  height={40}
+                  className="h-10 w-auto object-contain"
+                  priority
+                />
+              </a>
+              <a href={AFRILIFE_LOGO_HREF} className="transition-opacity hover:opacity-90">
+                <Image
+                  src="/images/logo/logo-afri-life.png"
+                  alt="Logo Afri Life"
+                  width={40}
+                  height={40}
+                  className="h-10 w-auto object-contain"
+                  priority
+                />
+              </a>
+            </div>
           </div>
 
           <div className="flex items-center justify-end gap-2">

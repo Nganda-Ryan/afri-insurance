@@ -5,6 +5,7 @@ import nodemailer from "nodemailer";
 
 import { prisma } from "@/lib/prisma";
 import { actionFail, actionOk } from "@/lib/http/action-result";
+import { fetchPolicyContractEmailAttachments } from "@/lib/travel/fetch-policy-contract-for-email";
 import type { ICheckoutRequestDto } from "@/types/checkout";
 import type { ActionResult } from "@/types/action-result";
 
@@ -97,33 +98,25 @@ export async function processInsuranceCheckout(
       },
     });
 
-    // Fictitious contract attachment (plain-text stub, replace with real PDF later)
-    const contractContent = [
-      "CONTRAT D'ASSURANCE VOYAGE",
-      "==========================",
-      "",
-      `Assuré        : ${firstName} ${lastName}`,
-      `Email         : ${email}`,
-      `Téléphone     : ${phone}`,
-      `Formule       : ${planCategory}`,
-      `Destination   : ${destination}`,
-      `Numéro police : ${policyId}`,
-      `Date émission : ${new Date().toLocaleDateString("fr-FR")}`,
-      "",
-      "Ce document est une simulation. Le contrat définitif vous sera transmis sous 48 h.",
-    ].join("\n");
+    const contractAttachments = await fetchPolicyContractEmailAttachments(
+      externalPolicyId,
+      email,
+    );
+    const hasContractAttachment = contractAttachments.length > 0;
 
     await transporter.sendMail({
       from: process.env.EMAIL_FROM,
       to: email,
-      subject: "Votre souscription Afri Insurance — Accédez à votre espace",
+      subject: "Votre contrat Afri Insurance",
       text: [
         `Bonjour ${firstName},`,
         "",
-        "Merci pour votre confiance ! Votre contrat d'assurance voyage a bien été enregistré.",
+        "Merci pour votre confiance ! Votre assurance voyage est confirmée.",
+        hasContractAttachment
+          ? "Votre contrat est joint à cet email (même document que sur la page de confirmation)."
+          : "Votre contrat est disponible dans votre espace client (lien ci-dessous).",
         "",
-        "Cliquez sur le lien ci-dessous pour accéder à votre espace client :",
-        "",
+        "Accédez à votre espace client :",
         magicLink,
         "",
         "Ce lien est valable 24 heures.",
@@ -135,9 +128,18 @@ export async function processInsuranceCheckout(
         <div style="font-family:sans-serif;max-width:560px;margin:auto">
           <p>Bonjour <strong>${firstName}</strong>,</p>
           <p>
-            Merci pour votre confiance&nbsp;! Votre contrat d'assurance voyage
-            a bien été enregistré.
+            Merci pour votre confiance&nbsp;! Votre assurance voyage est confirmée.
           </p>
+          ${
+            hasContractAttachment
+              ? `<p>
+            <strong>Votre contrat est joint à cet email</strong> (le même document
+            que vous pouvez télécharger après paiement).
+          </p>`
+              : `<p>
+            Votre contrat est disponible dans votre espace client via le lien ci-dessous.
+          </p>`
+          }
           <p style="margin:32px 0">
             <a
               href="${magicLink}"
@@ -162,13 +164,11 @@ export async function processInsuranceCheckout(
           </p>
         </div>
       `,
-      attachments: [
-        {
-          filename: "contrat.txt",
-          content: Buffer.from(contractContent, "utf-8"),
-          contentType: "text/plain",
-        },
-      ],
+      attachments: contractAttachments.map((attachment) => ({
+        filename: attachment.filename,
+        content: attachment.content,
+        contentType: attachment.contentType,
+      })),
     });
   } catch (err) {
     // Email failure is non-fatal — the policy is committed, log and continue.

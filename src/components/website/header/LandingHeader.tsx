@@ -5,6 +5,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 
+import {
+  AFRI_INSURANCE_LOGO_HREF,
+  AFRILIFE_LOGO_HREF,
+} from "@/lib/constants/constant";
+
 type NavItem = {
   label: string;
   href?: string;
@@ -79,7 +84,10 @@ const LandingHeader = () => {
     <header className="fixed top-0 left-0 z-50 w-full border-b border-white/15 bg-black/60 text-white backdrop-blur-[2px]">
       <nav className="mx-auto flex w-full max-w-[1500px] items-center justify-between px-2 py-2 lg:py-4 md:px-4 xl:px-6">
         <div className="flex items-center gap-2 sm:gap-3">
-          <Link href="/" className="transition-opacity hover:opacity-90">
+          <a
+            href={AFRI_INSURANCE_LOGO_HREF}
+            className="transition-opacity hover:opacity-90"
+          >
             <Image
               src="/images/logo/Logo-white-Afri-Insurance@3x.png"
               alt="Afri Insurance"
@@ -87,8 +95,11 @@ const LandingHeader = () => {
               width={128}
               className="h-6 w-auto md:h-7"
             />
-          </Link>
-          <Link href="/afrilife" className="transition-opacity hover:opacity-90">
+          </a>
+          <a
+            href={AFRILIFE_LOGO_HREF}
+            className="transition-opacity hover:opacity-90"
+          >
             <Image
               src="/images/logo/Logo-White-AfriLife@3x.png"
               alt="Afri Life"
@@ -96,7 +107,7 @@ const LandingHeader = () => {
               width={100}
               className="h-6 w-auto md:h-7"
             />
-          </Link>
+          </a>
         </div>
 
         <div className="hidden items-center gap-2 text-sm font-normal lg:flex xl:gap-3">

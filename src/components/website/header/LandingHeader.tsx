@@ -81,7 +81,7 @@ const LandingHeader = () => {
   ];
 
   return (
-    <header className="fixed top-0 left-0 z-50 w-full border-b border-white/15 bg-black/60 text-white backdrop-blur-[2px]">
+    <header className="fixed top-0 left-0 z-50 w-full border-b border-white/15 bg-brand-secondary text-white backdrop-blur-[2px]">
       <nav className="mx-auto flex w-full max-w-[1500px] items-center justify-between px-2 py-2 lg:py-4 md:px-4 xl:px-6">
         <div className="flex items-center gap-2 sm:gap-3">
           <a
@@ -93,7 +93,7 @@ const LandingHeader = () => {
               alt="Afri Insurance"
               height={50}
               width={128}
-              className="h-6 w-auto md:h-7"
+              className="h-9 w-auto md:h-10"
             />
           </a>
           <a
@@ -105,7 +105,7 @@ const LandingHeader = () => {
               alt="Afri Life"
               height={50}
               width={100}
-              className="h-6 w-auto md:h-7"
+              className="h-9 w-auto md:h-10"
             />
           </a>
         </div>

@@ -4,10 +4,10 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { QuoteHero } from "@/components/Quote/layout/QuoteHero";
-import {
-  QuotationProductNav,
-  type ProductType,
-} from "@/components/Quote/layout/QuotationProductNav";
+// import {
+//   QuotationProductNav,
+//   type ProductType,
+// } from "@/components/Quote/layout/QuotationProductNav";
 import { URL_PARAM_PRODUCT } from "@/lib/constants/constant";
 import {
   quoteProductCodeFromId,
@@ -64,10 +64,10 @@ export function QuoteCotationChrome() {
   return (
     <>
       <QuoteHero />
-      <QuotationProductNav
+      {/* <QuotationProductNav
         currentProduct={currentProduct}
         onProductChange={handleProductSwitch}
-      />
+      /> */}
 
       {showSwitchWarning && (
         <div

@@ -154,9 +154,9 @@ export function QuoteFormStep({
         <Button
           type="submit"
           variant="primary"
-          className="min-w-[200px] bg-brand-primary px-10 py-3 text-base font-semibold hover:bg-orange-600"
+          className="min-w-[70px] bg-brand-primary px-10 py-3 text-base font-semibold hover:bg-orange-600"
         >
-          Obtenir mon devis
+          Suivant
         </Button>
       </div>
     </form>

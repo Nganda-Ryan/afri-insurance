@@ -8,13 +8,13 @@ export function QuoteHero() {
     >
       <div className="mx-auto max-w-7xl">
         <p className="text-sm font-bold uppercase tracking-[0.2em] text-white sm:text-base">
-          Cotation en ligne
+          100% digital
         </p>
         <h1
           id="quote-hero-title"
           className="mt-3 text-2xl font-bold leading-tight text-white sm:text-3xl lg:text-4xl"
         >
-          Obtenez votre devis en quelques minutes
+          Achetez votre assurance voyage en quelques clics
         </h1>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/85 sm:text-base">
           Renseignez vos informations et recevez une proposition adaptée à votre voyage.

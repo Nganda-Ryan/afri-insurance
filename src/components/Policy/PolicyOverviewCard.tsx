@@ -21,7 +21,7 @@ interface PolicyOverviewCardProps {
 export function PolicyOverviewCard({ policy }: PolicyOverviewCardProps) {
   return (
     <div className="border border-gray-200 rounded-lg overflow-hidden mb-6 bg-white">
-      <div className={`bg-brand-secondary px-6 py-4 flex items-center justify-between`}>
+      <div className={`bg-brand-primary px-6 py-4 flex items-center justify-between`}>
         <div className="flex items-center gap-3">
           <ShieldCheckIcon className="w-6 h-6 text-text-inverse" />
           <h2 className="text-lg font-bold text-text-inverse">

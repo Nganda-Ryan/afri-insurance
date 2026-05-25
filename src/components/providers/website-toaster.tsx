@@ -23,7 +23,7 @@ export function WebsiteToaster() {
           warning: "border-amber-400/45 bg-amber-950/90",
           info: "border-sky-400/45 bg-sky-950/90",
           actionButton:
-            "bg-orange-500 text-white hover:bg-orange-600 focus:ring-2 focus:ring-orange-400 focus:ring-offset-0",
+            "bg-brand-primary text-white hover:bg-orange-600 focus:ring-2 focus:ring-orange-400 focus:ring-offset-0",
           cancelButton:
             "bg-white/10 text-white hover:bg-white/20 border border-white/20",
           closeButton:

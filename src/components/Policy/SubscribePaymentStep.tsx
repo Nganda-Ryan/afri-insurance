@@ -45,7 +45,7 @@ export function SubscribePaymentStep({
 }: PaymentStepProps) {
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-bold text-brand-secondary">Paiement mobile</h2>
+      <h2 className="text-xl font-bold">Paiement mobile</h2>
       <p className="text-sm text-text-main text-opacity-90">
         Renseignez le numéro du compte à débiter et le réseau. Référence de transaction :{" "}
         <span className="font-mono text-xs">{paymentTrid}</span>
@@ -116,7 +116,7 @@ export function SubscribePaymentStep({
       ) : null}
 
       {collectResult ? (
-        <div className="rounded-lg border border-border bg-muted/30 p-4">
+        <div className="rounded-lg border border-border bg-muted/30 p-4 bg-white">
           <p className="mb-3 text-sm text-text-main">
             Paiement initié. Après validation sur votre téléphone, vérifiez le statut ci-dessous.
           </p>

@@ -70,9 +70,9 @@ const LandingHeader = () => {
   ];
 
   const actionItems = [
-    { href: "/quote", label: "Obtenir devis", borderClass: "border-purple-500/80" },
+    { href: "/quote", label: "Obtenir devis", borderClass: "border-brand-secondary/80" },
     { href: "/claims", label: "Declarer sinistre", borderClass: "border-red-500/80" },
-    { href: "/signin", label: "Espace client", borderClass: "border-orange-500/90" },
+    { href: "/signin", label: "Espace client", borderClass: "border-brand-primary/90" },
   ];
 
   return (
@@ -107,7 +107,7 @@ const LandingHeader = () => {
                   href={item.href}
                   className={`whitespace-nowrap px-2 py-1 transition ${
                     pathname === item.href
-                      ? "bg-orange-500/70 px-3 py-3 text-white"
+                      ? "bg-brand-primary/70 px-3 py-3 text-white"
                       : "text-white/90 hover:text-orange-500"
                   }`}
                 >
@@ -129,7 +129,7 @@ const LandingHeader = () => {
                     <div key={child.label} className="group/submenu relative">
                       <Link
                         href={child.href ?? "#"}
-                        className="flex items-center justify-between px-3 py-2 text-sm text-white/90 transition hover:bg-orange-500/15 hover:text-orange-500"
+                        className="flex items-center justify-between px-3 py-2 text-sm text-white/90 transition hover:bg-brand-primary/15 hover:text-orange-500"
                       >
                         <span>{child.label}</span>
                         {child.children ? <span className="text-[10px]">▶</span> : null}
@@ -140,7 +140,7 @@ const LandingHeader = () => {
                             <Link
                               key={grandChild.label}
                               href={grandChild.href ?? "#"}
-                              className="block px-3 py-2 text-sm text-white/90 transition hover:bg-orange-500/15 hover:text-orange-500"
+                              className="block px-3 py-2 text-sm text-white/90 transition hover:bg-brand-primary/15 hover:text-orange-500"
                             >
                               {grandChild.label}
                             </Link>
@@ -168,7 +168,7 @@ const LandingHeader = () => {
 
         <button
           onClick={toggleMenu}
-          className="p-2 text-white transition-all hover:bg-orange-500/20 hover:text-orange-500 focus:outline-none lg:hidden"
+          className="p-2 text-white transition-all hover:bg-brand-primary/20 hover:text-orange-500 focus:outline-none lg:hidden"
           aria-label="Toggle menu"
         >
           {isMenuOpen ? (
@@ -236,7 +236,7 @@ const LandingHeader = () => {
                                       key={grandChild.label}
                                       href={grandChild.href ?? "#"}
                                       onClick={() => setIsMenuOpen(false)}
-                                      className="block px-2 py-1.5 text-sm text-white/80 hover:bg-orange-500/15 hover:text-orange-500"
+                                      className="block px-2 py-1.5 text-sm text-white/80 hover:bg-brand-primary/15 hover:text-orange-500"
                                     >
                                       {grandChild.label}
                                     </Link>
@@ -248,7 +248,7 @@ const LandingHeader = () => {
                             <Link
                               href={child.href ?? "#"}
                               onClick={() => setIsMenuOpen(false)}
-                              className="block px-3 py-2 text-sm font-normal text-white/90 hover:bg-orange-500/15 hover:text-orange-500"
+                              className="block px-3 py-2 text-sm font-normal text-white/90 hover:bg-brand-primary/15 hover:text-orange-500"
                             >
                               {child.label}
                             </Link>

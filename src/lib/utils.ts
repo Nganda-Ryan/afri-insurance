@@ -3,7 +3,16 @@ import { twMerge } from "tailwind-merge";
 
 import { DAY_IN_MS, PLANS_TTL_MS } from "@/lib/constants/constant";
 import { DESTINATION_AREA_OPTIONS } from "@/lib/travel/destination-area";
-import type { SubscriberFormData } from "@/types/subscribe";
+import type { PersonFormData, SubscriberFormData } from "@/types/subscribe";
+
+export type PassportUniquenessData = {
+  passport_number?: string;
+  groupMembers?: PersonFormData[];
+};
+
+type OldestAgeValidationData = Pick<PersonFormData, "birth_date"> & {
+  groupMembers?: PersonFormData[];
+};
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -79,30 +88,30 @@ export function normalizePassportNumber(value: string): string {
 
 export function validateUniquePassportNumber(
   value: string,
-  data: SubscriberFormData,
+  data: PassportUniquenessData,
 ): true | string {
   const normalized = normalizePassportNumber(value);
   if (!normalized) return true;
 
   const allNormalized = [
     data.passport_number,
-    ...data.groupMembers.map((m) => m.passport_number),
+    ...(data.groupMembers ?? []).map((m) => m.passport_number),
   ]
-    .map(normalizePassportNumber)
-    .filter(Boolean);
+    .filter((p): p is string => Boolean(p))
+    .map(normalizePassportNumber);
 
   const occurrences = allNormalized.filter((p) => p === normalized).length;
   return occurrences > 1 ? DUPLICATE_PASSPORT_MESSAGE : true;
 }
 
 export function hasExpectedOldestAge(
-  data: SubscriberFormData,
+  data: OldestAgeValidationData | SubscriberFormData,
   expectedOldestAge: number,
 ): boolean {
   if (!Number.isFinite(expectedOldestAge)) return true;
   const ages = [
     ageFromBirthDate(data.birth_date),
-    ...data.groupMembers.map((m) => ageFromBirthDate(m.birth_date)),
+    ...(data.groupMembers ?? []).map((m) => ageFromBirthDate(m.birth_date)),
   ].filter((v): v is number => v != null);
   const currentOldestAge = ages.length ? Math.max(...ages) : null;
   return currentOldestAge != null && currentOldestAge === expectedOldestAge;

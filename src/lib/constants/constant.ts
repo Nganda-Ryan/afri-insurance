@@ -36,6 +36,7 @@ export const QUOTE_PRODUCT_CODE_TRAVEL = "voyage";
 export const QUOTE_PRODUCT_CODE_HOME = "habitation";
 export const QUOTE_PRODUCT_CODE_AUTO = "auto";
 export const QUOTE_PRODUCT_CODE_PET = "animaux";
+export const QUOTE_PRODUCT_CODE_HEALTH = "sante";
 
 /* POLICY TYPES (source de vérité DB) */
 export const POLICY_TYPE_TRAVEL = "travel";
@@ -53,7 +54,10 @@ export const POLICY_TYPE_VALUES = [
 export type PolicyType = (typeof POLICY_TYPE_VALUES)[number];
 
 /** Codes URL pour chaque étape du wizard devis voyage. */
-export const QUOTE_WIZARD_STEP_CODE_TRIP = "voyage";
+export const QUOTE_WIZARD_STEP_CODE_FORM = "voyage";
+/** @deprecated Alias historique — même étape que formulaire */
+export const QUOTE_WIZARD_STEP_CODE_TRIP = QUOTE_WIZARD_STEP_CODE_FORM;
+/** @deprecated Fusionné dans l'étape formulaire */
 export const QUOTE_WIZARD_STEP_CODE_TRAVELER = "voyageur";
 export const QUOTE_WIZARD_STEP_CODE_QUOTE = "devis";
 

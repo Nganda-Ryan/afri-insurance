@@ -1,10 +1,10 @@
-// import LandingFooter from "@/components/website/LandingFooter";
-
 import type { Metadata } from "next";
 import React, { Suspense } from "react";
 
+import { QuoteCotationChrome } from "@/components/Quote/layout/QuoteCotationChrome";
+import LandingFooter from "@/components/website/header/LandingFooter";
 import LandingHeader from "@/components/website/header/LandingHeader";
-import { WebsiteShell } from "@/components/website/WebsiteShell";
+import { WebsiteLayoutContent } from "@/components/website/WebsiteLayoutContent";
 import { WebsiteToaster } from "@/components/providers/website-toaster";
 
 export const metadata: Metadata = {
@@ -18,15 +18,18 @@ export default function Layout({
   children: React.ReactNode;
 }>) {
   return (
-    <div>
+    <div className="flex min-h-screen flex-col">
       <LandingHeader />
-      <div className="dark:bg-boxdark-2 dark:text-bodydark bg-blue-sky mt-15 mb-20">
+      <Suspense fallback={null}>
+        <QuoteCotationChrome />
+      </Suspense>
+      <div className="dark:bg-boxdark-2 dark:text-bodydark flex flex-1 flex-col">
         <Suspense fallback={<div className="min-h-screen" />}>
-          <WebsiteShell>{children}</WebsiteShell>
+          <WebsiteLayoutContent>{children}</WebsiteLayoutContent>
         </Suspense>
         <WebsiteToaster />
       </div>
-      {/* <LandingFooter /> */}
+      <LandingFooter />
     </div>
   );
 }

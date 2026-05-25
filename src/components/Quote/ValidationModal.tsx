@@ -187,7 +187,7 @@ export function ValidationModal({
         <div className="sticky top-0 flex items-center justify-between border-b border-border bg-card px-6 py-4">
           <h2
             id="validation-modal-title"
-            className="text-2xl font-bold text-brand-secondary"
+            className="text-2xl font-bold"
           >
             Devis validé - {insuranceTypeLabel}
           </h2>
@@ -206,7 +206,7 @@ export function ValidationModal({
 
           {/* ── Récapitulatif plan ── */}
           <div className="mb-6 border rounded-lg bg-muted/50 p-6">
-            <h3 className="mb-4 text-lg font-bold text-brand-secondary">
+            <h3 className="mb-4 text-lg font-bold">
               Récapitulatif du plan choisi
             </h3>
             <div className="space-y-3">
@@ -251,7 +251,7 @@ export function ValidationModal({
             noValidate
             className="mb-6 rounded-lg border border-border bg-muted/40 p-6"
           >
-            <h3 className="mb-4 text-lg font-bold text-brand-secondary">
+            <h3 className="mb-4 text-lg font-bold">
               Informations du souscripteur
             </h3>
 

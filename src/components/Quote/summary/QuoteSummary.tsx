@@ -193,7 +193,7 @@ export function QuoteSummary({
         <div>
             <div className="flex items-center justify-between mb-8">
                 <h2 className="text-2xl font-bold">
-                    Vos options de devis
+                    Votre tarif
                 </h2>
                 <Button
                     type="button"

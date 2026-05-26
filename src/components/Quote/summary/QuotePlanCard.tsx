@@ -30,12 +30,6 @@ export function QuotePlanCard({
     <article
       className={`relative flex flex-col rounded-xl border bg-white p-4 transition-all hover:shadow-md dark:bg-zinc-950 dark:text-zinc-100`}
     >
-      {plan.is_default_product ? (
-        <div className="absolute -top-3 left-1/2 z-10 -translate-x-1/2 rounded-full bg-brand-primary px-4 py-1 text-sm font-semibold text-white">
-          Recommandée
-        </div>
-      ) : null}
-
       <div className="mb-4 mt-2 text-center">
         <h3 className="mb-2 text-xl font-bold">{plan.name}</h3>
         <div className="mb-1 text-4xl font-bold text-text-main">
@@ -73,7 +67,7 @@ export function QuotePlanCard({
             : "border! border-brand-primary! bg-transparent! text-brand-primary! ring-0! hover:bg-brand-primary! hover:text-text-inverse! dark:border-brand-primary! dark:text-brand-primary! dark:hover:bg-brand-primary! dark:hover:text-text-inverse!"
         }`}
       >
-        {isSelecting ? "Sélection…" : `Choisir ${plan.name}`}
+        Verifiez et payez
       </Button>
     </article>
   );

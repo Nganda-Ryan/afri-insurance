@@ -66,6 +66,7 @@ export const URL_PARAM_PRODUCT = "p";
 export const URL_PARAM_STEP = "e";
 export const URL_PARAM_CATEGORY = "cat";
 export const URL_PARAM_DEST = "dst";
+export const URL_PARAM_DEST_COUNTRY = "dstc";
 export const URL_PARAM_DEPART = "dep";
 export const URL_PARAM_RETURN = "ret";
 export const URL_PARAM_ADULTS = "adv";

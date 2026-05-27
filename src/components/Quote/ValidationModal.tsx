@@ -217,7 +217,8 @@ export function ValidationModal({
                   value: totalPremiumLabel,
                   large: true,
                 },
-                { label: "Destination", value: tripDetails.destination_area },
+                { label: "Zone de destination", value: tripDetails.destination_area },
+                { label: "Pays de destination", value: tripDetails.destination_country },
                 {
                   label: "Dates de couverture",
                   value: `${new Date(tripDetails.start_date).toLocaleDateString()} – ${new Date(tripDetails.end_date).toLocaleDateString()}`,

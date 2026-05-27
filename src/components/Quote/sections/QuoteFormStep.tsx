@@ -13,6 +13,10 @@ import { TravelerInformationSection } from "@/components/Quote/sections/Traveler
 import Button from "@/components/ui/button/Button";
 import { DAY_IN_MS } from "@/lib/constants/constant";
 import { writeQuoteHolderToStorage, isQuoteHolderComplete } from "@/lib/travel/quote-holder-storage";
+import {
+  isWorldCoverageZone,
+  WORLD_COVERAGE_COUNTRY,
+} from "@/lib/travel/authorized-countries";
 import { usePlanStore } from "@/store/planStore";
 import type { PersonFormData } from "@/types/subscribe";
 import type { TravelerInfoData, TravelQuoteFormData, TripDetailsData } from "@/types/travel";
@@ -67,12 +71,22 @@ export function QuoteFormStep({
       initialDateValues.defaultDeparture,
       initialDateValues.defaultReturn,
     );
+    const mergedTrip = {
+      ...tripDefaults,
+      ...(initialTrip ?? {}),
+    };
+    if (
+      mergedTrip.destination_area &&
+      isWorldCoverageZone(mergedTrip.destination_area) &&
+      !mergedTrip.destination_country
+    ) {
+      mergedTrip.destination_country = WORLD_COVERAGE_COUNTRY;
+    }
     return {
       ...emptyHolder(),
-      ...tripDefaults,
+      ...mergedTrip,
       oldest_traveler_age: 0,
       ...(initialHolder ?? {}),
-      ...(initialTrip ?? {}),
       ...(initialTraveler ?? {}),
     };
   }, [categoryOptions, initialHolder, initialTrip, initialTraveler]);
@@ -114,6 +128,7 @@ export function QuoteFormStep({
     const trip: TripDetailsData = {
       product_category: data.product_category,
       destination_area: data.destination_area,
+      destination_country: data.destination_country,
       start_date: data.start_date,
       end_date: data.end_date,
       adult: data.adult,

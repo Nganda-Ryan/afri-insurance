@@ -177,6 +177,7 @@ export interface PlanDetails {
 
 export interface TripDetailsData {
   destination_area: string;
+  destination_country: string;
   start_date: string;
   end_date: string;
   adult: number;

@@ -254,8 +254,12 @@ export function QuoteSummary({
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
-                    <span className="text-gray-600">Destination :</span>
+                    <span className="text-gray-600">Zone :</span>
                     <span className="ml-2 font-medium">{tripDetails.destination_area}</span>
+                </div>
+                <div>
+                    <span className="text-gray-600">Pays :</span>
+                    <span className="ml-2 font-medium">{tripDetails.destination_country}</span>
                 </div>
                 <div>
                     <span className="text-gray-600">Catégorie :</span>

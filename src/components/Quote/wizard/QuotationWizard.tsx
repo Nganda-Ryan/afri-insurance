@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { QuoteFormStep } from "@/components/Quote/sections/QuoteFormStep";
@@ -41,15 +47,17 @@ export function QuotationWizard({ onWizardStateChange }: QuotationWizardProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const [storedHolder, setStoredHolder] = useState<PersonFormData | null>(null);
-  const [holderHydrated, setHolderHydrated] = useState(false);
+  const [storedHolderOverride, setStoredHolderOverride] =
+    useState<PersonFormData | null>(null);
+  const storedHolderFromStorage = useSyncExternalStore(
+    () => () => {},
+    readQuoteHolderFromStorage,
+    () => null,
+  );
+  const storedHolder = storedHolderOverride ?? storedHolderFromStorage;
+  const holderHydrated = true;
 
   const stepLabels = ["Votre demande", "Devis"];
-
-  useEffect(() => {
-    setStoredHolder(readQuoteHolderFromStorage());
-    setHolderHydrated(true);
-  }, []);
 
   const replaceTravelWizardUrl = useCallback(
     (opts: {
@@ -113,7 +121,7 @@ export function QuotationWizard({ onWizardStateChange }: QuotationWizardProps) {
     holder: PersonFormData;
   }) => {
     writeQuoteHolderToStorage(data.holder);
-    setStoredHolder(data.holder);
+    setStoredHolderOverride(data.holder);
     replaceTravelWizardUrl({
       stepIndex: 1,
       trip: data.trip,

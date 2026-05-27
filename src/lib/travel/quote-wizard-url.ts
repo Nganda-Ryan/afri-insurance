@@ -13,6 +13,7 @@ import {
   URL_PARAM_CATEGORY,
   URL_PARAM_DEPART,
   URL_PARAM_DEST,
+  URL_PARAM_DEST_COUNTRY,
   URL_PARAM_PRODUCT,
   URL_PARAM_RETURN,
   URL_PARAM_STEP,
@@ -21,6 +22,7 @@ import {
   destinationAreaCodeFromValue,
   destinationAreaValueFromCode,
 } from "@/lib/travel/destination-area";
+import { isWorldCoverageZone } from "@/lib/travel/authorized-countries";
 import type { TravelerInfoData, TripDetailsData } from "@/types/travel";
 
 export type QuoteSidebarProductId = "travel" | "home" | "auto" | "pet" | "health";
@@ -86,9 +88,15 @@ function isIsoDate(s: string): boolean {
 export function isTripDetailsComplete(
   t: Partial<TripDetailsData>,
 ): t is TripDetailsData {
+  const hasDestinationCountry =
+    typeof t.destination_country === "string" &&
+    (isWorldCoverageZone(t.destination_area ?? "") ||
+      t.destination_country.trim().length > 0);
+
   return (
     typeof t.destination_area === "string" &&
     t.destination_area.trim().length > 0 &&
+    hasDestinationCountry &&
     typeof t.start_date === "string" &&
     t.start_date.length > 0 &&
     typeof t.end_date === "string" &&
@@ -107,6 +115,7 @@ export function parseTripDetailsFromSearchParams(
 ): TripDetailsData | null {
   const catParam = sp.get(URL_PARAM_CATEGORY);
   const dstParam = sp.get(URL_PARAM_DEST);
+  const dstCountryParam = sp.get(URL_PARAM_DEST_COUNTRY);
   const dep = sp.get(URL_PARAM_DEPART);
   const ret = sp.get(URL_PARAM_RETURN);
   const advRaw = sp.get(URL_PARAM_ADULTS);
@@ -117,6 +126,7 @@ export function parseTripDetailsFromSearchParams(
   const destination_area = dstParam
     ? (destinationAreaValueFromCode(dstParam) ?? dstParam.trim())
     : undefined;
+  const destination_country = dstCountryParam?.trim() || undefined;
 
   const adult = advRaw != null ? Number.parseInt(advRaw, 10) : Number.NaN;
 
@@ -125,6 +135,7 @@ export function parseTripDetailsFromSearchParams(
       ? { product_category: product_category as TripDetailsData["product_category"] }
       : {}),
     ...(destination_area != null ? { destination_area } : {}),
+    ...(destination_country != null ? { destination_country } : {}),
     ...(dep && isIsoDate(dep) ? { start_date: dep } : {}),
     ...(ret && isIsoDate(ret) ? { end_date: ret } : {}),
     ...(Number.isFinite(adult) && adult >= 1 ? { adult } : {}),
@@ -159,6 +170,9 @@ export function buildQuoteWizardSearchParams(opts: {
     const dst = destinationAreaCodeFromValue(opts.trip.destination_area);
     sp.set(URL_PARAM_CATEGORY, cat ?? opts.trip.product_category);
     sp.set(URL_PARAM_DEST, dst ?? opts.trip.destination_area);
+    if (opts.trip.destination_country.trim()) {
+      sp.set(URL_PARAM_DEST_COUNTRY, opts.trip.destination_country);
+    }
     sp.set(URL_PARAM_DEPART, opts.trip.start_date);
     sp.set(URL_PARAM_RETURN, opts.trip.end_date);
     sp.set(URL_PARAM_ADULTS, String(opts.trip.adult));

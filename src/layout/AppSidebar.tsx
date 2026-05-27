@@ -26,11 +26,6 @@ const navItems: NavItem[] = [
     path: "/dashboard",
   },
   {
-    icon: <DollarLineIcon />,
-    name: "Transactions",
-    path: "/transactions",
-  },
-  {
     icon: <UserCircleIcon />,
     name: "Profil",
     path: "/profil",

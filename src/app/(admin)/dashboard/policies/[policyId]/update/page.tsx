@@ -213,7 +213,7 @@ export default function UpdatePolicyPage() {
         </button>
 
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-brand-secondary lg:text-3xl">
+          <h1 className="text-2xl font-bold lg:text-3xl">
             Mettre à jour le contrat
           </h1>
           <p className="mt-1 text-gray-500">Mise à jour du souscripteur, des bénéficiaires et de la durée.</p>
@@ -314,7 +314,7 @@ export default function UpdatePolicyPage() {
             <div className="space-y-4">
               {beneficiaries.map((b, index) => (
                 <div key={b.id} className="rounded-lg border border-border bg-card p-4 sm:p-5">
-                  <h3 className="mb-3 text-base font-semibold text-brand-secondary">
+                  <h3 className="mb-3 text-base font-semibold">
                     Bénéficiaire {index + 1}
                   </h3>
 

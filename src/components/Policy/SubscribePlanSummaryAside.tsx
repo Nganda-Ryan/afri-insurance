@@ -19,8 +19,8 @@ export function SubscribePlanSummaryAside({
 }: PlanSummaryAsideProps) {
   return (
     <aside className="lg:col-span-4">
-      <div className="rounded-lg border border-border bg-muted/50 p-4 sm:p-5 lg:sticky lg:top-24">
-        <h2 className="mb-4 text-base font-bold text-brand-secondary sm:text-lg">
+      <div className="rounded-lg border border-border bg-muted/50 p-4 sm:p-5 lg:sticky lg:top-24 bg-white">
+        <h2 className="mb-4 text-base font-bold sm:text-lg">
           Recapitulatif du plan choisi
         </h2>
         <div className="space-y-3 text-sm">

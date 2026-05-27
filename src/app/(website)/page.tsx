@@ -3,11 +3,20 @@
 import React, { Suspense, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 
-import { QuotationWizard } from "@/components/Quote/QuotationWizard";
+import { QuotePageLayout } from "@/components/Quote/layout/QuotePageLayout";
+import { QuotePortalAside } from "@/components/Quote/layout/QuotePortalAside";
+import { QuotationWizard } from "@/components/Quote/wizard/QuotationWizard";
 import { URL_PARAM_PRODUCT } from "@/lib/constants/constant";
 import { quoteProductIdFromUrlCode } from "@/lib/travel/quote-wizard-url";
 import { usePlanStore } from "@/store/planStore";
 import { useWizardStore } from "@/store/wizardStore";
+
+const COMING_SOON_LABELS: Record<string, string> = {
+  home: "Assurance habitation",
+  auto: "Assurance automobile",
+  health: "Assurance santé",
+  pet: "Assurance individuelle accidents",
+};
 
 function HomeQuotationPageContent() {
   const searchParams = useSearchParams();
@@ -28,26 +37,19 @@ function HomeQuotationPageContent() {
   return (
     <main
       id="parcours-cotation"
-      className="mx-auto max-w-[900px] px-4 py-8 lg:py-12"
-      aria-labelledby="page-cotation-title"
+      className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:py-10"
+      aria-labelledby="quote-hero-title"
     >
       {currentProduct === "travel" ? (
-        <>
-          <header>
-            <p className="text-sm font-semibold uppercase tracking-wide text-brand-primary">
-              Cotation en ligne
-            </p>
-          </header>
+        <QuotePageLayout aside={<QuotePortalAside />}>
           <QuotationWizard onWizardStateChange={setWizardInProgress} />
-        </>
+        </QuotePageLayout>
       ) : (
-        <div className="py-20 text-center">
-          <h1 className="mb-4 text-3xl font-bold text-brand-secondary">
-            {currentProduct === "home" && "Assurance habitation"}
-            {currentProduct === "auto" && "Assurance auto"}
-            {currentProduct === "pet" && "Assurance animaux"}
-          </h1>
-          <p className="text-text-main">
+        <div className="rounded-lg border border-border bg-white px-6 py-16 text-center shadow-sm">
+          <h2 className="mb-3 text-2xl font-bold">
+            {COMING_SOON_LABELS[currentProduct] ?? "Ce produit"}
+          </h2>
+          <p className="text-text-main text-opacity-90">
             Le moteur de cotation pour ce produit arrive prochainement.
           </p>
         </div>
@@ -58,7 +60,11 @@ function HomeQuotationPageContent() {
 
 export default function HomeQuotationPage() {
   return (
-    <Suspense fallback={<main className="mx-auto max-w-[900px] px-4 py-8 lg:py-12" />}>
+    <Suspense
+      fallback={
+        <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:py-10" />
+      }
+    >
       <HomeQuotationPageContent />
     </Suspense>
   );

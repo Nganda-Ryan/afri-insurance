@@ -45,7 +45,7 @@ export default function AdminPolicyDetailPage() {
           <ArrowLeftIcon className="h-5 w-5 text-text-main" />
         </button>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-brand-secondary lg:text-3xl">
+          <h1 className="text-2xl font-bold lg:text-3xl">
             Détail du contrat
           </h1>
           <p className="mt-1 text-gray-500">

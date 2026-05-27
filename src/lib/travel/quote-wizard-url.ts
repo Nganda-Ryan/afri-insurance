@@ -1,11 +1,12 @@
 import {
   QUOTE_PRODUCT_CODE_AUTO,
+  QUOTE_PRODUCT_CODE_HEALTH,
   QUOTE_PRODUCT_CODE_HOME,
   QUOTE_PRODUCT_CODE_PET,
   QUOTE_PRODUCT_CODE_TRAVEL,
+  QUOTE_WIZARD_STEP_CODE_FORM,
   QUOTE_WIZARD_STEP_CODE_QUOTE,
   QUOTE_WIZARD_STEP_CODE_TRAVELER,
-  QUOTE_WIZARD_STEP_CODE_TRIP,
   TRIP_PRODUCT_CATEGORY_OPTIONS,
   URL_PARAM_ADULTS,
   URL_PARAM_AGE,
@@ -22,13 +23,16 @@ import {
 } from "@/lib/travel/destination-area";
 import type { TravelerInfoData, TripDetailsData } from "@/types/travel";
 
-export type QuoteSidebarProductId = "travel" | "home" | "auto" | "pet";
+export type QuoteSidebarProductId = "travel" | "home" | "auto" | "pet" | "health";
+
+export type QuoteWizardStepIndex = 0 | 1;
 
 const PRODUCT_CODE_TO_ID: Record<string, QuoteSidebarProductId> = {
   [QUOTE_PRODUCT_CODE_TRAVEL]: "travel",
   [QUOTE_PRODUCT_CODE_HOME]: "home",
   [QUOTE_PRODUCT_CODE_AUTO]: "auto",
   [QUOTE_PRODUCT_CODE_PET]: "pet",
+  [QUOTE_PRODUCT_CODE_HEALTH]: "health",
 };
 
 const PRODUCT_ID_TO_CODE: Record<QuoteSidebarProductId, string> = {
@@ -36,6 +40,7 @@ const PRODUCT_ID_TO_CODE: Record<QuoteSidebarProductId, string> = {
   home: QUOTE_PRODUCT_CODE_HOME,
   auto: QUOTE_PRODUCT_CODE_AUTO,
   pet: QUOTE_PRODUCT_CODE_PET,
+  health: QUOTE_PRODUCT_CODE_HEALTH,
 };
 
 export function quoteProductIdFromUrlCode(
@@ -52,18 +57,16 @@ export function quoteProductCodeFromId(id: QuoteSidebarProductId): string {
 
 export function wizardStepIndexFromUrlCode(
   code: string | null | undefined,
-): 0 | 1 | 2 | null {
+): QuoteWizardStepIndex | null {
   if (!code) return null;
   const c = code.trim().toLowerCase();
-  if (c === QUOTE_WIZARD_STEP_CODE_TRIP) return 0;
-  if (c === QUOTE_WIZARD_STEP_CODE_TRAVELER) return 1;
-  if (c === QUOTE_WIZARD_STEP_CODE_QUOTE) return 2;
+  if (c === QUOTE_WIZARD_STEP_CODE_FORM || c === QUOTE_WIZARD_STEP_CODE_TRAVELER) return 0;
+  if (c === QUOTE_WIZARD_STEP_CODE_QUOTE) return 1;
   return null;
 }
 
-export function wizardStepUrlCodeFromIndex(step: 0 | 1 | 2): string {
-  if (step === 0) return QUOTE_WIZARD_STEP_CODE_TRIP;
-  if (step === 1) return QUOTE_WIZARD_STEP_CODE_TRAVELER;
+export function wizardStepUrlCodeFromIndex(step: QuoteWizardStepIndex): string {
+  if (step === 0) return QUOTE_WIZARD_STEP_CODE_FORM;
   return QUOTE_WIZARD_STEP_CODE_QUOTE;
 }
 
@@ -108,7 +111,6 @@ export function parseTripDetailsFromSearchParams(
   const ret = sp.get(URL_PARAM_RETURN);
   const advRaw = sp.get(URL_PARAM_ADULTS);
 
-  // Accept both short URL codes and raw API values for resilience.
   const product_category = catParam
     ? (tripCategoryValueFromCode(catParam) ?? catParam.trim())
     : undefined;
@@ -116,8 +118,7 @@ export function parseTripDetailsFromSearchParams(
     ? (destinationAreaValueFromCode(dstParam) ?? dstParam.trim())
     : undefined;
 
-  const adult =
-    advRaw != null ? Number.parseInt(advRaw, 10) : Number.NaN;
+  const adult = advRaw != null ? Number.parseInt(advRaw, 10) : Number.NaN;
 
   const partial: Partial<TripDetailsData> = {
     ...(product_category != null
@@ -138,15 +139,14 @@ export function parseTravelerInfoFromSearchParams(
   const ageRaw = sp.get(URL_PARAM_AGE);
   if (ageRaw == null) return null;
   const n = Number.parseInt(ageRaw, 10);
-  // Aligner sur les bornes UI (TravelerInfo : tranches produit ou 0–99 par défaut).
   if (!Number.isFinite(n) || n < 0 || n > 99) return null;
   return { oldest_traveler_age: n };
 }
 
-/** Construit les paramètres d’URL pour le parcours devis (produit + étape + données). */
+/** Construit les paramètres d'URL pour le parcours devis (produit + étape + données). */
 export function buildQuoteWizardSearchParams(opts: {
   productId: QuoteSidebarProductId;
-  stepIndex: 0 | 1 | 2;
+  stepIndex: QuoteWizardStepIndex;
   trip: TripDetailsData | null;
   traveler: TravelerInfoData | null;
 }): URLSearchParams {
@@ -171,17 +171,15 @@ export function buildQuoteWizardSearchParams(opts: {
   return sp;
 }
 
-/** Ajuste l’étape affichée si l’URL demande une étape sans données suffisantes. */
+/** Ajuste l'étape affichée si l'URL demande une étape sans données suffisantes. */
 export function resolveWizardStepIndex(
-  requested: 0 | 1 | 2 | null,
+  requested: QuoteWizardStepIndex | null,
   trip: TripDetailsData | null,
   traveler: TravelerInfoData | null,
-): 0 | 1 | 2 {
+  hasStoredHolder: boolean,
+): QuoteWizardStepIndex {
   if (requested == null) return 0;
-  if (!trip) return 0;
-  if (requested === 0) return 0;
-  if (requested === 1) return isTripDetailsComplete(trip) ? 1 : 0;
-  if (!isTripDetailsComplete(trip)) return 0;
-  if (!traveler) return 1;
-  return 2;
+  if (!trip || !traveler || !hasStoredHolder) return 0;
+  if (requested === 1) return 1;
+  return 0;
 }

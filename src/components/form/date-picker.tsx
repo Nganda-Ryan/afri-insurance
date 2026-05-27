@@ -84,14 +84,14 @@ export default function DatePicker({
 
     const flatPickr = flatpickr(inputElement, {
       mode: mode || 'single',
-      static: true,
+      static: false,
       disableMobile: true,
       monthSelectorType: 'static',
       dateFormat: 'Y-m-d',
       defaultDate: value || defaultDate,
       minDate: min,
       maxDate: max,
-      appendTo: appendToBody ? document.body : undefined,
+      appendTo: appendToBody === false ? undefined : document.body,
       onChange: normalizedOnChange,
     });
 

@@ -10,7 +10,7 @@ interface PolicyFooterProps {
 
 export function PolicyFooter({ catalog, createdAt }: PolicyFooterProps) {
   return (
-    <div className="bg-surface-muted rounded-lg p-5 text-center">
+    <div className="rounded-lg p-5 text-center">
       <p className="text-sm text-gray-600">
         Code catalogue :{" "}
         <span className="font-mono font-semibold">{catalog.code}</span> ·

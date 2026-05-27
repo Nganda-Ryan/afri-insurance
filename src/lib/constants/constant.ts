@@ -1,3 +1,7 @@
+
+
+export const SAFETY_BUFFER_MS = 60_000;
+
 /* TRIP CATEGORIES — valeurs API + codes URL courts */
 
 export const TRIP_PRODUCT_CATEGORY_STANDARD = "Standard";
@@ -32,6 +36,7 @@ export const QUOTE_PRODUCT_CODE_TRAVEL = "voyage";
 export const QUOTE_PRODUCT_CODE_HOME = "habitation";
 export const QUOTE_PRODUCT_CODE_AUTO = "auto";
 export const QUOTE_PRODUCT_CODE_PET = "animaux";
+export const QUOTE_PRODUCT_CODE_HEALTH = "sante";
 
 /* POLICY TYPES (source de vérité DB) */
 export const POLICY_TYPE_TRAVEL = "travel";
@@ -49,7 +54,10 @@ export const POLICY_TYPE_VALUES = [
 export type PolicyType = (typeof POLICY_TYPE_VALUES)[number];
 
 /** Codes URL pour chaque étape du wizard devis voyage. */
-export const QUOTE_WIZARD_STEP_CODE_TRIP = "voyage";
+export const QUOTE_WIZARD_STEP_CODE_FORM = "voyage";
+/** @deprecated Alias historique — même étape que formulaire */
+export const QUOTE_WIZARD_STEP_CODE_TRIP = QUOTE_WIZARD_STEP_CODE_FORM;
+/** @deprecated Fusionné dans l'étape formulaire */
 export const QUOTE_WIZARD_STEP_CODE_TRAVELER = "voyageur";
 export const QUOTE_WIZARD_STEP_CODE_QUOTE = "devis";
 
@@ -62,6 +70,10 @@ export const URL_PARAM_DEPART = "dep";
 export const URL_PARAM_RETURN = "ret";
 export const URL_PARAM_ADULTS = "adv";
 export const URL_PARAM_AGE = "age";
+
+/** Liens des logos Afri Insurance (1) et Afrilife (2). */
+export const AFRI_INSURANCE_LOGO_HREF = `https://afri-insurance.vercel.app/?${URL_PARAM_PRODUCT}=${QUOTE_PRODUCT_CODE_TRAVEL}&${URL_PARAM_STEP}=${QUOTE_WIZARD_STEP_CODE_FORM}`;
+export const AFRILIFE_LOGO_HREF = "https://afri-insurance.com/afrilife/";
 
 /* PLAN TYPES */
 export const PLAN_TYPE_STANDARD = "standard";

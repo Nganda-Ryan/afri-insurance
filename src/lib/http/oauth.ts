@@ -7,24 +7,14 @@ import {
   getEvoOAuthScope,
 } from "@/lib/env/server";
 import { normalizeError } from "@/lib/http/errors";
+import { SAFETY_BUFFER_MS } from "../constants/constant";
+import { CachedToken, TokenResponse } from "@/types/authTypes";
 
-type CachedToken = {
-  accessToken: string;
-  expiresAtMs: number;
-};
 
 let cache: CachedToken | null = null;
 
-type TokenResponse = {
-  access_token?: string;
-  expires_in?: number;
-};
 
-const SAFETY_BUFFER_MS = 60_000;
-
-export async function getClientCredentialsAccessToken(options?: {
-  forceRefresh?: boolean;
-}): Promise<string> {
+export async function getClientCredentialsAccessToken(options?: {forceRefresh?: boolean;}): Promise<string> {
   const forceRefresh = options?.forceRefresh === true;
   const now = Date.now();
   if (!forceRefresh && cache && cache.expiresAtMs > now + SAFETY_BUFFER_MS) {
@@ -37,9 +27,7 @@ export async function getClientCredentialsAccessToken(options?: {
   const scope = getEvoOAuthScope();
 
   const tokenUrl = new URL("token", baseUrl).toString();
-  const basic = Buffer.from(`${clientId}:${clientSecret}`, "utf8").toString(
-    "base64",
-  );
+  const basic = Buffer.from(`${clientId}:${clientSecret}`, "utf8").toString("base64");
 
   const body = new URLSearchParams({
     grant_type: "client_credentials",
@@ -61,19 +49,19 @@ export async function getClientCredentialsAccessToken(options?: {
     throw new Error(normalizeError(e).message);
   }
 
+  console.log('@@@res', res);
   const json = (await res.json().catch(() => ({}))) as TokenResponse;
+  console.log('@@@json', json);
 
   if (!res.ok || !json.access_token) {
-    const msg =
-      typeof (json as { error_description?: string }).error_description ===
-      "string"
+    const msg = typeof (json as { error_description?: string }).error_description === "string"
         ? (json as { error_description: string }).error_description
         : `OAuth token request failed (${res.status})`;
+
     throw new Error(msg);
   }
 
-  const expiresInSec =
-    typeof json.expires_in === "number" && json.expires_in > 0
+  const expiresInSec = typeof json.expires_in === "number" && json.expires_in > 0
       ? json.expires_in
       : 3600;
 

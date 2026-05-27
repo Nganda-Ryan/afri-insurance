@@ -42,12 +42,12 @@ export default function Page() {
         <button
           type="button"
           onClick={() => router.back()}
-          className="p-2 rounded-lg hover:bg-surface-muted transition-colors"
+          className="p-2 rounded-lg hover:transition-colors"
         >
           <ArrowLeftIcon className="w-5 h-5 text-text-main" />
         </button>
         <div className="flex-1">
-          <h1 className="text-3xl lg:text-4xl font-bold text-brand-secondary">
+          <h1 className="text-3xl lg:text-4xl font-bold">
             Police confirmée
           </h1>
           <p className="text-gray-500 mt-1">

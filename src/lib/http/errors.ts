@@ -28,6 +28,7 @@ function pickMessage(data: unknown): string | undefined {
 
 export function normalizeError(err: unknown): NormalizedHttpError {
   if (axios.isAxiosError(err)) {
+    console.log('@@@axios.isAxiosError(err)');
     const ax = err as AxiosError<unknown>;
     const fromBody = pickMessage(ax.response?.data);
     return {

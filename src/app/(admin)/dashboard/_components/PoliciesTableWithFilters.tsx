@@ -243,7 +243,7 @@ export function PoliciesTableWithFilters({ policies }: PoliciesTableWithFiltersP
 
           <Button
             onClick={handleExport}
-            className="bg-orange-500 hover:bg-primary/90 md:ml-auto md:w-auto"
+            className="bg-brand-primary hover:bg-primary/90 md:ml-auto md:w-auto"
             disabled={filteredPolicies.length === 0}
           >
             <Download className="mr-2 h-4 w-4" />

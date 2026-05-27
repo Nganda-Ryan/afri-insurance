@@ -5,6 +5,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 
+import {
+  AFRI_INSURANCE_LOGO_HREF,
+  AFRILIFE_LOGO_HREF,
+} from "@/lib/constants/constant";
+
 type NavItem = {
   label: string;
   href?: string;
@@ -70,33 +75,39 @@ const LandingHeader = () => {
   ];
 
   const actionItems = [
-    { href: "/quote", label: "Obtenir devis", borderClass: "border-purple-500/80" },
+    { href: "/quote", label: "Obtenir devis", borderClass: "border-brand-secondary/80" },
     { href: "/claims", label: "Declarer sinistre", borderClass: "border-red-500/80" },
-    { href: "/signin", label: "Espace client", borderClass: "border-orange-500/90" },
+    { href: "/signin", label: "Espace client", borderClass: "border-brand-primary/90" },
   ];
 
   return (
-    <header className="fixed top-0 left-0 z-50 w-full border-b border-white/15 bg-black/60 text-white backdrop-blur-[2px]">
+    <header className="fixed top-0 left-0 z-50 w-full border-b border-white/15 bg-brand-secondary text-white backdrop-blur-[2px]">
       <nav className="mx-auto flex w-full max-w-[1500px] items-center justify-between px-2 py-2 lg:py-4 md:px-4 xl:px-6">
         <div className="flex items-center gap-2 sm:gap-3">
-          <Link href="/" className="transition-opacity hover:opacity-90">
+          <a
+            href={AFRI_INSURANCE_LOGO_HREF}
+            className="transition-opacity hover:opacity-90"
+          >
             <Image
               src="/images/logo/Logo-white-Afri-Insurance@3x.png"
               alt="Afri Insurance"
               height={50}
               width={128}
-              className="h-6 w-auto md:h-7"
+              className="h-9 w-auto md:h-10"
             />
-          </Link>
-          <Link href="/afrilife" className="transition-opacity hover:opacity-90">
+          </a>
+          <a
+            href={AFRILIFE_LOGO_HREF}
+            className="transition-opacity hover:opacity-90"
+          >
             <Image
               src="/images/logo/Logo-White-AfriLife@3x.png"
               alt="Afri Life"
               height={50}
               width={100}
-              className="h-6 w-auto md:h-7"
+              className="h-9 w-auto md:h-10"
             />
-          </Link>
+          </a>
         </div>
 
         <div className="hidden items-center gap-2 text-sm font-normal lg:flex xl:gap-3">
@@ -107,7 +118,7 @@ const LandingHeader = () => {
                   href={item.href}
                   className={`whitespace-nowrap px-2 py-1 transition ${
                     pathname === item.href
-                      ? "bg-orange-500/70 px-3 py-3 text-white"
+                      ? "bg-brand-primary/70 px-3 py-3 text-white"
                       : "text-white/90 hover:text-orange-500"
                   }`}
                 >
@@ -129,7 +140,7 @@ const LandingHeader = () => {
                     <div key={child.label} className="group/submenu relative">
                       <Link
                         href={child.href ?? "#"}
-                        className="flex items-center justify-between px-3 py-2 text-sm text-white/90 transition hover:bg-orange-500/15 hover:text-orange-500"
+                        className="flex items-center justify-between px-3 py-2 text-sm text-white/90 transition hover:bg-brand-primary/15 hover:text-orange-500"
                       >
                         <span>{child.label}</span>
                         {child.children ? <span className="text-[10px]">▶</span> : null}
@@ -140,7 +151,7 @@ const LandingHeader = () => {
                             <Link
                               key={grandChild.label}
                               href={grandChild.href ?? "#"}
-                              className="block px-3 py-2 text-sm text-white/90 transition hover:bg-orange-500/15 hover:text-orange-500"
+                              className="block px-3 py-2 text-sm text-white/90 transition hover:bg-brand-primary/15 hover:text-orange-500"
                             >
                               {grandChild.label}
                             </Link>
@@ -168,7 +179,7 @@ const LandingHeader = () => {
 
         <button
           onClick={toggleMenu}
-          className="p-2 text-white transition-all hover:bg-orange-500/20 hover:text-orange-500 focus:outline-none lg:hidden"
+          className="p-2 text-white transition-all hover:bg-brand-primary/20 hover:text-orange-500 focus:outline-none lg:hidden"
           aria-label="Toggle menu"
         >
           {isMenuOpen ? (
@@ -236,7 +247,7 @@ const LandingHeader = () => {
                                       key={grandChild.label}
                                       href={grandChild.href ?? "#"}
                                       onClick={() => setIsMenuOpen(false)}
-                                      className="block px-2 py-1.5 text-sm text-white/80 hover:bg-orange-500/15 hover:text-orange-500"
+                                      className="block px-2 py-1.5 text-sm text-white/80 hover:bg-brand-primary/15 hover:text-orange-500"
                                     >
                                       {grandChild.label}
                                     </Link>
@@ -248,7 +259,7 @@ const LandingHeader = () => {
                             <Link
                               href={child.href ?? "#"}
                               onClick={() => setIsMenuOpen(false)}
-                              className="block px-3 py-2 text-sm font-normal text-white/90 hover:bg-orange-500/15 hover:text-orange-500"
+                              className="block px-3 py-2 text-sm font-normal text-white/90 hover:bg-brand-primary/15 hover:text-orange-500"
                             >
                               {child.label}
                             </Link>

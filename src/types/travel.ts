@@ -5,9 +5,9 @@ import type {
   subscribePolicyInputSchema,
   travelQuoteWizardInputSchema,
 } from "@/schemas/travel";
+import type { PersonFormData } from "@/types/subscribe";
 
 export type TravelQuoteWizardInput = z.input<typeof travelQuoteWizardInputSchema>;
-
 export type TravelQuoteWizardParsed = z.output<typeof travelQuoteWizardInputSchema>;
 
 /** Corps attendu par POST `travel/quotes_requests` (Get Quote). */
@@ -186,6 +186,9 @@ export interface TripDetailsData {
 export interface TravelerInfoData {
   oldest_traveler_age: number;
 }
+
+/** Formulaire étape 0 du parcours devis voyage (souscripteur + voyage + âge). */
+export type TravelQuoteFormData = PersonFormData & TripDetailsData & TravelerInfoData;
 
 export interface SelectedPlan {
   name: string;

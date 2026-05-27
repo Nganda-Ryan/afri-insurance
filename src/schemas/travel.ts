@@ -34,20 +34,44 @@ export const beneficiarySchema = z.object({
   city: z.string().min(1),
 });
 
-export const subscribePolicyInputSchema = z.object({
-  subscription_country: z.string().min(1),
-  language_code: z.string().min(2).max(5),
-  agent_scope: z.string(),
-  /** Optionnel : permet de souscrire sans dépendre du cookie EVO quote_code (utile si session expirée). */
-  quote_code: z.string().min(1).optional(),
-  policy_holder: z.array(policyPersonSchema).min(1),
-  beneficiaries: z.array(beneficiarySchema).min(1),
-  consents: z.array(z.string()),
-  payment: z.object({
-    type: z.string().min(1),
-  }),
-  addons: z.array(z.string()),
-});
+const duplicatePassportMessage =
+  "Ce numéro de passeport est déjà utilisé pour un autre voyageur";
+
+export const subscribePolicyInputSchema = z
+  .object({
+    subscription_country: z.string().min(1),
+    language_code: z.string().min(2).max(5),
+    agent_scope: z.string(),
+    /** Optionnel : permet de souscrire sans dépendre du cookie EVO quote_code (utile si session expirée). */
+    quote_code: z.string().min(1).optional(),
+    policy_holder: z.array(policyPersonSchema).min(1),
+    beneficiaries: z.array(beneficiarySchema).min(1),
+    consents: z.array(z.string()),
+    payment: z.object({
+      type: z.string().min(1),
+    }),
+    addons: z.array(z.string()),
+  })
+  .superRefine((data, ctx) => {
+    const byPassport = new Map<string, number[]>();
+    data.beneficiaries.forEach((beneficiary, index) => {
+      const key = beneficiary.passport_number.trim().toUpperCase();
+      if (!key) return;
+      const indices = byPassport.get(key) ?? [];
+      indices.push(index);
+      byPassport.set(key, indices);
+    });
+    for (const indices of byPassport.values()) {
+      if (indices.length <= 1) continue;
+      for (const index of indices) {
+        ctx.addIssue({
+          code: "custom",
+          message: duplicatePassportMessage,
+          path: ["beneficiaries", index, "passport_number"],
+        });
+      }
+    }
+  });
 
 export const policiesByDateInputSchema = z.object({
   start_date: z.string().min(1),

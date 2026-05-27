@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { ArrowLeftIcon, ChevronLeftIcon } from "lucide-react";
+import { ArrowLeftIcon } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -22,18 +22,16 @@ import {
   languageCodeFromQuoteContext,
   subscriptionCountryFromQuoteContext,
 } from "@/lib/travel/quote-subscribe-context";
+import {
+  isQuoteHolderComplete,
+  readQuoteHolderFromStorage,
+} from "@/lib/travel/quote-holder-storage";
 import { ageFromBirthDate, generatePaymentTrid, hasExpectedOldestAge } from "@/lib/utils";
 import { SubscribePaymentStep } from "@/components/Policy/SubscribePaymentStep";
 import { SubscribePersonFields } from "@/components/Policy/SubscribePersonFields";
 import { SubscribePlanSummaryAside } from "@/components/Policy/SubscribePlanSummaryAside";
 import { SubscribeRecapStep } from "@/components/Policy/SubscribeRecapStep";
-import {
-  HOLDER_FIELDS,
-  type FlowPhase,
-  type PersonFormData,
-  type Step,
-  type SubscriberFormData,
-} from "@/types/subscribe";
+import type { FlowPhase, PersonFormData, Step, SubscriberFormData } from "@/types/subscribe";
 import type { SubscribePolicyInputDto, TravelQuoteContext } from "@/types/travel";
 import type { S3pCashoutCollectResult } from "@/types/smobilpay";
 
@@ -65,6 +63,8 @@ export default function SubscribePage() {
     message: string;
   } | null>(null);
   const [currentStep, setCurrentStep] = useState<Step>(1);
+  const [quoteHolder, setQuoteHolder] = useState<PersonFormData | null>(null);
+  const [holderReady, setHolderReady] = useState(false);
   const isSubmitting =
     subscribe.isPending ||
     isCheckingOut ||
@@ -103,53 +103,67 @@ export default function SubscribePage() {
   const currencyLabel = quoteContext.currency?.trim();
   const totalPremiumLabel = `${planPrice.toLocaleString("fr-FR")}${currencyLabel ? ` ${currencyLabel}` : ""}`;
 
+  const emptyMember = (): PersonFormData => ({
+    title: "M",
+    first_name: "",
+    last_name: "",
+    birth_date: "",
+    email: "",
+    phone_number: "",
+    address: "",
+    city: "",
+    passport_number: "",
+    passeport_exp_date: "",
+  });
+
   const {
     control,
     register,
     handleSubmit,
-    trigger,
+    reset,
+    getValues,
     watch,
     formState: { errors },
   } = useForm<SubscriberFormData>({
     mode: "onSubmit",
     defaultValues: {
-      title: "M",
-      first_name: "",
-      last_name: "",
-      birth_date: "",
-      email: "",
-      phone_number: "",
-      address: "",
-      city: "",
-      passport_number: "",
-      passeport_exp_date: "",
-      groupMembers: Array.from({ length: additionalTravelerCount }, () => ({
-        title: "M" as const,
-        first_name: "",
-        last_name: "",
-        birth_date: "",
-        email: "",
-        phone_number: "",
-        address: "",
-        city: "",
-        passport_number: "",
-        passeport_exp_date: "",
-      })),
+      ...emptyMember(),
+      groupMembers: Array.from({ length: additionalTravelerCount }, emptyMember),
     },
   });
 
-  const [holderBirthDate, groupMembers] = watch(["birth_date", "groupMembers"]) as [
-    string,
-    PersonFormData[],
-  ];
+  useEffect(() => {
+    if (!hasRequiredParams) return;
+    const stored = readQuoteHolderFromStorage();
+    if (!stored || !isQuoteHolderComplete(stored)) {
+      toast.error(
+        "Informations du souscripteur manquantes. Veuillez compléter le formulaire de cotation.",
+      );
+      router.replace("/");
+      return;
+    }
+    setQuoteHolder(stored);
+    reset({
+      ...stored,
+      groupMembers: Array.from({ length: additionalTravelerCount }, emptyMember),
+    });
+    setHolderReady(true);
+    if (!hasGroup) {
+      setRecapData({ ...stored, groupMembers: [] });
+      setFlowPhase("recap");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasRequiredParams, hasGroup, additionalTravelerCount, router, reset]);
+
+  const groupMembers = watch("groupMembers") as PersonFormData[];
 
   const detectedOldestAge = useMemo(() => {
     const ages = [
-      ageFromBirthDate(holderBirthDate),
+      quoteHolder ? ageFromBirthDate(quoteHolder.birth_date) : null,
       ...(groupMembers ?? []).map((m) => ageFromBirthDate(m.birth_date)),
     ].filter((v): v is number => v != null);
     return ages.length ? Math.max(...ages) : null;
-  }, [holderBirthDate, groupMembers]);
+  }, [quoteHolder, groupMembers]);
 
   const ageState: "neutral" | "match" | "mismatch" = useMemo(() => {
     if (!Number.isFinite(expectedOldestAge)) return "neutral";
@@ -190,11 +204,6 @@ export default function SubscribePage() {
     reselectDone,
   ]);
 
-  const onNextStep = async () => {
-    const ok = await trigger(HOLDER_FIELDS);
-    if (ok) setCurrentStep(2);
-  };
-
   const hasValidOldestAge = (data: SubscriberFormData) => {
     if (!hasExpectedOldestAge(data, expectedOldestAge)) {
       toast.error(
@@ -206,8 +215,13 @@ export default function SubscribePage() {
   };
 
   const onSubmit = (data: SubscriberFormData) => {
-    if (!hasValidOldestAge(data)) return;
-    setRecapData(data);
+    if (!quoteHolder) return;
+    const merged: SubscriberFormData = {
+      ...quoteHolder,
+      groupMembers: data.groupMembers,
+    };
+    if (!hasValidOldestAge(merged)) return;
+    setRecapData(merged);
     setFlowPhase("recap");
   };
 
@@ -397,7 +411,7 @@ export default function SubscribePage() {
     return (
       <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:py-12">
         <div className="rounded-lg border border-border bg-card p-6 text-card-foreground">
-          <h1 className="text-2xl font-bold text-brand-secondary">Souscription</h1>
+          <h1 className="text-2xl font-bold">Souscription</h1>
           <p className="mt-3 text-sm text-text-main">
             Informations de devis manquantes. Veuillez retourner aux offres et
             selectionner un plan.
@@ -415,20 +429,23 @@ export default function SubscribePage() {
     );
   }
 
-  const showStepOne = flowPhase === "form" && currentStep === 1;
-  const showStepTwo = flowPhase === "form" && hasGroup && currentStep === 2;
+  const showGroupStep = flowPhase === "form" && hasGroup && currentStep === 1;
   const stepperLabels = hasGroup
-    ? ["Souscripteur", "Membres du groupe", "Récapitulatif", "Paiement"]
-    : ["Souscripteur", "Récapitulatif", "Paiement"];
+    ? ["Membres du groupe", "Récapitulatif", "Paiement"]
+    : ["Récapitulatif", "Paiement"];
   const stepperIndex = (() => {
-    if (flowPhase === "recap") return hasGroup ? 2 : 1;
-    if (flowPhase === "payment") return hasGroup ? 3 : 2;
-    if (hasGroup) {
-      if (currentStep === 1) return 0;
-      return 1;
-    }
+    if (flowPhase === "recap") return hasGroup ? 1 : 0;
+    if (flowPhase === "payment") return hasGroup ? 2 : 1;
     return 0;
   })();
+
+  if (hasRequiredParams && !holderReady) {
+    return (
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-12">
+        <div className="h-8 w-48 animate-pulse rounded bg-surface-muted" />
+      </main>
+    );
+  }
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8 lg:py-12">
@@ -469,26 +486,16 @@ export default function SubscribePage() {
             </div>
           )}
 
-          {flowPhase === "form" && (
+          {flowPhase === "form" && hasGroup && (
             <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
-              {showStepOne && (
-                <SubscribePersonFields
-                  key="holder"
-                  control={control}
-                  register={register}
-                  errors={errors}
-                  namePrefix=""
-                  title="Informations du souscripteur"
-                />
-              )}
-
-              {showStepTwo && (
+              {showGroupStep && (
                 <div className="space-y-4">
                   {Array.from({ length: additionalTravelerCount }).map((_, index) => (
                     <SubscribePersonFields
                       key={`member-${index}`}
                       control={control}
                       register={register}
+                      getValues={getValues}
                       errors={errors}
                       namePrefix={`groupMembers.${index}.`}
                       title={`Informations du membre ${index + 2}`}
@@ -497,49 +504,16 @@ export default function SubscribePage() {
                 </div>
               )}
 
-              {hasGroup && currentStep === 1 ? (
-                <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-end">
-                  <Button
-                    type="button"
-                    variant="primary"
-                    onClick={() => void onNextStep()}
-                    className="w-full sm:w-auto"
-                  >
-                    Suivant
-                  </Button>
-                </div>
-              ) : hasGroup && currentStep === 2 ? (
-                <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setCurrentStep(1)}
-                    startIcon={<ChevronLeftIcon className="h-4 w-4" />}
-                    className="w-full sm:w-auto"
-                  >
-                    Precedent
-                  </Button>
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    disabled={isSubmitting}
-                    className="w-full sm:w-auto"
-                  >
-                    {isSubmitting ? "Traitement en cours..." : "Suivant"}
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-end">
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    disabled={isSubmitting}
-                    className="w-full sm:w-auto"
-                  >
-                    {isSubmitting ? "Traitement en cours..." : "Suivant"}
-                  </Button>
-                </div>
-              )}
+              <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-end">
+                <Button
+                  type="submit"
+                  variant="primary"
+                  disabled={isSubmitting}
+                  className="w-full sm:w-auto"
+                >
+                  {isSubmitting ? "Traitement en cours..." : "Suivant"}
+                </Button>
+              </div>
             </form>
           )}
 
@@ -553,7 +527,14 @@ export default function SubscribePage() {
               startDate={startDate}
               endDate={endDate}
               isSubmitting={isSubmitting}
-              onEdit={() => setFlowPhase("form")}
+              onEdit={() => {
+                if (hasGroup) {
+                  setFlowPhase("form");
+                  setCurrentStep(1);
+                } else {
+                  router.push("/");
+                }
+              }}
               onContinueToPayment={handlePasserAuPaiement}
             />
           )}

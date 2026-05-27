@@ -448,12 +448,15 @@ export default function SubscribePage() {
   }
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8 lg:py-12">
-      <Button
+    // <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8 lg:py-12">
+    //   <Button
+      <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:pl-25 lg:pr-8 lg:py-12">
+    {/* Return Button: Full width on mobile for better UX */}
+    <Button
         type="button"
         variant="outline"
         onClick={() => router.back()}
-        className="mb-4 sm:mb-6"
+        className="mb-6 w-full sm:w-auto"
         startIcon={<ArrowLeftIcon className="h-4 w-4" />}
       >
         Retourner

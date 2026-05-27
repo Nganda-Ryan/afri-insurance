@@ -6,6 +6,10 @@ import UserDropdown from "@/components/website/header/UserDropdown";
 import { useSidebar } from "@/context/SidebarContext";
 import Image from "next/image";
 import Link from "next/link";
+// 1. Importation de l'icône téléphone depuis lucide-react
+import { Phone } from "lucide-react"; 
+// 2. Importation de l'icône WhatsApp nettoyée depuis votre dossier d'icônes
+import { WhatsappIcon } from "@/icons"; 
 
 import {
   AFRI_INSURANCE_LOGO_HREF,
@@ -44,10 +48,12 @@ const AppHeader: React.FC = () => {
   return (
     <header className="fixed top-0 left-0 right-0 flex w-screen bg-white border-gray-200 z-40 dark:border-gray-800 dark:bg-gray-900 lg:border-b">
       <div className="w-full px-3 sm:px-5 lg:px-6">
-        <div className="grid grid-cols-3 items-center border-b border-gray-200 dark:border-gray-800 lg:border-b-0 py-3 lg:py-4">
-          <div className="flex items-center justify-start">
+        <div className="grid grid-cols-3 items-center border-b border-gray-200 dark:border-gray-800 lg:border-b-0 py-2.5 lg:py-3">
+          
+          {/* Section Gauche : Bouton Toggle & Raccourcis de contact rapides opacifiés */}
+          <div className="flex items-center justify-start gap-4">
             <button
-              className="items-center justify-center w-10 h-10 text-gray-500 border-gray-200 rounded-lg dark:border-gray-800 lg:flex dark:text-gray-400 lg:h-11 lg:w-11 lg:border"
+              className="flex items-center justify-center w-10 h-10 text-gray-500 border-gray-200 rounded-lg dark:border-gray-800 dark:text-gray-400 lg:h-11 lg:w-11 lg:border"
               onClick={handleToggle}
               aria-label="Toggle Sidebar"
             >
@@ -82,19 +88,29 @@ const AppHeader: React.FC = () => {
                   />
                 </svg>
               )}
-              {/* Cross Icon */}
             </button>
+
+            {/* Raccourcis de contact cachés sur mobile pour garder de l'espace */}
+            <div className="hidden sm:flex items-center gap-3 text-gray-500 dark:text-gray-400">
+              <a href="tel:+237681071414" className="hover:text-brand-primary transition-colors" aria-label="Appeler le support">
+                <Phone className="h-5 w-5" />
+              </a>
+              <a href="https://wa.me/237681071414" target="_blank" rel="noopener noreferrer" className="hover:text-[#25D366] transition-colors" aria-label="Contacter sur WhatsApp">
+                <WhatsappIcon className="h-5 w-5 text-[#25D366]" />
+              </a>
+            </div>
           </div>
 
+          {/* Section Centre : Logos légèrement agrandis */}
           <div className="flex items-center justify-center">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3.5">
               <a href={AFRI_INSURANCE_LOGO_HREF} className="transition-opacity hover:opacity-90">
                 <Image
                   src="/images/logo/logo-afri-insurance.png"
                   alt="Logo Afri Insurance"
-                  width={110}
-                  height={40}
-                  className="h-10 w-auto object-contain"
+                  width={125} // Ajustement pour conserver le ratio du rendu h-11 / h-12
+                  height={44}
+                  className="h-11 lg:h-12 w-auto object-contain"
                   priority
                 />
               </a>
@@ -102,19 +118,22 @@ const AppHeader: React.FC = () => {
                 <Image
                   src="/images/logo/logo-afri-life.png"
                   alt="Logo Afri Life"
-                  width={40}
-                  height={40}
-                  className="h-10 w-auto object-contain"
+                  width={44}
+                  height={44}
+                  className="h-11 lg:h-12 w-auto object-contain"
                   priority
                 />
               </a>
             </div>
           </div>
 
+          {/* Section Droite : Actions utilisateur */}
           <div className="flex items-center justify-end gap-2">
+            <NotificationDropdown />
             <ThemeToggleButton />
             <UserDropdown />
           </div>
+
         </div>
       </div>
     </header>

@@ -75,7 +75,7 @@ export async function requestTravelQuoteAction(
 
 export async function selectTravelQuoteProductAction(
   productIndex: number,
-): Promise<ActionResult<Record<string, never>>> {
+): Promise<ActionResult<{ quoteCode: string }>> {
   if (!Number.isInteger(productIndex) || productIndex < 0) {
     return actionFail("INVALID_PRODUCT_INDEX", "Index de produit invalide.");
   }
@@ -106,7 +106,7 @@ export async function selectTravelQuoteProductAction(
   }
 
   cookieStore.set(EVO_QUOTE_CODE_COOKIE, quoteCode, cookieBase);
-  return actionOk({});
+  return actionOk({ quoteCode });
 }
 
 export async function subscribeTravelPolicyAction(
@@ -121,12 +121,17 @@ export async function subscribeTravelPolicyAction(
   }
 
   const cookieStore = await cookies();
-  const quoteCode = cookieStore.get(EVO_QUOTE_CODE_COOKIE)?.value;
+  const quoteCodeFromPayload = parsed.data.quote_code?.trim();
+  const quoteCode =
+    quoteCodeFromPayload || cookieStore.get(EVO_QUOTE_CODE_COOKIE)?.value;
   if (!quoteCode) {
     return actionFail(
       "QUOTE_CODE_COOKIE_MISSING",
       "Code de devis manquant. Sélectionnez un produit issu du tarif en ligne.",
     );
+  }
+  if (quoteCodeFromPayload) {
+    cookieStore.set(EVO_QUOTE_CODE_COOKIE, quoteCodeFromPayload, cookieBase);
   }
 
   const apiBody: ISubscribePolicyRequestBody = {

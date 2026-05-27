@@ -27,7 +27,11 @@ import Button from "@/components/ui/button/Button";
 interface QuoteSummaryProps {
   tripDetails: TripDetailsData;
   travelerInfo: TravelerInfoData;
-  onPlanSelect: (plan: SelectedPlan, quoteContext: TravelQuoteContext | undefined) => void;
+  onPlanSelect: (
+    plan: SelectedPlan,
+    quoteContext: TravelQuoteContext | undefined,
+    quoteCode: string,
+  ) => void;
   onBack: () => void;
 }
 
@@ -101,6 +105,7 @@ export function QuoteSummary({
     const quoteContext = result?.ok === true ? result.data?.quoteContext : undefined;
 
     const apiPlans: PlanDetails[] = useMemo(() => {
+        console.log(result);
         if (!result?.ok || !result.data) return [];
         const { products, quoteContext: ctx } = result.data;
 
@@ -112,8 +117,7 @@ export function QuoteSummary({
                 type: mapTypeFromIndex(i),
                 price: parsePriceLabel(p.price_label),
                 price_label: p.price_label,
-                per_trip_label:
-                    p.duration != null ? `${p.duration} jours` : "Pour ce voyage",
+                per_trip_label: p.duration != null ? `${p.duration} jours` : "Pour ce voyage",
                 product_index: p.index,
                 source: "api" as const,
                 currency,
@@ -134,6 +138,11 @@ export function QuoteSummary({
             toast.error(res.error?.message ?? "Sélection impossible.");
             return;
         }
+        const quoteCode = (res.data as { quoteCode?: string } | null)?.quoteCode;
+        if (!quoteCode) {
+          toast.error("Code de devis manquant. Relancez une cotation.");
+          return;
+        }
         onPlanSelect(
             {
                 name: plan.name,
@@ -143,6 +152,7 @@ export function QuoteSummary({
                 source: plan.source,
             },
             quoteContext,
+            quoteCode,
         );
     };
 

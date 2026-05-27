@@ -4,7 +4,6 @@ import React, { useEffect, useMemo } from "react";
 import { ChevronDownIcon, MinusIcon, PlusIcon } from "lucide-react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 
-import { DESTINATION_AREA_OPTIONS } from "@/lib/travel/destination-area";
 import { usePlanStore } from "@/store/planStore";
 import type { IFactorizedDestination } from "@/types/travel";
 import { TripDetailsData } from "@/types/travel";
@@ -14,6 +13,7 @@ import Label from "@/components/form/Label";
 import Select from "@/components/form/Select";
 import InputField from "@/components/form/input/InputField";
 import Button from "@/components/ui/button/Button";
+import { addDaysToIso, daysBetween, destinationLabel } from "@/lib/utils";
 
 
 interface TripDetailsProps {
@@ -30,25 +30,6 @@ const initialDateValues = (() => {
     defaultReturn: new Date(now + 14 * DAY_IN_MS).toISOString().split("T")[0],
   };
 })();
-
-/** Nombre de jours entre deux dates ISO yyyy-mm-dd (inclusive du jour de départ). */
-function daysBetween(start: string, end: string): number {
-  const s = new Date(start).getTime();
-  const e = new Date(end).getTime();
-  return Math.round((e - s) / DAY_IN_MS);
-}
-
-/** Ajoute n jours à une date ISO et retourne la date ISO résultante. */
-function addDaysToIso(iso: string, days: number): string {
-  const d = new Date(iso);
-  d.setDate(d.getDate() + days);
-  return d.toISOString().split("T")[0];
-}
-
-/** Retrouve le label lisible d'une destination à partir de sa valeur API. */
-function destinationLabel(value: string): string {
-  return DESTINATION_AREA_OPTIONS.find((o) => o.value === value)?.label ?? value;
-}
 
 export function TripDetails({ onSubmit, initialValues }: TripDetailsProps) {
   const today = initialDateValues.today;
@@ -74,7 +55,7 @@ export function TripDetails({ onSubmit, initialValues }: TripDetailsProps) {
       destination_area: "",
       start_date: defaultDeparture,
       end_date: defaultReturn,
-      adult: 2,
+      adult: 1,
       product_category: defaultCategory as TripDetailsData["product_category"],
       ...(initialValues ?? {}),
     };

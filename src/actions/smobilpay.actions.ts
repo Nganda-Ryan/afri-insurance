@@ -1,23 +1,41 @@
 "use server";
 
 import { actionFail, actionOk } from "@/lib/http/action-result";
-import { readAxiosErrorMessage, readAxiosFeCode } from "@/lib/http/axios-error-body";
 import {
+  readAxiosErrorMessage,
+  readAxiosFeCode,
+  readS3pOrAxiosErrorMessage,
+} from "@/lib/http/axios-error-body";
+import {
+  getEurToXafExchangeRate,
+  getMomoServiceId,
+  getOmServiceId,
   getSmobilpayMerchant,
   getSmobilpayServiceId,
 } from "@/lib/env/server";
 import {
+  s3pCashoutCollectInputSchema,
   s3pInitiatePaymentInputSchema,
   s3pVerifyInputSchema,
 } from "@/schemas/smobilpay";
 import { smobilpayService } from "@/services/smobilpay.service";
 import type { ActionResult } from "@/types/action-result";
 import type {
+  S3pCashoutCollectResult,
   S3pCollectionResponseDto,
   S3pInitiatePaymentInput,
   S3pPaymentStatusDto,
   S3pVerifyInput,
 } from "@/types/smobilpay";
+
+function digitsOnly(value: string): string {
+  return value.replace(/\D/g, "");
+}
+
+function convertEuroToXaf(amountEur: number): number {
+  const rate = getEurToXafExchangeRate();
+  return Math.round(amountEur * rate);
+}
 
 interface InitiatePaymentResult {
   ptn: string;
@@ -116,6 +134,134 @@ export async function initiateTravelPolicyPaymentAction(
   }
 }
 
+/**
+ * Paiement cash-out (OM / MoMo) avant souscription :
+ * GET /cashout → GET /validate → POST /quotestd → POST /collectstd.
+ */
+export async function initiateCashoutCollectionAction(
+  payload: unknown,
+): Promise<ActionResult<S3pCashoutCollectResult>> {
+  const parsed = s3pCashoutCollectInputSchema.safeParse(payload);
+  if (!parsed.success) {
+    return actionFail(
+      "VALIDATION_ERROR",
+      parsed.error.issues[0]?.message ?? "Données de paiement invalides.",
+    );
+  }
+  const data = {
+    ...parsed.data,
+    walletDestination: digitsOnly(parsed.data.walletDestination),
+    customerPhonenumber: digitsOnly(parsed.data.customerPhonenumber),
+  };
+  if (data.walletDestination.length < 8) {
+    return actionFail("VALIDATION_ERROR", "Numéro de paiement invalide.");
+  }
+  if (data.customerPhonenumber.length < 8) {
+    return actionFail("VALIDATION_ERROR", "Téléphone souscripteur invalide.");
+  }
+
+  const amount = convertEuroToXaf(parsed.data.amount);
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return actionFail("VALIDATION_ERROR", "Montant de paiement invalide.");
+  }
+
+  const serviceId =
+    data.channel === "momo" ? getMomoServiceId() : getOmServiceId();
+  if (data.channel === "om" && !serviceId.trim()) {
+    return actionFail(
+      "CONFIG_ERROR",
+      "Orange Money n'est pas configuré (OM_SERVICE_ID).",
+    );
+  }
+
+  let cashout: Awaited<ReturnType<typeof smobilpayService.getCashout>>;
+  try {
+    cashout = await smobilpayService.getCashout();
+  } catch (e) {
+    return actionFail(
+      readAxiosFeCode(e) ?? "S3P_CASHOUT_FAILED",
+      readS3pOrAxiosErrorMessage(e),
+    );
+  }
+
+  const line = cashout.find((row) => String(row.serviceid) === String(serviceId));
+  if (!line?.payItemId) {
+    return actionFail(
+      "S3P_CASHOUT_LINE_NOT_FOUND",
+      "Ce moyen de paiement n'est pas disponible pour le moment.",
+    );
+  }
+
+  try {
+    const validated = await smobilpayService.validateCashoutDestination({
+      destination: data.walletDestination,
+      serviceId: String(serviceId),
+    });
+    const ok =
+      validated.status === "VERIFIED" || validated.status === "VALIDATED";
+    if (!ok) {
+      return actionFail(
+        "S3P_VALIDATE_FAILED",
+        `Compte mobile : statut « ${validated.status} » (attendu vérifié).`,
+      );
+    }
+  } catch (e) {
+    return actionFail(
+      readAxiosFeCode(e) ?? "S3P_VALIDATE_FAILED",
+      readS3pOrAxiosErrorMessage(e),
+    );
+  }
+
+  let quoteId: string;
+  let payItemIdQuoted: string;
+  try {
+    const quote = await smobilpayService.requestQuote({
+      amount,
+      payItemId: line.payItemId,
+    });
+    quoteId = quote.quoteId;
+    payItemIdQuoted = quote.payItemId;
+  } catch (e) {
+    return actionFail(
+      readAxiosFeCode(e) ?? "S3P_QUOTE_FAILED",
+      readS3pOrAxiosErrorMessage(e),
+    );
+  }
+
+  const nationalService =
+    data.walletDestination.startsWith("237") &&
+    data.walletDestination.length > 9
+      ? data.walletDestination.slice(3)
+      : data.walletDestination;
+
+  try {
+    const collection = await smobilpayService.collect({
+      quoteId,
+      customerPhonenumber: data.customerPhonenumber,
+      customerEmailaddress: data.customerEmailaddress,
+      customerName: data.customerName,
+      customerAddress: data.customerAddress,
+      serviceNumber: nationalService,
+      trid: data.trid,
+    });
+
+    return actionOk({
+      quoteId,
+      ptn: collection.ptn,
+      trid: collection.trid ?? data.trid,
+      receiptNumber: collection.receiptNumber,
+      veriCode: collection.veriCode,
+      status: String(collection.status),
+      payItemId: collection.payItemId ?? payItemIdQuoted,
+    });
+  } catch (e) {
+    return actionFail(
+      readAxiosFeCode(e) ?? "S3P_COLLECT_FAILED",
+      readS3pOrAxiosErrorMessage(e),
+    );
+  }
+}
+
 /** GET /verifytx — recupere le statut courant d'une collecte. */
 export async function verifyTravelPolicyPaymentAction(
   input: S3pVerifyInput,
@@ -133,7 +279,7 @@ export async function verifyTravelPolicyPaymentAction(
   } catch (e) {
     return actionFail(
       readAxiosFeCode(e) ?? "S3P_VERIFY_FAILED",
-      readAxiosErrorMessage(e),
+      readS3pOrAxiosErrorMessage(e),
     );
   }
 }

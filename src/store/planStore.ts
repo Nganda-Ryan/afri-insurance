@@ -5,6 +5,7 @@ import { getTravelPlansAction } from "@/actions/travel-session.actions";
 import { factorizePlans } from "@/lib/travel/factorize-plans";
 import type { IGetPlanResponseDto, IGetPlanResponseDtoFactorize } from "@/types/travel";
 import { PLANS_TTL_MS } from "@/lib/constants/constant";
+import { isCacheValid } from "@/lib/utils";
 
 
 interface PlanStoreState {
@@ -20,10 +21,6 @@ interface PlanStoreState {
   resetPlans: () => void;
 }
 
-function isCacheValid(fetchedAt: number | null): boolean {
-  if (fetchedAt === null) return false;
-  return Date.now() - fetchedAt < PLANS_TTL_MS;
-}
 
 export const usePlanStore = create<PlanStoreState>()(
   persist(

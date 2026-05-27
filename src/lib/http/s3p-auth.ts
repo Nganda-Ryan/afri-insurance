@@ -4,12 +4,9 @@ import crypto from "crypto";
 
 /**
  * Signature header s3pAuth (Smobilpay / Maviance).
- * Schema OAuth 1.0a-like : HMAC-SHA1 sur la base string composee de
- *  METHOD & url-encoded(URL) & url-encoded(params tries)
- *
- * Les params signes incluent :
- *  - les query params de la requete (et le body uniquement si form-encoded ; pour S3P le body est JSON donc on ne l'inclut pas)
- *  - les champs s3pAuth (nonce, timestamp, signature_method, token, version)
+ * Aligné sur le script Postman officiel : concaténation key=value (sans encodage par clé),
+ * puis baseString = METHOD & encodeURIComponent(url) & encodeURIComponent(parameterString),
+ * HMAC-SHA1 + Base64. nonce et timestamp = même valeur (Date.now() en ms).
  */
 
 interface BuildAuthInput {
@@ -18,68 +15,52 @@ interface BuildAuthInput {
   url: string;
   /** Query params de la requete (GET). */
   queryParams?: Record<string, string | number | undefined>;
-  /** Body params de la requete (POST JSON). */
+  /** Body params de la requete (POST JSON aplati). */
   bodyParams?: Record<string, string | number | undefined>;
   publicKey: string;
   secretKey: string;
 }
 
-function rfc3986(input: string): string {
-  return encodeURIComponent(input)
-    .replaceAll("!", "%21")
-    .replaceAll("*", "%2A")
-    .replaceAll("'", "%27")
-    .replaceAll("(", "%28")
-    .replaceAll(")", "%29");
-}
-
-function generateNonce(): string {
-  if (typeof crypto.randomUUID === "function") {
-    return crypto.randomUUID();
-  }
-  return crypto.randomBytes(16).toString("hex");
-}
-
-function unixTimestampSeconds(): string {
-  return Math.floor(Date.now() / 1000).toString();
+function trimParamValue(v: string | number): string {
+  const s = typeof v === "string" ? v.trim() : String(v);
+  return s;
 }
 
 export function buildS3pAuthorizationHeader(input: BuildAuthInput): string {
   const { method, url, queryParams, bodyParams, publicKey, secretKey } = input;
 
-  const nonce = generateNonce();
-  const timestamp = unixTimestampSeconds();
+  const ts = Date.now();
+  const timestamp = String(ts);
+  const nonce = String(ts);
 
-  const oauthParams: Record<string, string> = {
-    "s3pAuth_nonce": nonce,
-    "s3pAuth_signature_method": "HMAC-SHA1",
-    "s3pAuth_timestamp": timestamp,
-    "s3pAuth_token": publicKey,
-  };
+  /** Ordre Postman : {...query/body, ...s3pParams} — champs oauth écrasent le reste. */
+  const allParams: Record<string, string> = {};
 
-  const allParams: Record<string, string> = { ...oauthParams };
   if (bodyParams) {
     for (const [k, v] of Object.entries(bodyParams)) {
       if (v == null) continue;
-      allParams[k] = String(v);
+      allParams[k] = trimParamValue(v);
     }
   }
   if (queryParams) {
     for (const [k, v] of Object.entries(queryParams)) {
       if (v == null) continue;
-      allParams[k] = String(v);
+      allParams[k] = trimParamValue(v);
     }
   }
 
-  const sortedParams = Object.keys(allParams)
-    .sort()
-    .map((k) => `${rfc3986(k)}=${rfc3986(allParams[k] ?? "")}`)
-    .join("&");
+  allParams.s3pAuth_nonce = nonce;
+  allParams.s3pAuth_signature_method = "HMAC-SHA1";
+  allParams.s3pAuth_timestamp = timestamp;
+  allParams.s3pAuth_token = publicKey.trim();
+
+  const sortedKeys = Object.keys(allParams).sort();
+  const parameterString = sortedKeys.map((k) => `${k}=${allParams[k]}`).join("&");
 
   const baseString = [
     method.toUpperCase(),
-    rfc3986(url),
-    rfc3986(sortedParams),
+    encodeURIComponent(url),
+    encodeURIComponent(parameterString),
   ].join("&");
 
   const signature = crypto

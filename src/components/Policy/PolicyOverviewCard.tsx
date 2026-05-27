@@ -10,7 +10,7 @@ import {
 import React from "react";
 
 import type { IPolicyData } from "@/types/travel";
-import { formatDate } from "./utils";
+import { formatDate } from "@/lib/utils";
 import { InfoRow } from "./InfoRow";
 import { StatusBadge } from "./StatusBadge";
 

@@ -39,19 +39,50 @@ function envOrDefault(name: string, fallback: string): string {
 }
 
 export function getSmobilpayBaseUrl(): string {
-  const raw = envOrDefault(
-    "NEXT_PUBLIC_SMOBILEPAY_BASE_URL",
-    "https://s3p.smobilpay.staging.maviance.info/v2",
-  );
+  const fromS3p =
+    process.env.S3P_URL?.trim() ??
+    process.env.NEXT_PUBLIC_S3P_URL?.trim();
+  const raw =
+    fromS3p && fromS3p.length > 0
+      ? fromS3p
+      : envOrDefault(
+          "NEXT_PUBLIC_SMOBILEPAY_BASE_URL",
+          "https://s3p.smobilpay.staging.maviance.info/v2",
+        );
   return raw.endsWith("/") ? raw.slice(0, -1) : raw;
 }
 
+/** Service S3P cash-out MTN Mobile Money (ex. 20053). */
+export function getMomoServiceId(): string {
+  const v =
+    process.env.MOMO_SERVICE_ID?.trim() ||
+    process.env.MOMO_PAYMENT_ID?.trim() ||
+    process.env.NEXT_PUBLIC_MOMO_SERVICE_ID?.trim();
+  return v && v.length > 0 ? v : "20053";
+}
+
+/** Service S3P cash-out Orange Money — obligatoire en prod (variable d'environnement). */
+export function getOmServiceId(): string {
+  const v =
+    process.env.OM_SERVICE_ID?.trim() ||
+    process.env.NEXT_PUBLIC_OM_SERVICE_ID?.trim();
+  return v && v.length > 0 ? v : "";
+}
+
 export function getSmobilpayPublicKey(): string {
-  return requireEnv("NEXT_PUBLIC_SMOBILEPAY_PUBLIC_KEY");
+  return (
+    process.env.S3P_KEY?.trim() ||
+    process.env.NEXT_PUBLIC_SMOBILEPAY_PUBLIC_KEY?.trim() ||
+    requireEnv("NEXT_PUBLIC_SMOBILEPAY_PUBLIC_KEY")
+  );
 }
 
 export function getSmobilpaySecretKey(): string {
-  return requireEnv("SMOBILEPAY_SECRET_KEY");
+  return (
+    process.env.S3P_SECRET?.trim() ||
+    process.env.SMOBILEPAY_SECRET_KEY?.trim() ||
+    requireEnv("SMOBILEPAY_SECRET_KEY")
+  );
 }
 
 export function getSmobilpayMerchant(): string {
@@ -64,4 +95,27 @@ export function getSmobilpayServiceId(): string {
 
 export function getSmobilpayApiVersion(): string {
   return envOrDefault("SMOBILEPAY_API_VERSION", "3.0.0");
+}
+
+/** Taux EUR -> XAF utilisé pour l'initiation de paiement S3P. */
+export function getEurToXafExchangeRate(): number {
+  const raw = process.env.EXCHANGE_RATE?.trim();
+  if (!raw) return 655.957;
+  const sanitized = raw.replace(/\s+/g, "").replace(/[^\d.,-]/g, "");
+  const normalized = (() => {
+    // 1.234,56 -> 1234.56
+    if (sanitized.includes(".") && sanitized.includes(",")) {
+      if (sanitized.lastIndexOf(",") > sanitized.lastIndexOf(".")) {
+        return sanitized.replaceAll(".", "").replace(",", ".");
+      }
+      // 1,234.56 -> 1234.56
+      return sanitized.replaceAll(",", "");
+    }
+    // 655,957 -> 655.957
+    if (sanitized.includes(",")) return sanitized.replace(",", ".");
+    return sanitized;
+  })();
+  const parsed = Number(normalized);
+  if (!Number.isFinite(parsed) || parsed <= 0) return 655.957;
+  return parsed;
 }

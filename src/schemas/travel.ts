@@ -38,6 +38,8 @@ export const subscribePolicyInputSchema = z.object({
   subscription_country: z.string().min(1),
   language_code: z.string().min(2).max(5),
   agent_scope: z.string(),
+  /** Optionnel : permet de souscrire sans dépendre du cookie EVO quote_code (utile si session expirée). */
+  quote_code: z.string().min(1).optional(),
   policy_holder: z.array(policyPersonSchema).min(1),
   beneficiaries: z.array(beneficiarySchema).min(1),
   consents: z.array(z.string()),

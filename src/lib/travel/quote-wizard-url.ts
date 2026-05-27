@@ -7,21 +7,20 @@ import {
   QUOTE_WIZARD_STEP_CODE_TRAVELER,
   QUOTE_WIZARD_STEP_CODE_TRIP,
   TRIP_PRODUCT_CATEGORY_OPTIONS,
+  URL_PARAM_ADULTS,
+  URL_PARAM_AGE,
+  URL_PARAM_CATEGORY,
+  URL_PARAM_DEPART,
+  URL_PARAM_DEST,
+  URL_PARAM_PRODUCT,
+  URL_PARAM_RETURN,
+  URL_PARAM_STEP,
 } from "@/lib/constants/constant";
 import {
   destinationAreaCodeFromValue,
   destinationAreaValueFromCode,
 } from "@/lib/travel/destination-area";
 import type { TravelerInfoData, TripDetailsData } from "@/types/travel";
-
-export const URL_PARAM_PRODUCT = "p";
-export const URL_PARAM_STEP = "e";
-export const URL_PARAM_CATEGORY = "cat";
-export const URL_PARAM_DEST = "dst";
-export const URL_PARAM_DEPART = "dep";
-export const URL_PARAM_RETURN = "ret";
-export const URL_PARAM_ADULTS = "adv";
-export const URL_PARAM_AGE = "age";
 
 export type QuoteSidebarProductId = "travel" | "home" | "auto" | "pet";
 

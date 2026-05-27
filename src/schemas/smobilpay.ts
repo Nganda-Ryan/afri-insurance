@@ -31,3 +31,15 @@ export const s3pVerifyInputSchema = z.object({
   ptn: z.string().min(1).optional(),
   trid: z.string().min(1).optional(),
 });
+
+/** Collecte cash-out (OM / MoMo) avant création de police. */
+export const s3pCashoutCollectInputSchema = z.object({
+  amount: z.number().positive(),
+  channel: z.enum(["om", "momo"]),
+  walletDestination: z.string().min(8, "Numéro de paiement trop court"),
+  customerPhonenumber: z.string().min(8, "Téléphone souscripteur invalide"),
+  customerEmailaddress: z.string().email(),
+  customerName: z.string().min(1),
+  customerAddress: z.string().optional(),
+  trid: z.string().min(1),
+});

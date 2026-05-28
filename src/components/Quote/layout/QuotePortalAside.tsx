@@ -6,6 +6,7 @@ import {
   QUOTE_PORTAL_HOW_IT_WORKS,
   QUOTE_PORTAL_SUPPORT,
 } from "@/lib/constants/quote-portal";
+import { Mail, Phone } from "lucide-react";
 
 export function QuotePortalAside() {
   return (
@@ -42,27 +43,28 @@ export function QuotePortalAside() {
           
           {/* Bloc Téléphone & WhatsApp */}
           <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <TelephoneIcone className="h-6 w-6 shrink-0"/>
-              <p className="font-bold">{QUOTE_PORTAL_SUPPORT.phone}</p>
+            <p className="font-bold">Nous joindre par :</p>
+            <div className="flex items-center gap-2 pl-1">
+              <Phone className="h-4 w-4 shrink-0"/>
+              <p className="text-gray-600">{QUOTE_PORTAL_SUPPORT.phone}</p>
             </div>
-            <div className="flex items-center gap-2 pl-[24px]">
+            
+            <div className="flex items-center gap-2 pl-1">
               <WhatsappIcon className="h-5 w-5 shrink-0 text-[#25D366]" />
               <p className="text-gray-600">{QUOTE_PORTAL_SUPPORT.phoneHours}</p>
             </div>
-          </div>
-
-          {/* Bloc Email */}
-          <div className="flex items-start gap-2 pt-1">
-            <EnvelopeIcon className="mt-0.5 h-5 w-5 shrink-0" />
-            <div>
-              <p className="font-bold">{QUOTE_PORTAL_SUPPORT.email}</p>
-              <p className="text-gray-600">{QUOTE_PORTAL_SUPPORT.emailResponse}</p>
+            
+            <div className="flex items-start gap-2 pl-1">
+              <Mail className="h-4 w-4 shrink-0 mt-0.5 ml-0.5" />
+              <div>
+                <p>{QUOTE_PORTAL_SUPPORT.email}</p>
+                <p className="text-gray-600">{QUOTE_PORTAL_SUPPORT.emailResponse}</p>
+              </div>
             </div>
           </div>
 
           {/* Bloc Nos Agences dynamique */}
-          <div className="pt-1">
+          <div>
             <p className="font-semibold">{QUOTE_PORTAL_SUPPORT.agenciesLabel}</p>
             <ul className="mt-1 space-y-1.5 pl-1 text-gray-600">
               {QUOTE_PORTAL_SUPPORT.agencies.map((agency, index) => (
@@ -75,10 +77,6 @@ export function QuotePortalAside() {
               ))}
             </ul>
           </div>
-
-          <p className="pt-1 text-center text-xs font-semibold">
-            {QUOTE_PORTAL_SUPPORT.footer}
-          </p>
         </div>
       </div>
     </div>

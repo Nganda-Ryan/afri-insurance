@@ -35,20 +35,20 @@ export default function AdminPolicyDetailPage() {
   const policy = result.data;
 
   return (
-    <main>
+    <main className="text-gray-900 dark:text-gray-100">
       <div className="mb-6 flex items-center gap-3">
         <button
           type="button"
           onClick={() => router.push("/dashboard")}
-          className="rounded-lg p-2 transition-colors hover:bg-surface-muted"
+          className="rounded-lg p-2 transition-colors hover:bg-surface-muted dark:hover:bg-gray-800"
         >
-          <ArrowLeftIcon className="h-5 w-5 text-text-main" />
+          <ArrowLeftIcon className="h-5 w-5 text-text-main dark:text-gray-200" />
         </button>
         <div className="flex-1">
           <h1 className="text-2xl font-bold lg:text-3xl">
             Détail du contrat
           </h1>
-          <p className="mt-1 text-gray-500">
+          <p className="mt-1 text-gray-500 dark:text-gray-400">
             Consultation de la police depuis le dashboard
           </p>
         </div>

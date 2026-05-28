@@ -51,7 +51,7 @@ interface PoliciesTableWithFiltersProps {
 export function PoliciesTableWithFilters({ policies }: PoliciesTableWithFiltersProps) {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
   const [cancelDialogPolicy, setCancelDialogPolicy] = useState<Policy | null>(null);
   const [cancelReason, setCancelReason] = useState("");
   const cancelPolicy = useCancelTravelPolicy();
@@ -61,8 +61,15 @@ export function PoliciesTableWithFilters({ policies }: PoliciesTableWithFiltersP
   );
   const downloadTimeoutsRef = useRef<number[]>([]);
 
-  const categories = useMemo(
-    () => Array.from(new Set(policies.map((policy) => policy.planCategory))),
+  const policyTypes = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          policies
+            .map((policy) => policy.policyType?.trim() ?? "")
+            .filter((policyType) => policyType.length > 0),
+        ),
+      ),
     [policies]
   );
 
@@ -76,17 +83,25 @@ export function PoliciesTableWithFilters({ policies }: PoliciesTableWithFiltersP
           policy.planCategory.toLowerCase().includes(normalizedSearch) ||
           policy.destination.toLowerCase().includes(normalizedSearch) ||
           policy.id.toLowerCase().includes(normalizedSearch);
-        const matchesCategory =
-          categoryFilter === "all" || policy.planCategory === categoryFilter;
+        const normalizedPolicyType = policy.policyType?.trim() ?? "";
+        const matchesType = typeFilter === "all" || normalizedPolicyType === typeFilter;
 
-        return matchesSearch && matchesCategory;
+        return matchesSearch && matchesType;
       }),
-    [categoryFilter, policies, searchTerm]
+    [typeFilter, policies, searchTerm]
   );
 
   const handleExport = () => {
-    const csv = [
-      ["Référence externe", "Référence interne", "Type", "Catégorie", "Destination", "Date de création"],
+    const escapeCsvCell = (value: string) => `"${value.replace(/"/g, "\"\"")}"`;
+    const rows = [
+      [
+        "Référence externe",
+        "Référence interne",
+        "Type",
+        "Catégorie",
+        "Destination",
+        "Date de création",
+      ],
       ...filteredPolicies.map((policy) => [
         policy.externalPolicyId ?? "",
         policy.id,
@@ -95,11 +110,11 @@ export function PoliciesTableWithFilters({ policies }: PoliciesTableWithFiltersP
         policy.destination,
         new Date(policy.createdAt).toLocaleDateString("fr-FR"),
       ]),
-    ]
-      .map((row) => row.join(","))
-      .join("\n");
+    ];
 
-    const blob = new Blob([csv], { type: "text/csv" });
+    const csv = rows.map((row) => row.map(escapeCsvCell).join(";")).join("\n");
+    const utf8Bom = "\uFEFF";
+    const blob = new Blob([utf8Bom, csv], { type: "text/csv;charset=utf-8;" });
     const url = window.URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
@@ -223,19 +238,19 @@ export function PoliciesTableWithFilters({ policies }: PoliciesTableWithFiltersP
                 placeholder="Rechercher par type, catégorie, destination ou référence…"
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
-                className="w-full rounded-lg border border-border bg-white py-2 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:outline-none dark:bg-slate-800"
+                className="w-full rounded-lg border border-border bg-white py-2 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-400"
               />
             </div>
 
             <select
-              value={categoryFilter}
-              onChange={(event) => setCategoryFilter(event.target.value)}
-              className="w-full rounded-lg border border-border bg-white px-4 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary focus:outline-none dark:bg-slate-800"
+              value={typeFilter}
+              onChange={(event) => setTypeFilter(event.target.value)}
+              className="w-full rounded-lg border border-border bg-white px-4 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             >
-              <option value="all">Toutes les catégories</option>
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
+              <option value="all">Tous les types</option>
+              {policyTypes.map((policyType) => (
+                <option key={policyType} value={policyType}>
+                  {policyType}
                 </option>
               ))}
             </select>
@@ -255,11 +270,11 @@ export function PoliciesTableWithFilters({ policies }: PoliciesTableWithFiltersP
       <div className="overflow-hidden rounded-lg border border-border bg-white dark:bg-slate-900">
         <div className="flex items-center gap-2 border-b border-border px-6 py-4">
           <FileText className="h-5 w-5 text-orange-500" />
-          <h2 className="text-base font-semibold text-foreground">
+          <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
             Liste des polices d&apos;assurance
           </h2>
           {filteredPolicies.length !== policies.length && (
-            <span className="ml-auto text-xs text-muted-foreground">
+            <span className="ml-auto text-xs text-slate-600 dark:text-slate-400">
               {filteredPolicies.length} / {policies.length} résultat
               {filteredPolicies.length !== 1 ? "s" : ""}
             </span>
@@ -268,13 +283,13 @@ export function PoliciesTableWithFilters({ policies }: PoliciesTableWithFiltersP
 
         {filteredPolicies.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <ShieldCheck className="mb-3 h-10 w-10 text-slate-300" />
-            <p className="text-sm font-medium text-foreground">
+            <ShieldCheck className="mb-3 h-10 w-10 text-slate-300 dark:text-slate-600" />
+            <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
               {policies.length === 0
                 ? "Aucune police pour le moment"
                 : "Aucun résultat pour cette recherche"}
             </p>
-            <p className="mt-1 text-xs text-orange-500 dark:text-blue-400">
+            <p className="mt-1 text-xs text-orange-600 dark:text-orange-300">
               {policies.length === 0
                 ? "Vos contrats apparaîtront ici après souscription."
                 : "Essayez de modifier vos critères de recherche."}
@@ -282,22 +297,22 @@ export function PoliciesTableWithFilters({ policies }: PoliciesTableWithFiltersP
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm text-slate-800 dark:text-slate-200">
               <thead className="border-b border-border bg-slate-50 dark:bg-slate-800">
                 <tr>
-                  <th className="px-6 py-3 text-left font-semibold text-foreground">
+                  <th className="px-6 py-3 text-left font-semibold text-slate-800 dark:text-slate-200">
                     <span className="flex items-center gap-1.5">
                       <Calendar className="h-4 w-4 text-orange-500" />
                       Date de création
                     </span>
                   </th>
-                  <th className="px-6 py-3 text-left font-semibold text-foreground">
+                  <th className="px-6 py-3 text-left font-semibold text-slate-800 dark:text-slate-200">
                     Référence
                   </th>
-                  <th className="px-6 py-3 text-left font-semibold text-foreground">
+                  <th className="px-6 py-3 text-left font-semibold text-slate-800 dark:text-slate-200">
                     Type
                   </th>
-                  <th className="px-6 py-3 text-left font-semibold text-foreground">
+                  <th className="px-6 py-3 text-left font-semibold text-slate-800 dark:text-slate-200">
                     Actions
                   </th>
                 </tr>
@@ -308,17 +323,17 @@ export function PoliciesTableWithFilters({ policies }: PoliciesTableWithFiltersP
                     key={policy.id}
                     className="border-b border-border transition-colors last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800/50"
                   >
-                    <td className="px-6 py-4 text-muted-foreground">
+                    <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
                       {new Date(policy.createdAt).toLocaleDateString("fr-FR", {
                         day: "2-digit",
                         month: "long",
                         year: "numeric",
                       })}
                     </td>
-                    <td className="px-6 py-4 font-mono text-xs text-slate-400">
+                    <td className="px-6 py-4 font-mono text-xs text-slate-600 dark:text-slate-300">
                       {policy.externalPolicyId ?? policy.id}
                     </td>
-                    <td className="px-6 py-4 text-muted-foreground">
+                    <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
                       {policy.policyType ?? "-"}
                     </td>
                     <td className="px-6 py-4">
@@ -328,9 +343,18 @@ export function PoliciesTableWithFilters({ policies }: PoliciesTableWithFiltersP
                           return (
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                              <MoreHorizontal className="h-4 w-4" />
+                                <button
+                                  type="button"
+                                  className="rounded-md p-1 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-100"
+                                  aria-label="Actions de la police"
+                                >
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-52">
+                              <DropdownMenuContent
+                                align="end"
+                                className="w-52 border border-slate-200 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                              >
                                 <DropdownMenuItem
                                   onClick={() => handleViewDetails(policy)}
                                   disabled={!hasExternalPolicyId}
@@ -362,7 +386,7 @@ export function PoliciesTableWithFilters({ policies }: PoliciesTableWithFiltersP
                                 <DropdownMenuItem
                                   onClick={() => openCancelDialog(policy)}
                                   disabled={!hasExternalPolicyId || cancelPolicy.isPending}
-                                  className="text-red-600 focus:text-red-600"
+                                  className="text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400"
                                 >
                                   <Ban className="mr-2 h-3.5 w-3.5" />
                                   Annuler

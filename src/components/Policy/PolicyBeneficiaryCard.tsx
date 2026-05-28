@@ -11,8 +11,8 @@ interface PolicyBeneficiaryCardProps {
 
 export function PolicyBeneficiaryCard({ beneficiaries }: PolicyBeneficiaryCardProps) {
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden mb-6 bg-white">
-      <div className="bg-brand-primary bg-opacity-10 px-6 py-4 flex items-center gap-3 border-b border-gray-200">
+    <div className="mb-6 overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+      <div className="flex items-center gap-3 border-b border-gray-200 bg-brand-primary px-6 py-4 dark:border-gray-700">
         <UserIcon className="w-5 h-5 text-white" />
         <h2 className="text-lg font-bold text-white">
           Détails du bénéficiaire

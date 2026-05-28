@@ -82,7 +82,7 @@ const LandingHeader = () => {
 
   return (
     <header className="fixed top-0 left-0 z-50 w-full border-b border-white/15 bg-brand-secondary text-white backdrop-blur-[2px]">
-      <nav className="mx-auto flex w-full max-w-[1500px] items-center justify-between px-2 py-2 lg:py-4 md:px-4 xl:px-6">
+      <nav className="mx-auto flex w-full max-w-[1500px] items-center justify-between px-2 py-2 md:px-4 xl:px-6">
         <div className="flex items-center gap-2 sm:gap-3">
           <a
             href={AFRI_INSURANCE_LOGO_HREF}
@@ -91,9 +91,9 @@ const LandingHeader = () => {
             <Image
               src="/images/logo/Logo-white-Afri-Insurance@3x.png"
               alt="Afri Insurance"
-              height={50}
-              width={128}
-              className="h-9 w-auto md:h-10"
+              height={72}
+              width={168}
+              className="h-12 w-auto md:h-14"
             />
           </a>
           <a
@@ -103,9 +103,9 @@ const LandingHeader = () => {
             <Image
               src="/images/logo/Logo-White-AfriLife@3x.png"
               alt="Afri Life"
-              height={50}
-              width={100}
-              className="h-9 w-auto md:h-10"
+              height={70}
+              width={130}
+              className="h-13 w-auto md:h-[62px]"
             />
           </a>
         </div>

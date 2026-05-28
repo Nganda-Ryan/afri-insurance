@@ -20,7 +20,7 @@ export function StatusBadge({ status }: StatusBadgeProps) {
   }
 
   return (
-    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-700">
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-sm font-semibold text-green-700 dark:bg-green-950/80 dark:text-green-200">
       <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
       {label}
     </span>

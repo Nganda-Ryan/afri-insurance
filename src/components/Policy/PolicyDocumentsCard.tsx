@@ -24,23 +24,23 @@ export function PolicyDocumentsCard({ attachments }: PolicyDocumentsCardProps) {
   };
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden mb-6 bg-white">
-      <div className="bg-brand-primary bg-opacity-10 px-6 py-4 flex items-center gap-3 border-b border-gray-200">
+    <div className="mb-6 overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+      <div className="flex items-center gap-3 border-b border-gray-200 bg-brand-primary px-6 py-4 dark:border-gray-700">
         <FileTextIcon className="w-5 h-5 text-white" />
         <h2 className="text-lg font-bold text-white">Documents</h2>
       </div>
-      <div className=" space-y-3">
+      <div className="space-y-3">
         {attachments.map((attachment, index) => (
           <div
             key={attachment.file_name}
-            className="flex items-center justify-between p-4 rounded-lg"
+            className="flex items-center justify-between rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800/60"
           >
             <div className="flex items-center gap-4">
               <div>
-                <p className="font-semibold text-text-main text-sm">
+                <p className="text-sm font-semibold text-text-main dark:text-gray-100">
                   {attachment.file_name}
                 </p>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                   Généré le{" "}
                   {formatDate(attachment.created_at.split(" ")[0])}
                 </p>

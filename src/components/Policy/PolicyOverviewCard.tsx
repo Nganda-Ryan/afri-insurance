@@ -20,7 +20,7 @@ interface PolicyOverviewCardProps {
 
 export function PolicyOverviewCard({ policy }: PolicyOverviewCardProps) {
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden mb-6 bg-white">
+    <div className="mb-6 overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
       <div className={`bg-brand-primary px-6 py-4 flex items-center justify-between`}>
         <div className="flex items-center gap-3">
           <ShieldCheckIcon className="w-6 h-6 text-text-inverse" />
@@ -30,7 +30,7 @@ export function PolicyOverviewCard({ policy }: PolicyOverviewCardProps) {
         </div>
         <StatusBadge status={policy.policy_status} />
       </div>
-      <div className="p-6">
+      <div className="p-6 dark:text-gray-100">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8">
           <InfoRow
             label="Numéro de police"

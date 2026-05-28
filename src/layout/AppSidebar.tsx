@@ -93,42 +93,34 @@ const AppSidebar: React.FC = () => {
             </button>
           ) : (
             nav.path && (
-              // <Link
-              //   href={nav.path}
-              //   className={`menu-item group ${
-              //     isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
-              //   }`}
-              // >
-              //   <span
-              //     className={`${
-              //       isActive(nav.path)
-              //         ? "menu-item-icon-active"
-              //         : "menu-item-icon-inactive"
-              //     }`}
-              //   >
-              //     {nav.icon}
-              //   </span>
-              //   {(isExpanded || isHovered || isMobileOpen) && (
-              //     <span className={`menu-item-text`}>{nav.name}</span>
-              //   )}
-              // </Link>
+              
               <Link
                 href={nav.path}
-                className={`menu-item group ${isActive(nav.path) ? "bg-orange-500/15 text-text-inverse border-l-4 border-orange-500"
-                    : "text-text-inverse text-opacity-70 hover:text-opacity-100 hover:bg-white hover:bg-opacity-10"
-                  }`}
+                className={`menu-item group ${
+                  isActive(nav.path)
+                    ? "border-l-4 border-orange-500 bg-orange-500/15 text-gray-900 dark:bg-orange-500/20 dark:text-gray-100"
+                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
+                }`}
               >
                 <span
-                // className={`${
-                //   isActive(nav.path)
-                //     ? "menu-item-icon-active"
-                //     : "menu-item-icon-inactive"
-                // }`}
+                  className={
+                    isActive(nav.path)
+                      ? "text-orange-600 dark:text-orange-400"
+                      : "text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-200"
+                  }
                 >
                   {nav.icon}
                 </span>
                 {(isExpanded || isHovered || isMobileOpen) && (
-                  <span className={`menu-item-text`}>{nav.name}</span>
+                  <span
+                    className={`menu-item-text ${
+                      isActive(nav.path)
+                        ? "text-gray-900 dark:text-gray-100"
+                        : "text-gray-700 dark:text-gray-300"
+                    }`}
+                  >
+                    {nav.name}
+                  </span>
                 )}
               </Link>
             )
@@ -235,9 +227,9 @@ const AppSidebar: React.FC = () => {
   };
 
   return (
-    <div className='bg-white'>
+    <div className="bg-white dark:bg-gray-900">
       <aside
-        className={`fixed pt-[100px] top-0 left-0 flex flex-col px-5 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out border-r border-gray-200
+        className={`fixed top-0 left-0 flex h-screen flex-col border-r border-gray-200 bg-white px-5 pt-[100px] text-gray-900 transition-all duration-300 ease-in-out dark:border-gray-800 dark:bg-gray-900 dark:text-gray-100
         ${isExpanded || isMobileOpen
             ? "w-[290px]"
             : isHovered
@@ -252,7 +244,7 @@ const AppSidebar: React.FC = () => {
             <div className="flex flex-col gap-4">
               <div>
                 <h2
-                  className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${!isExpanded && !isHovered
+                  className={`mb-4 flex text-xs uppercase leading-[20px] text-gray-400 dark:text-gray-500 ${!isExpanded && !isHovered
                       ? "lg:justify-center"
                       : "justify-start"
                     }`}

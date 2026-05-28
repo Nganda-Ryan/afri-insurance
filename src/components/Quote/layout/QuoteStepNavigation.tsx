@@ -33,7 +33,7 @@ export function QuoteStepNavigation({
   nextType = "button",
 }: QuoteStepNavigationProps) {
   return (
-    <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-row gap-3 pt-2 sm:items-center sm:justify-between">
       {showPrevious ? (
         <Button
           type="button"

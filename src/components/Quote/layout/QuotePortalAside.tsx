@@ -46,7 +46,7 @@ export function QuotePortalAside() {
   }, [searchParams, showPlanRecap]);
 
   return (
-    <div className="space-y-4 hidden sm:block">
+    <div className="space-y-4">
       {planRecapProps && <QuotePlanRecapCard {...planRecapProps} />}
 
       <div className="overflow-hidden rounded-lg border border-gray-200/80 bg-white">

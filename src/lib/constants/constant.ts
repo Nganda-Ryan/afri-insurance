@@ -54,16 +54,25 @@ export const POLICY_TYPE_VALUES = [
 export type PolicyType = (typeof POLICY_TYPE_VALUES)[number];
 
 /** Codes URL pour chaque étape du wizard devis voyage. */
-export const QUOTE_WIZARD_STEP_CODE_FORM = "voyage";
-/** @deprecated Alias historique — même étape que formulaire */
-export const QUOTE_WIZARD_STEP_CODE_TRIP = QUOTE_WIZARD_STEP_CODE_FORM;
-/** @deprecated Fusionné dans l'étape formulaire */
+export const QUOTE_WIZARD_STEP_CODE_TRIP = "voyage";
+/** @deprecated Alias historique — étape 0 (détails du voyage) */
+export const QUOTE_WIZARD_STEP_CODE_FORM = QUOTE_WIZARD_STEP_CODE_TRIP;
 export const QUOTE_WIZARD_STEP_CODE_TRAVELER = "voyageur";
 export const QUOTE_WIZARD_STEP_CODE_QUOTE = "devis";
+export const QUOTE_WIZARD_STEP_CODE_DETAILS = "details";
+export const QUOTE_WIZARD_STEP_CODE_RECAP = "recap";
+export const QUOTE_WIZARD_STEP_CODE_PAYMENT = "paiement";
 
 /** Clés des query params pour le parcours devis (URL courte/lisible). */
 export const URL_PARAM_PRODUCT = "p";
 export const URL_PARAM_STEP = "e";
+export const URL_PARAM_PLAN_NAME = "pln";
+export const URL_PARAM_PLAN_PRICE = "prc";
+export const URL_PARAM_PRODUCT_INDEX = "pidx";
+export const URL_PARAM_QUOTE_CODE = "qcd";
+export const URL_PARAM_CURRENCY = "cur";
+export const URL_PARAM_COUNTRY = "cty";
+export const URL_PARAM_LANGUAGE = "lng";
 export const URL_PARAM_CATEGORY = "cat";
 export const URL_PARAM_DEST = "dst";
 export const URL_PARAM_DEST_COUNTRY = "dstc";
@@ -73,7 +82,7 @@ export const URL_PARAM_ADULTS = "adv";
 export const URL_PARAM_AGE = "age";
 
 /** Liens des logos Afri Insurance (1) et Afrilife (2). */
-export const AFRI_INSURANCE_LOGO_HREF = `https://afri-insurance.vercel.app/?${URL_PARAM_PRODUCT}=${QUOTE_PRODUCT_CODE_TRAVEL}&${URL_PARAM_STEP}=${QUOTE_WIZARD_STEP_CODE_FORM}`;
+export const AFRI_INSURANCE_LOGO_HREF = `https://afri-insurance.vercel.app/?${URL_PARAM_PRODUCT}=${QUOTE_PRODUCT_CODE_TRAVEL}&${URL_PARAM_STEP}=${QUOTE_WIZARD_STEP_CODE_TRIP}`;
 export const AFRILIFE_LOGO_HREF = "https://afri-insurance.com/afrilife/";
 
 /* PLAN TYPES */

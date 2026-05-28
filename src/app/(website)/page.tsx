@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 
 import { QuotePageLayout } from "@/components/Quote/layout/QuotePageLayout";
 import { QuotePortalAside } from "@/components/Quote/layout/QuotePortalAside";
+import { QuoteFlowProgressBar } from "@/components/Quote/wizard/QuoteFlowProgressBar";
 import { QuotationWizard } from "@/components/Quote/wizard/QuotationWizard";
 import { URL_PARAM_PRODUCT } from "@/lib/constants/constant";
 import { quoteProductIdFromUrlCode } from "@/lib/travel/quote-wizard-url";
@@ -41,7 +42,10 @@ function HomeQuotationPageContent() {
       aria-labelledby="quote-hero-title"
     >
       {currentProduct === "travel" ? (
-        <QuotePageLayout aside={<QuotePortalAside />}>
+        <QuotePageLayout
+          progress={<QuoteFlowProgressBar />}
+          aside={<QuotePortalAside />}
+        >
           <QuotationWizard onWizardStateChange={setWizardInProgress} />
         </QuotePageLayout>
       ) : (

@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { ChevronLeftIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import type {
@@ -22,7 +21,7 @@ import { buildGetQuotePayload } from "@/lib/travel/build-get-quote-payload";
 import { PLAN_TYPE_ELITE, PLAN_TYPE_PREMIUM, PLAN_TYPE_STANDARD } from "@/lib/constants/constant";
 import { QuoteErrorCard } from "./QuoteErrorCard";
 import { QuotePlanCard } from "./QuotePlanCard";
-import Button from "@/components/ui/button/Button";
+import { QuoteStepNavigation } from "@/components/Quote/layout/QuoteStepNavigation";
 
 interface QuoteSummaryProps {
   tripDetails: TripDetailsData;
@@ -190,21 +189,11 @@ export function QuoteSummary({
     }
 
     return (
-        <div>
-            <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl font-bold">
-                    Votre tarif
-                </h2>
-                <Button
-                    type="button"
-                    variant="outline"
-                    onClick={onBack}
-                    className="rounded-lg px-4 py-2 text-text-main hover:border-brand-secondary"
-                    startIcon={<ChevronLeftIcon className="w-4 h-4" />}
-                >
-                    Modifier
-                </Button>
-            </div>
+        <div className="space-y-4">
+            <div className="rounded-lg border border-gray-200 bg-white p-4 md:p-6">
+            <h2 className="mb-6 text-2xl font-bold">
+                Votre tarif
+            </h2>
 
             {quoteContext &&
                 (quoteContext.language ||
@@ -291,6 +280,12 @@ export function QuoteSummary({
                 </div>
                 </div>
             </div>
+            </div>
+
+            <QuoteStepNavigation
+                onPrevious={onBack}
+                showNext={false}
+            />
         </div>
     );
 }

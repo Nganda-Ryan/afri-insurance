@@ -10,7 +10,7 @@ export function InfoRow({ label, value, icon }: InfoRowProps) {
   return (
     <div className="flex items-start gap-3 border-b border-gray-100 py-3 last:border-b-0 dark:border-gray-800">
       {icon && (
-        <div className="mt-0.5 shrink-0 text-brand-secondary dark:text-orange-400">{icon}</div>
+        <div className="mt-0.5 shrink-0 dark:text-orange-400">{icon}</div>
       )}
       <div className="flex-1 min-w-0">
         <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">

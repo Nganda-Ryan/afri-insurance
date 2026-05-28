@@ -7,7 +7,7 @@ export const QUOTE_PORTAL_HOW_IT_WORKS = [
   {
     step: 2,
     title: "Obtenez votre devis en 1 clic",
-    subtitle: "Sous 24h par email",
+    subtitle: "Instantanément par email",
   },
   {
     step: 3,
@@ -17,7 +17,7 @@ export const QUOTE_PORTAL_HOW_IT_WORKS = [
   {
     step: 4,
     title: "Recevez votre contrat par email",
-    subtitle: "Votre assurance voyage est prête",
+    subtitle: "Immédiatement après paiement",
   },
 ] as const;
 export const QUOTE_PORTAL_SUPPORT = {
@@ -27,8 +27,8 @@ export const QUOTE_PORTAL_SUPPORT = {
   emailResponse: "Réponse sous 24h",
   agenciesLabel: "Nos agences :",
   agencies: [
-    { city: "Yde", address: "Carrefour Avenue Germaine - Essos" },
-    { city: "Dla", address: "Près de l’hôtel la falaise Akwa" }
+    { city: "Yaoundé", address: "Carrefour Avenue Germaine - Essos." },
+    { city: "Douala", address: "À côté de l’hôtel la Falaise Akwa." }
   ],
   footer: "Member of CCA Bank Holding",
 } as const;

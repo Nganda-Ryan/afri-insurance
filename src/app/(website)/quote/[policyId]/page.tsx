@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import React from "react";
 
 import { useTravelPolicy } from "@/hooks/use-travel-quote-session";
+import { QuoteHero } from "@/components/Quote/layout/QuoteHero";
 import { PolicyBeneficiaryCard } from "@/components/Policy/PolicyBeneficiaryCard";
 import { PolicyDocumentsCard } from "@/components/Policy/PolicyDocumentsCard";
 import { PolicyErrorState } from "@/components/Policy/PolicyErrorState";
@@ -14,56 +15,68 @@ import { PolicyLoadingState } from "@/components/Policy/PolicyLoadingState";
 import { PolicyOverviewCard } from "@/components/Policy/PolicyOverviewCard";
 import { PolicySuccessBanner } from "@/components/Policy/PolicySuccessBanner";
 
+const POLICY_HERO = {
+  badge: "Souscription confirmée",
+  title: "Police confirmée",
+  description: "Votre assurance voyage est maintenant active.",
+} as const;
+
 export default function Page() {
-    const router = useRouter();
-    const params = useParams<{ policyId: string }>();
-    const policyId = params.policyId;
+  const router = useRouter();
+  const params = useParams<{ policyId: string }>();
+  const policyId = params.policyId;
 
-    const { result, isLoading, refetch } = useTravelPolicy(policyId);
-    console.log("result", result);
-    if (isLoading) {
-        return <PolicyLoadingState />;
-    }
+  const { result, isLoading, refetch } = useTravelPolicy(policyId);
 
-    if (!result?.ok || !result.data) {
-        return (
-        <PolicyErrorState
+  if (isLoading) {
+    return (
+      <>
+        <QuoteHero {...POLICY_HERO} />
+        <main className="mx-auto max-w-[900px] px-4 py-8 lg:py-12">
+          <PolicyLoadingState />
+        </main>
+      </>
+    );
+  }
+
+  if (!result?.ok || !result.data) {
+    return (
+      <>
+        <QuoteHero {...POLICY_HERO} />
+        <main className="mx-auto max-w-[900px] px-4 py-8 lg:py-12">
+          <PolicyErrorState
             message={result?.error?.message ?? "Police introuvable."}
             onRetry={() => void refetch()}
-        />
-        );
-    }
+          />
+        </main>
+      </>
+    );
+  }
 
-    const policy = result.data;
+  const policy = result.data;
 
   return (
-    <main className="mx-auto max-w-[900px] px-4 py-8 lg:py-12">
-      <div className="flex items-center gap-3 mb-6">
+    <>
+      {/* <QuoteHero {...POLICY_HERO} /> */}
+      <main className="mx-auto max-w-[900px] px-4 py-8 lg:py-12">
         <button
           type="button"
           onClick={() => router.back()}
-          className="p-2 rounded-lg hover:transition-colors"
+          className="mb-6 flex items-center gap-2 rounded-lg p-2 text-text-main transition-colors hover:bg-gray-100"
         >
-          <ArrowLeftIcon className="w-5 h-5 text-text-main" />
+          <ArrowLeftIcon className="h-5 w-5" />
+          <span className="text-sm font-medium">Retour</span>
         </button>
-        <div className="flex-1">
-          <h1 className="text-3xl lg:text-4xl font-bold">
-            Police confirmée
-          </h1>
-          <p className="text-gray-500 mt-1">
-            Votre assurance voyage est maintenant active
-          </p>
-        </div>
-      </div>
 
-      <PolicySuccessBanner policyNumber={policy.policy_number} />
-      <PolicyOverviewCard policy={policy} />
-      <PolicyBeneficiaryCard beneficiaries={policy.beneficiaries} />
-      <PolicyHolderCard policyHolder={policy.policy_holder[0]} />
-      {policy.attachments.length > 0 && (
-        <PolicyDocumentsCard attachments={policy.attachments} />
-      )}
-      <PolicyFooter catalog={policy.catalog} createdAt={policy.created_at} />
-    </main>
+        <PolicySuccessBanner policyNumber={policy.policy_number} />
+        <PolicyOverviewCard policy={policy} />
+        <PolicyBeneficiaryCard beneficiaries={policy.beneficiaries} />
+        <PolicyHolderCard policyHolder={policy.policy_holder[0]} />
+        {policy.attachments.length > 0 && (
+          <PolicyDocumentsCard attachments={policy.attachments} />
+        )}
+        <PolicyFooter catalog={policy.catalog} createdAt={policy.created_at} />
+      </main>
+    </>
   );
 }

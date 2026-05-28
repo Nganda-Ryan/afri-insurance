@@ -6,8 +6,8 @@ export const QUOTE_PORTAL_HOW_IT_WORKS = [
   },
   {
     step: 2,
-    title: "Obtenez votre devis en 1 clic",
-    subtitle: "Instantanément par email",
+    title: "Obtenez votre devis",
+    subtitle: "Instantanément en 1 clic",
   },
   {
     step: 3,

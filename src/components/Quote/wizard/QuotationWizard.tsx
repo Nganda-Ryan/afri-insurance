@@ -20,6 +20,7 @@ import {
 } from "@/lib/constants/constant";
 import {
   readQuoteHolderFromStorage,
+  subscribeQuoteHolderStorage,
   writeQuoteHolderToStorage,
 } from "@/lib/travel/quote-holder-storage";
 import {
@@ -50,7 +51,7 @@ export function QuotationWizard({ onWizardStateChange }: QuotationWizardProps) {
   const [storedHolderOverride, setStoredHolderOverride] =
     useState<PersonFormData | null>(null);
   const storedHolderFromStorage = useSyncExternalStore(
-    () => () => {},
+    subscribeQuoteHolderStorage,
     readQuoteHolderFromStorage,
     () => null,
   );

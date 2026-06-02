@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -33,7 +33,12 @@ import {
   writeQuoteRecapToStorage,
 } from "@/lib/travel/quote-recap-storage";
 import type { ParsedSelectedPlan } from "@/lib/travel/quote-wizard-url";
-import { ageFromBirthDate, generatePaymentTrid, hasOldestAgeInRange } from "@/lib/utils";
+import {
+  ageFromBirthDate,
+  generatePaymentTrid,
+  hasOldestAgeInRange,
+  stripDiacritics,
+} from "@/lib/utils";
 import { usePlanStore } from "@/store/planStore";
 import {
   HOLDER_FIELDS,
@@ -123,18 +128,24 @@ export function TravelQuoteSubscribePhase({
     initiateCashout.isPending ||
     verifyPayment.isPending;
 
-  const emptyMember = (): PersonFormData => ({
-    title: "M",
-    first_name: "",
-    last_name: "",
-    birth_date: "",
-    email: "",
-    phone_number: "",
-    address: "",
-    city: "",
-    passport_number: "",
-    passeport_exp_date: "",
-  });
+  const emptyMember = useCallback(
+    (): PersonFormData => ({
+      title: "M",
+      first_name: "",
+      last_name: "",
+      birth_date: "",
+      email: "",
+      phone_number: "",
+      address: "",
+      city: "",
+      passport_number: "",
+      passeport_exp_date: "",
+      destination_country: tripDetails.destination_country,
+      residence_country: "",
+      nationality: "",
+    }),
+    [tripDetails.destination_country],
+  );
 
   const {
     control,
@@ -157,11 +168,12 @@ export function TravelQuoteSubscribePhase({
     const stored = readQuoteHolderFromStorage();
     if (stored) {
       reset({
+        ...emptyMember(),
         ...stored,
         groupMembers: Array.from({ length: additionalTravelerCount }, emptyMember),
       });
     }
-  }, [additionalTravelerCount, reset]);
+  }, [additionalTravelerCount, emptyMember, reset]);
 
   useEffect(() => {
     if (
@@ -260,6 +272,9 @@ export function TravelQuoteSubscribePhase({
       city: data.city,
       passport_number: data.passport_number,
       passeport_exp_date: data.passeport_exp_date,
+      destination_country: data.destination_country,
+      residence_country: data.residence_country,
+      nationality: data.nationality,
     });
     writeQuoteRecapToStorage(data);
     setRecapData(data);
@@ -268,9 +283,12 @@ export function TravelQuoteSubscribePhase({
 
   const completeSubscriptionAfterPayment = (data: SubscriberFormData) => {
     if (!hasValidOldestAge(data)) return;
+    const sanitizeCountry = (value: string) => stripDiacritics(value);
 
     const payload: SubscribePolicyInputDto = {
-      subscription_country: subscriptionCountryFromQuoteContext(quoteContext),
+      subscription_country: sanitizeCountry(
+        subscriptionCountryFromQuoteContext(quoteContext),
+      ),
       language_code: languageCodeFromQuoteContext(quoteContext),
       agent_scope: "",
       quote_code: quoteCode.trim() || undefined,
@@ -297,6 +315,9 @@ export function TravelQuoteSubscribePhase({
           address: data.address,
           passeport_exp_date: data.passeport_exp_date,
           city: data.city,
+          destination_country: sanitizeCountry(data.destination_country),
+          residence_country: sanitizeCountry(data.residence_country),
+          nationality: sanitizeCountry(data.nationality),
         },
         ...data.groupMembers.map((m) => ({
           title: m.title,
@@ -309,6 +330,9 @@ export function TravelQuoteSubscribePhase({
           address: m.address,
           passeport_exp_date: m.passeport_exp_date,
           city: m.city,
+          destination_country: sanitizeCountry(m.destination_country),
+          residence_country: sanitizeCountry(m.residence_country),
+          nationality: sanitizeCountry(m.nationality),
         })),
       ],
       consents: [],

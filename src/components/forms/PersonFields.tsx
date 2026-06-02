@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import {
   Controller,
   type Control,
@@ -11,6 +12,9 @@ import {
 } from "react-hook-form";
 
 import { validateUniquePassportNumber, type PassportUniquenessData } from "@/lib/utils";
+
+import { AUTHORIZED_COUNTRIES } from "@/lib/constants/authorized-contry";
+import { WORLD_COVERAGE_COUNTRY } from "@/lib/travel/authorized-countries";
 
 import DatePicker from "@/components/form/date-picker";
 import InputField from "@/components/form/input/InputField";
@@ -55,6 +59,17 @@ export function PersonFields<T extends PersonFieldsFormValues>({
       : (errors as FieldErrors<{ groupMembers: PersonFormData[] }>).groupMembers?.[memberIndex]?.[
           key
         ];
+
+  const residenceNationalityOptions = useMemo(() => {
+    const all = Array.from(new Set(Object.values(AUTHORIZED_COUNTRIES).flat()));
+    const withoutCoverage = all.filter(
+      (c) => c && c.trim().length > 0 && c !== WORLD_COVERAGE_COUNTRY,
+    );
+
+    return withoutCoverage
+      .sort((a, b) => a.localeCompare(b, "fr"))
+      .map((country) => ({ value: country, label: country }));
+  }, []);
 
   const fields = (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -212,6 +227,91 @@ export function PersonFields<T extends PersonFieldsFormValues>({
         />
         {fieldError("city") && (
           <p className="mt-1 text-sm text-red-500">{String(fieldError("city")?.message ?? "")}</p>
+        )}
+      </div>
+
+      <div>
+        <Label className="mb-2 font-semibold text-text-main">
+          Pays de destination
+        </Label>
+        <Controller
+          control={control}
+          name={fieldName("destination_country")}
+          render={({ field }) => (
+            <Select
+              id={fieldId("destination_country")}
+              name={field.name}
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              disabled
+              options={
+                field.value
+                  ? [{ value: field.value, label: field.value }]
+                  : []
+              }
+              error={!!fieldError("destination_country")}
+              className="border border-gray-200 py-3 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
+            />
+          )}
+        />
+      </div>
+
+      <div>
+        <Label className="mb-2 font-semibold text-text-main">
+          Pays de résidence <span className="text-red-500">*</span>
+        </Label>
+        <Controller
+          control={control}
+          name={fieldName("residence_country")}
+          rules={{ required: "Pays de résidence obligatoire" }}
+          render={({ field }) => (
+            <Select
+              id={fieldId("residence_country")}
+              name={field.name}
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              placeholder="Choisir un pays…"
+              options={residenceNationalityOptions}
+              error={!!fieldError("residence_country")}
+              className="border border-gray-200 py-3 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
+            />
+          )}
+        />
+        {fieldError("residence_country") && (
+          <p className="mt-1 text-sm text-red-500">
+            {String(fieldError("residence_country")?.message ?? "")}
+          </p>
+        )}
+      </div>
+
+      <div>
+        <Label className="mb-2 font-semibold text-text-main">
+          Nationalité <span className="text-red-500">*</span>
+        </Label>
+        <Controller
+          control={control}
+          name={fieldName("nationality")}
+          rules={{ required: "Nationalité obligatoire" }}
+          render={({ field }) => (
+            <Select
+              id={fieldId("nationality")}
+              name={field.name}
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              placeholder="Choisir un pays…"
+              options={residenceNationalityOptions}
+              error={!!fieldError("nationality")}
+              className="border border-gray-200 py-3 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
+            />
+          )}
+        />
+        {fieldError("nationality") && (
+          <p className="mt-1 text-sm text-red-500">
+            {String(fieldError("nationality")?.message ?? "")}
+          </p>
         )}
       </div>
 

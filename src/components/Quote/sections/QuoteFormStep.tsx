@@ -40,6 +40,9 @@ const emptyHolder = (): PersonFormData => ({
   city: "",
   passport_number: "",
   passeport_exp_date: "",
+  destination_country: "",
+  residence_country: "",
+  nationality: "",
 });
 
 interface QuoteFormStepProps {
@@ -121,6 +124,9 @@ export function QuoteFormStep({
       city: data.city,
       passport_number: data.passport_number,
       passeport_exp_date: data.passeport_exp_date,
+      destination_country: data.destination_country,
+      residence_country: "",
+      nationality: "",
     };
 
     if (!isQuoteHolderComplete(holder)) return;

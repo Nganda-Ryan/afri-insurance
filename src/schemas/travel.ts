@@ -32,6 +32,9 @@ export const beneficiarySchema = z.object({
   address: z.string().min(1),
   passeport_exp_date: z.string().min(1),
   city: z.string().min(1),
+  destination_country: z.string().min(1),
+  residence_country: z.string().min(1),
+  nationality: z.string().min(1),
 });
 
 const duplicatePassportMessage =

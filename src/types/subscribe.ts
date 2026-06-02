@@ -12,6 +12,9 @@ export interface PersonFormData {
   city: string;
   passport_number: string;
   passeport_exp_date: string;
+  destination_country: string;
+  residence_country: string;
+  nationality: string;
 }
 
 export interface SubscriberFormData extends PersonFormData {
@@ -29,4 +32,6 @@ export const HOLDER_FIELDS: Array<keyof Omit<SubscriberFormData, "groupMembers">
   "city",
   "passport_number",
   "passeport_exp_date",
+  "residence_country",
+  "nationality",
 ];

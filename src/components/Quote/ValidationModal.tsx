@@ -3,13 +3,14 @@
 import React from "react";
 import { CreditCardIcon, XIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import {
   languageCodeFromQuoteContext,
   subscriptionCountryFromQuoteContext,
 } from "@/lib/travel/quote-subscribe-context";
+import { stripDiacritics } from "@/lib/utils";
 import type {
   SelectedPlan,
   SubscribePolicyInputDto,
@@ -25,11 +26,9 @@ import {
   POLICY_TYPE_PET,
   POLICY_TYPE_TRAVEL,
 } from "@/lib/constants/constant";
-import DatePicker from "@/components/form/date-picker";
-import InputField from "@/components/form/input/InputField";
-import Label from "@/components/form/Label";
-import Select from "@/components/form/Select";
 import Button from "@/components/ui/button/Button";
+import { SubscribePersonFields } from "@/components/Policy/SubscribePersonFields";
+import type { PersonFormData } from "@/types/subscribe";
 
 interface ValidationModalProps {
   selectedPlan: SelectedPlan;
@@ -37,19 +36,6 @@ interface ValidationModalProps {
   travelerInfo: TravelerInfoData;
   quoteContext?: TravelQuoteContext;
   onClose: () => void;
-}
-
-interface SubscriberFormData {
-  title: "M" | "Mme";
-  first_name: string;
-  last_name: string;
-  birth_date: string;
-  email: string;
-  phone_number: string;
-  address: string;
-  city: string;
-  passport_number: string;
-  passeport_exp_date: string;
 }
 
 function policyTypeLabel(type: string): string {
@@ -84,16 +70,25 @@ export function ValidationModal({
   const {
     control,
     register,
+    getValues,
     handleSubmit,
     formState: { errors },
-  } = useForm<SubscriberFormData>({
+  } = useForm<PersonFormData>({
     mode: "onSubmit",
-    defaultValues: { title: "M" },
+    defaultValues: {
+      title: "M",
+      destination_country: tripDetails.destination_country,
+      residence_country: "",
+      nationality: "",
+    },
   });
 
-  const onSubmit = (data: SubscriberFormData) => {
+  const onSubmit = (data: PersonFormData) => {
+    const sanitizeCountry = (value: string) => stripDiacritics(value);
     const payload: SubscribePolicyInputDto = {
-      subscription_country: subscriptionCountryFromQuoteContext(quoteContext),
+      subscription_country: sanitizeCountry(
+        subscriptionCountryFromQuoteContext(quoteContext),
+      ),
       language_code: languageCodeFromQuoteContext(quoteContext),
       agent_scope: "",
       policy_holder: [
@@ -119,6 +114,9 @@ export function ValidationModal({
           address: data.address,
           passeport_exp_date: data.passeport_exp_date,
           city: data.city,
+          destination_country: sanitizeCountry(data.destination_country),
+          residence_country: sanitizeCountry(data.residence_country),
+          nationality: sanitizeCountry(data.nationality),
         },
       ],
       consents: [],
@@ -255,234 +253,14 @@ export function ValidationModal({
             <h3 className="mb-4 text-lg font-bold">
               Informations du souscripteur
             </h3>
-
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              {/* Civilité */}
-              <div>
-                <Label className="mb-2 font-semibold text-text-main">
-                  Civilité <span className="text-red-500">*</span>
-                </Label>
-                <Controller
-                  control={control}
-                  name="title"
-                  rules={{ required: "Civilité obligatoire" }}
-                  render={({ field }) => (
-                    <Select
-                      id="subscriber-title"
-                      name={field.name}
-                      value={field.value}
-                      onChange={field.onChange}
-                      onBlur={field.onBlur}
-                      options={[
-                        { value: "M", label: "M." },
-                        { value: "Mme", label: "Mme" },
-                      ]}
-                      error={!!errors.title}
-                      className="border bg-white py-3 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
-                    />
-                  )}
-                />
-                {errors.title && (
-                  <p className="mt-1 text-sm text-red-500">{errors.title.message}</p>
-                )}
-              </div>
-
-              {/* Prénom */}
-              <div>
-                <Label className="mb-2 font-semibold text-text-main">
-                  Prénom <span className="text-red-500">*</span>
-                </Label>
-                <InputField
-                  type="text"
-                  placeholder="Jean"
-                  {...register("first_name", { required: "Prénom obligatoire" })}
-                  error={!!errors.first_name}
-                  className="border bg-white dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
-                />
-                {errors.first_name && (
-                  <p className="mt-1 text-sm text-red-500">{errors.first_name.message}</p>
-                )}
-              </div>
-
-              {/* Nom */}
-              <div>
-                <Label className="mb-2 font-semibold text-text-main">
-                  Nom <span className="text-red-500">*</span>
-                </Label>
-                <InputField
-                  type="text"
-                  placeholder="Dupont"
-                  {...register("last_name", { required: "Nom obligatoire" })}
-                  error={!!errors.last_name}
-                  className="border bg-white dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
-                />
-                {errors.last_name && (
-                  <p className="mt-1 text-sm text-red-500">{errors.last_name.message}</p>
-                )}
-              </div>
-
-              {/* Date de naissance */}
-              <div>
-                <Label className="mb-2 font-semibold text-text-main">
-                  Date de naissance <span className="text-red-500">*</span>
-                </Label>
-                <Controller
-                  control={control}
-                  name="birth_date"
-                  rules={{
-                    required: "Date de naissance obligatoire",
-                    validate: (v) =>
-                      new Date(v) < new Date() || "La date doit être dans le passé",
-                  }}
-                  render={({ field }) => (
-                    <DatePicker
-                      id="subscriber-birth-date"
-                      name={field.name}
-                      value={field.value}
-                      appendToBody
-                      onChange={field.onChange}
-                      onBlur={field.onBlur}
-                      error={!!errors.birth_date}
-                      className="border bg-white dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
-                    />
-                  )}
-                />
-                {errors.birth_date && (
-                  <p className="mt-1 text-sm text-red-500">{errors.birth_date.message}</p>
-                )}
-              </div>
-
-              {/* E-mail */}
-              <div>
-                <Label className="mb-2 font-semibold text-text-main">
-                  E-mail <span className="text-red-500">*</span>
-                </Label>
-                <InputField
-                  type="email"
-                  placeholder="jean.dupont@example.com"
-                  {...register("email", {
-                    required: "E-mail obligatoire",
-                    pattern: {
-                      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                      message: "Format e-mail invalide",
-                    },
-                  })}
-                  error={!!errors.email}
-                  className="border bg-white dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
-                />
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
-                )}
-              </div>
-
-              {/* Téléphone */}
-              <div>
-                <Label className="mb-2 font-semibold text-text-main">
-                  Téléphone <span className="text-red-500">*</span>
-                </Label>
-                <InputField
-                  type="tel"
-                  placeholder="+237 6 00 00 00 00"
-                  {...register("phone_number", {
-                    required: "Téléphone obligatoire",
-                  })}
-                  error={!!errors.phone_number}
-                  className="border bg-white dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
-                />
-                {errors.phone_number && (
-                  <p className="mt-1 text-sm text-red-500">{errors.phone_number.message}</p>
-                )}
-              </div>
-
-              {/* Adresse */}
-              <div className="md:col-span-2">
-                <Label className="mb-2 font-semibold text-text-main">
-                  Adresse postale <span className="text-red-500">*</span>
-                </Label>
-                <InputField
-                  type="text"
-                  placeholder="123 rue de la Paix"
-                  {...register("address", { required: "Adresse obligatoire" })}
-                  error={!!errors.address}
-                  className="border bg-white dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
-                />
-                {errors.address && (
-                  <p className="mt-1 text-sm text-red-500">{errors.address.message}</p>
-                )}
-              </div>
-
-              {/* Ville */}
-              <div>
-                <Label className="mb-2 font-semibold text-text-main">
-                  Ville <span className="text-red-500">*</span>
-                </Label>
-                <InputField
-                  type="text"
-                  placeholder="Yaoundé"
-                  {...register("city", { required: "Ville obligatoire" })}
-                  error={!!errors.city}
-                  className="border bg-white dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
-                />
-                {errors.city && (
-                  <p className="mt-1 text-sm text-red-500">{errors.city.message}</p>
-                )}
-              </div>
-
-              {/* Numéro de passeport */}
-              <div>
-                <Label className="mb-2 font-semibold text-text-main">
-                  Numéro de passeport <span className="text-red-500">*</span>
-                </Label>
-                <InputField
-                  type="text"
-                  placeholder="AB123456"
-                  {...register("passport_number", {
-                    required: "Numéro de passeport obligatoire",
-                  })}
-                  error={!!errors.passport_number}
-                  className="border bg-white dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
-                />
-                {errors.passport_number && (
-                  <p className="mt-1 text-sm text-red-500">
-                    {errors.passport_number.message}
-                  </p>
-                )}
-              </div>
-
-              {/* Date d'expiration du passeport */}
-              <div>
-                <Label className="mb-2 font-semibold text-text-main">
-                  Expiration du passeport <span className="text-red-500">*</span>
-                </Label>
-                <Controller
-                  control={control}
-                  name="passeport_exp_date"
-                  rules={{
-                    required: "Date d'expiration obligatoire",
-                    validate: (v) =>
-                      new Date(v) > new Date() ||
-                      "Le passeport doit être valide (date future)",
-                  }}
-                  render={({ field }) => (
-                    <DatePicker
-                      id="subscriber-passport-exp-date"
-                      name={field.name}
-                      value={field.value}
-                      appendToBody
-                      onChange={field.onChange}
-                      onBlur={field.onBlur}
-                      error={!!errors.passeport_exp_date}
-                      className="border bg-white dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
-                    />
-                  )}
-                />
-                {errors.passeport_exp_date && (
-                  <p className="mt-1 text-sm text-red-500">
-                    {errors.passeport_exp_date.message}
-                  </p>
-                )}
-              </div>
-            </div>
+            <SubscribePersonFields
+              control={control}
+              register={register}
+              getValues={getValues}
+              errors={errors}
+              namePrefix=""
+              embedded
+            />
 
             <Button
               type="submit"

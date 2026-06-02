@@ -33,7 +33,8 @@ import {
   writeQuoteRecapToStorage,
 } from "@/lib/travel/quote-recap-storage";
 import type { ParsedSelectedPlan } from "@/lib/travel/quote-wizard-url";
-import { ageFromBirthDate, generatePaymentTrid, hasExpectedOldestAge } from "@/lib/utils";
+import { ageFromBirthDate, generatePaymentTrid, hasOldestAgeInRange } from "@/lib/utils";
+import { usePlanStore } from "@/store/planStore";
 import {
   HOLDER_FIELDS,
   type PersonFormData,
@@ -97,6 +98,22 @@ export function TravelQuoteSubscribePhase({
   const additionalTravelerCount =
     tripDetails.adult > 1 ? tripDetails.adult - 1 : 0;
   const hasGroup = additionalTravelerCount > 0;
+
+  // Retrouve la tranche d'âge couverte (min_age / max_age) qui correspond
+  // à l'âge déclaré lors de l'étape devis, pour la catégorie et destination choisies.
+  const matchedRange = usePlanStore((s) => {
+    const destination = s.plans
+      .find((c) => c.name === tripDetails.product_category)
+      ?.destinations.find((d) => d.destination === tripDetails.destination_area);
+    if (!destination) return null;
+    return (
+      destination.age_ranges.find(
+        (r) => expectedOldestAge >= r.min_age && expectedOldestAge < r.max_age,
+      ) ??
+      destination.age_ranges.find((r) => expectedOldestAge === r.max_age) ??
+      null
+    );
+  });
 
   const destination = tripDetails.destination_area;
 
@@ -188,21 +205,24 @@ export function TravelQuoteSubscribePhase({
   }, [holderBirthDate, groupMembers]);
 
   const ageState: "neutral" | "match" | "mismatch" = useMemo(() => {
-    if (!Number.isFinite(expectedOldestAge)) return "neutral";
+    if (!matchedRange) return "neutral";
     if (detectedOldestAge == null) return "neutral";
-    return detectedOldestAge === expectedOldestAge ? "match" : "mismatch";
-  }, [detectedOldestAge, expectedOldestAge]);
+    return detectedOldestAge >= matchedRange.min_age && detectedOldestAge <= matchedRange.max_age
+      ? "match"
+      : "mismatch";
+  }, [detectedOldestAge, matchedRange]);
 
   const ageInfoMessage = useMemo(() => {
-    if (!Number.isFinite(expectedOldestAge)) return null;
+    if (!matchedRange) return null;
+    const { min_age, max_age } = matchedRange;
     if (detectedOldestAge == null) {
-      return `Age le plus eleve attendu : ${expectedOldestAge} ans.`;
+      return `Tranche d'âge attendue : ${min_age} – ${max_age} ans.`;
     }
-    if (detectedOldestAge === expectedOldestAge) {
-      return `Verification OK : actuellement, le plus age est ${detectedOldestAge} ans (attendu : ${expectedOldestAge} ans).`;
+    if (detectedOldestAge >= min_age && detectedOldestAge <= max_age) {
+      return `Vérification OK : le plus âgé a ${detectedOldestAge} ans (tranche couverte : ${min_age} – ${max_age} ans).`;
     }
-    return `Attention : actuellement, le plus age est ${detectedOldestAge} ans, alors que l'age attendu est ${expectedOldestAge} ans.`;
-  }, [detectedOldestAge, expectedOldestAge]);
+    return `Attention : le plus âgé a ${detectedOldestAge} ans, mais la tranche couverte est ${min_age} – ${max_age} ans.`;
+  }, [detectedOldestAge, matchedRange]);
 
   const ageBannerClasses =
     ageState === "match"
@@ -217,9 +237,10 @@ export function TravelQuoteSubscribePhase({
   };
 
   const hasValidOldestAge = (data: SubscriberFormData) => {
-    if (!hasExpectedOldestAge(data, expectedOldestAge)) {
+    if (!matchedRange) return true; // Pas de tranche connue : on laisse passer
+    if (!hasOldestAgeInRange(data, matchedRange.min_age, matchedRange.max_age)) {
       toast.error(
-        `L'age du plus age doit etre ${expectedOldestAge} ans. Veuillez corriger les dates de naissance avant de continuer.`,
+        `L'âge du plus âgé doit être compris entre ${matchedRange.min_age} et ${matchedRange.max_age} ans. Veuillez corriger les dates de naissance avant de continuer.`,
       );
       return false;
     }

@@ -1,11 +1,12 @@
 "use client";
 
-import { ArrowLeftIcon } from "lucide-react";
+import React, { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import React from "react";
 
 import { useTravelPolicy } from "@/hooks/use-travel-quote-session";
-import { QuoteHero } from "@/components/Quote/layout/QuoteHero";
+import { PolicyHero } from "@/components/Quote/layout/PolicyHero";
+import { QuotePageLayout } from "@/components/Quote/layout/QuotePageLayout";
+import { QuotePortalAside } from "@/components/Quote/layout/QuotePortalAside";
 import { PolicyBeneficiaryCard } from "@/components/Policy/PolicyBeneficiaryCard";
 import { PolicyDocumentsCard } from "@/components/Policy/PolicyDocumentsCard";
 import { PolicyErrorState } from "@/components/Policy/PolicyErrorState";
@@ -21,6 +22,11 @@ const POLICY_HERO = {
   description: "Votre assurance voyage est maintenant active.",
 } as const;
 
+/**
+ * Layout partagé : Hero + grille 8/4 (contenu | récapitulatif).
+ * Aucun bouton Retour : toute tentative de navigation arrière
+ * ramène l'utilisateur à la racine "/" (étape 1, champs vidés).
+ */
 export default function Page() {
   const router = useRouter();
   const params = useParams<{ policyId: string }>();
@@ -28,12 +34,27 @@ export default function Page() {
 
   const { result, isLoading, refetch } = useTravelPolicy(policyId);
 
+  // Intercepte la navigation arrière du navigateur et redirige vers "/".
+  useEffect(() => {
+    const handlePopState = () => {
+      router.replace("/");
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [router]);
+
   if (isLoading) {
     return (
       <>
-        <QuoteHero {...POLICY_HERO} />
-        <main className="mx-auto max-w-[900px] px-4 py-8 lg:py-12">
-          <PolicyLoadingState />
+        <PolicyHero {...POLICY_HERO} />
+        <main
+          id="policy-detail"
+          className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:py-10"
+          aria-labelledby="quote-hero-title"
+        >
+          <QuotePageLayout aside={<QuotePortalAside />}>
+            <PolicyLoadingState />
+          </QuotePageLayout>
         </main>
       </>
     );
@@ -42,12 +63,18 @@ export default function Page() {
   if (!result?.ok || !result.data) {
     return (
       <>
-        <QuoteHero {...POLICY_HERO} />
-        <main className="mx-auto max-w-[900px] px-4 py-8 lg:py-12">
-          <PolicyErrorState
-            message={result?.error?.message ?? "Police introuvable."}
-            onRetry={() => void refetch()}
-          />
+        <PolicyHero {...POLICY_HERO} />
+        <main
+          id="policy-detail"
+          className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:py-10"
+          aria-labelledby="quote-hero-title"
+        >
+          <QuotePageLayout aside={<QuotePortalAside />}>
+            <PolicyErrorState
+              message={result?.error?.message ?? "Police introuvable."}
+              onRetry={() => void refetch()}
+            />
+          </QuotePageLayout>
         </main>
       </>
     );
@@ -57,25 +84,24 @@ export default function Page() {
 
   return (
     <>
-      {/* <QuoteHero {...POLICY_HERO} /> */}
-      <main className="mx-auto max-w-[900px] px-4 py-8 lg:py-12">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="mb-6 flex items-center gap-2 rounded-lg p-2 text-text-main transition-colors hover:bg-gray-100"
-        >
-          <ArrowLeftIcon className="h-5 w-5" />
-          <span className="text-sm font-medium">Retour</span>
-        </button>
-
-        <PolicySuccessBanner policyNumber={policy.policy_number} />
-        <PolicyOverviewCard policy={policy} />
-        <PolicyBeneficiaryCard beneficiaries={policy.beneficiaries} />
-        <PolicyHolderCard policyHolder={policy.policy_holder[0]} />
-        {policy.attachments.length > 0 && (
-          <PolicyDocumentsCard attachments={policy.attachments} />
-        )}
-        <PolicyFooter catalog={policy.catalog} createdAt={policy.created_at} />
+      <PolicyHero {...POLICY_HERO} />
+      <main
+        id="policy-detail"
+        className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:py-10"
+        aria-labelledby="quote-hero-title"
+      >
+        <QuotePageLayout aside={<QuotePortalAside />}>
+          <div className="space-y-4">
+            {/* <PolicySuccessBanner policyNumber={policy.policy_number} /> */}
+            <PolicyOverviewCard policy={policy} />
+            <PolicyBeneficiaryCard beneficiaries={policy.beneficiaries} />
+            <PolicyHolderCard policyHolder={policy.policy_holder[0]} />
+            {policy.attachments.length > 0 && (
+              <PolicyDocumentsCard attachments={policy.attachments} />
+            )}
+            <PolicyFooter catalog={policy.catalog} createdAt={policy.created_at} />
+          </div>
+        </QuotePageLayout>
       </main>
     </>
   );

@@ -117,6 +117,25 @@ export function hasExpectedOldestAge(
   return currentOldestAge != null && currentOldestAge === expectedOldestAge;
 }
 
+/**
+ * Vérifie que l'âge du voyageur le plus âgé (calculé à partir des dates de naissance saisies)
+ * se situe dans l'intervalle de la tranche d'âge couverte [minAge, maxAge].
+ * Retourne true si aucun âge calculable (permissif en l'absence de données).
+ */
+export function hasOldestAgeInRange(
+  data: OldestAgeValidationData | SubscriberFormData,
+  minAge: number,
+  maxAge: number,
+): boolean {
+  const ages = [
+    ageFromBirthDate(data.birth_date),
+    ...(data.groupMembers ?? []).map((m) => ageFromBirthDate(m.birth_date)),
+  ].filter((v): v is number => v != null);
+  if (ages.length === 0) return true;
+  const currentOldestAge = Math.max(...ages);
+  return currentOldestAge >= minAge && currentOldestAge <= maxAge;
+}
+
 
 export function isCacheValid(fetchedAt: number | null): boolean {
   if (fetchedAt === null) return false;

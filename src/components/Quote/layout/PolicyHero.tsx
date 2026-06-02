@@ -1,19 +1,27 @@
 "use client";
 
-interface QuoteHeroProps {
+interface PolicyHeroProps {
   badge?: string;
   title?: string;
   description?: string;
 }
 
-export function QuoteHero({
+/**
+ * Variante de QuoteHero conçue pour les pages intérieures
+ * (ex: /quote/[policyId]).
+ *
+ * Sur ces pages, `WebsiteLayoutContent` ajoute déjà `pt-16 lg:pt-20`
+ * pour compenser le header fixe — ce composant n'a donc pas besoin
+ * de grand padding supérieur et évite le double-espace visible.
+ */
+export function PolicyHero({
   badge = "100% digital",
   title = "Achetez votre assurance voyage en quelques clics",
   description = "Renseignez vos informations et recevez une proposition adaptée à votre voyage.",
-}: QuoteHeroProps) {
+}: PolicyHeroProps) {
   return (
     <section
-      className="bg-brand-primary px-4 pb-10 pt-20 sm:px-6 sm:pb-8 sm:pt-20 lg:pb-10 lg:pt-22"
+      className="-mt-16 lg:-mt-20 bg-brand-primary px-4 pb-6 pt-20 sm:px-6 sm:pb-8 sm:pt-24 lg:pb-10 lg:pt-28"
       aria-labelledby="quote-hero-title"
     >
       <div className="mx-auto max-w-7xl">

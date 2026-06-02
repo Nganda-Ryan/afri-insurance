@@ -8,6 +8,7 @@ export const AUTHORIZED_COUNTRIES = {
         "Burkina Faso",
         "Burundi",
         "Cabo Verde (Cap-Vert)",
+        "Cameroun",
         "Comores",
         "Congo (Brazzaville)",
         "Côte d'Ivoire",

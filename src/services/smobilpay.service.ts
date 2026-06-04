@@ -7,8 +7,6 @@ import type {
   S3pCollectionResponseDto,
   S3pPaymentStatusDto,
   S3pQuoteDto,
-  S3pSubscriptionDto,
-  S3pValidateDestinationDto,
 } from "@/types/smobilpay";
 
 function normalizeVerifyTxPayload(data: unknown): S3pPaymentStatusDto[] {
@@ -16,24 +14,6 @@ function normalizeVerifyTxPayload(data: unknown): S3pPaymentStatusDto[] {
   if (Array.isArray(data)) return data as S3pPaymentStatusDto[];
   if (typeof data === "object") return [data as S3pPaymentStatusDto];
   return [];
-}
-
-/** GET /subscription — recupere le payItemId d'un service de souscription. */
-export async function getS3pSubscription(params: {
-  merchant: string;
-  serviceid: string;
-  serviceNumber?: string;
-  customerNumber?: string;
-}): Promise<S3pSubscriptionDto[]> {
-  const client = getS3pClient();
-  try {
-    const res = await client.get<S3pSubscriptionDto[]>("/subscription", {
-      params,
-    });
-    return res.data;
-  } catch (e) {
-    throw toError(e);
-  }
 }
 
 /** GET /cashout — liste des services cash-out (OM, MoMo, …). */
@@ -47,26 +27,10 @@ export async function getS3pCashout(): Promise<S3pCashoutLineDto[]> {
   }
 }
 
-/** GET /validate — vérifie que la destination existe pour un service. */
-export async function getS3pValidateCashoutDestination(params: {
-  destination: string;
-  serviceId: string;
-}): Promise<S3pValidateDestinationDto> {
-  const client = getS3pClient();
-  try {
-    const res = await client.get<S3pValidateDestinationDto>("/validate", {
-      params: {
-        destination: params.destination,
-        serviceId: params.serviceId,
-      },
-    });
-    return res.data;
-  } catch (e) {
-    throw toError(e);
-  }
-}
-
-/** POST /quotestd — demande un devis pour un payItem. */
+/**
+ * POST /quotestd — demande un devis pour un payItem.
+ * `payItemId` provient exclusivement de GET /cashout (ligne filtrée par MOMO_SERVICE_ID / OM_SERVICE_ID).
+ */
 export async function postS3pQuote(body: {
   amount: number;
   payItemId: string;
@@ -119,9 +83,7 @@ export async function getS3pVerifyTx(params: {
 }
 
 export const smobilpayService = {
-  getSubscription: getS3pSubscription,
   getCashout: getS3pCashout,
-  validateCashoutDestination: getS3pValidateCashoutDestination,
   requestQuote: postS3pQuote,
   collect: postS3pCollect,
   verifyTx: getS3pVerifyTx,

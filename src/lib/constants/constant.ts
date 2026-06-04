@@ -70,6 +70,7 @@ export const URL_PARAM_PLAN_NAME = "pln";
 export const URL_PARAM_PLAN_PRICE = "prc";
 export const URL_PARAM_PRODUCT_INDEX = "pidx";
 export const URL_PARAM_QUOTE_CODE = "qcd";
+export const URL_PARAM_QUOTE_ID = "qid";
 export const URL_PARAM_CURRENCY = "cur";
 export const URL_PARAM_COUNTRY = "cty";
 export const URL_PARAM_LANGUAGE = "lng";

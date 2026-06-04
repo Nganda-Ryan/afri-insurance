@@ -63,7 +63,7 @@ export function TravelerAgeFields({
   }, [oldestTravelerAge, ageRanges]);
 
   return (
-    <div className="space-y-6 border-t border-gray-100 pt-6">
+    <div className="space-y-6 border-gray-100 pt-6">
       <h3 className="text-lg font-semibold">
         Voyageur le plus âgé
       </h3>

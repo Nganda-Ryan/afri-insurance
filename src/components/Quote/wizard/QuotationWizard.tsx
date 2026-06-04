@@ -85,6 +85,7 @@ export function QuotationWizard({ onWizardStateChange }: QuotationWizardProps) {
     plan: SelectedPlan,
     ctx?: TravelQuoteContext,
     quoteCode?: string,
+    quoteId?: number,
   ) => {
     if (!tripDetails || !travelerInfo) return;
     clearQuoteRecapStorage();
@@ -95,6 +96,7 @@ export function QuotationWizard({ onWizardStateChange }: QuotationWizardProps) {
       selection: {
         plan,
         quoteCode: quoteCode ?? "",
+        quoteId,
         quoteContext: ctx ?? {},
       },
     });

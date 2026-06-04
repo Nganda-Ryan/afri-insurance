@@ -24,7 +24,7 @@ import {
 } from "@/schemas/travel";
 import { travelService } from "@/services/travel.service";
 import {
-  extractQuoteCodeAtIndex,
+  extractSelectedTravelQuoteProduct,
   extractTravelQuoteContext,
   extractTravelQuoteProductSummaries,
 } from "@/lib/travel/evo-quote-response";
@@ -35,6 +35,7 @@ import type {
   IGetQuoteResponseDto,
   IPolicyData,
   ISubscribePolicyRequestBody,
+  SelectTravelQuoteProductActionData,
   SubscribePolicyInputDto,
   TravelQuoteActionData,
 } from "@/types/travel";
@@ -75,7 +76,7 @@ export async function requestTravelQuoteAction(
 
 export async function selectTravelQuoteProductAction(
   productIndex: number,
-): Promise<ActionResult<{ quoteCode: string }>> {
+): Promise<ActionResult<SelectTravelQuoteProductActionData>> {
   if (!Number.isInteger(productIndex) || productIndex < 0) {
     return actionFail("INVALID_PRODUCT_INDEX", "Index de produit invalide.");
   }
@@ -97,16 +98,24 @@ export async function selectTravelQuoteProductAction(
     );
   }
 
-  const quoteCode = extractQuoteCodeAtIndex(raw, productIndex);
-  if (!quoteCode) {
+  const selected = extractSelectedTravelQuoteProduct(raw, productIndex);
+  if (!selected) {
     return actionFail(
       "QUOTE_CODE_NOT_FOUND",
       "Produit de devis introuvable pour cet index.",
     );
   }
 
+  const quoteCode = selected.products[0]?.quote_code;
+  if (!quoteCode) {
+    return actionFail(
+      "QUOTE_CODE_NOT_FOUND",
+      "Code de devis manquant pour ce produit.",
+    );
+  }
+
   cookieStore.set(EVO_QUOTE_CODE_COOKIE, quoteCode, cookieBase);
-  return actionOk({ quoteCode });
+  return actionOk(selected);
 }
 
 export async function subscribeTravelPolicyAction(

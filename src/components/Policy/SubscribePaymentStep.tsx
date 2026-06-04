@@ -1,14 +1,17 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import InputField from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import Select from "@/components/form/Select";
+import { getPaymentInitiatedMessage } from "@/lib/errorCode";
 import { QuoteStepNavigation } from "@/components/Quote/layout/QuoteStepNavigation";
 import Button from "@/components/ui/button/Button";
 import type { S3pCashoutCollectResult } from "@/types/smobilpay";
 
 interface PaymentStepProps {
-  paymentTrid: string;
+  quoteId: string;
   walletPhone: string;
   payChannel: "" | "om" | "momo";
   canInitierPaiement: boolean;
@@ -18,6 +21,7 @@ interface PaymentStepProps {
   subscribePending: boolean;
   collectResult: S3pCashoutCollectResult | null;
   paymentInitFeedback: { tone: "success" | "error"; message: string } | null;
+  initiateCooldownSec: number;
   onWalletPhoneChange: (value: string) => void;
   onPayChannelChange: (value: "" | "om" | "momo") => void;
   onBack: () => void;
@@ -25,8 +29,10 @@ interface PaymentStepProps {
   onVerifyPayment: () => void;
 }
 
+const VERIFY_PAYMENT_COOLDOWN_SEC = 10;
+
 export function SubscribePaymentStep({
-  paymentTrid,
+  quoteId,
   walletPhone,
   payChannel,
   canInitierPaiement,
@@ -36,19 +42,39 @@ export function SubscribePaymentStep({
   subscribePending,
   collectResult,
   paymentInitFeedback,
+  initiateCooldownSec,
   onWalletPhoneChange,
   onPayChannelChange,
   onBack,
   onInitiatePayment,
   onVerifyPayment,
 }: PaymentStepProps) {
+  const [verifyCooldownSec, setVerifyCooldownSec] = useState(0);
+
+  useEffect(() => {
+    if (verifyCooldownSec <= 0) return;
+    const timer = window.setTimeout(() => {
+      setVerifyCooldownSec((prev) => Math.max(0, prev - 1));
+    }, 1000);
+    return () => window.clearTimeout(timer);
+  }, [verifyCooldownSec]);
+
+  const verifyBlocked =
+    verifyPending || subscribePending || verifyCooldownSec > 0;
+
+  const handleVerifyPayment = () => {
+    if (verifyBlocked) return;
+    setVerifyCooldownSec(VERIFY_PAYMENT_COOLDOWN_SEC);
+    onVerifyPayment();
+  };
+
   return (
     <div className="space-y-4">
       <div className="space-y-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
         <h2 className="text-xl font-bold text-brand-secondary">Paiement mobile</h2>
         <p className="text-sm text-text-main text-opacity-90">
           Renseignez le numéro du compte à débiter et le réseau. Référence de transaction :{" "}
-          <span className="font-mono text-xs">{paymentTrid}</span>
+          <span className="font-mono text-xs">{quoteId}</span>
         </p>
 
         <div className="space-y-4">
@@ -96,17 +122,24 @@ export function SubscribePaymentStep({
         {collectResult ? (
           <div className="rounded-lg border border-border bg-muted/30 p-4">
             <p className="mb-3 text-sm text-text-main">
-              Paiement initié. Après validation sur votre téléphone, vérifiez le statut ci-dessous.
+              {getPaymentInitiatedMessage(payChannel)}
             </p>
-            <Button
-              type="button"
-              variant="primary"
-              onClick={onVerifyPayment}
-              disabled={verifyPending || subscribePending}
-              className="w-full sm:w-auto"
-            >
-              {verifyPending ? "Vérification…" : "Vérifier le statut du paiement"}
-            </Button>
+            <div className="flex flex-wrap items-center gap-3">
+              <Button
+                type="button"
+                variant="primary"
+                onClick={handleVerifyPayment}
+                disabled={verifyBlocked}
+                className="w-full sm:w-auto"
+              >
+                {verifyPending ? "Vérification…" : "Vérifier le statut du paiement"}
+              </Button>
+              {verifyCooldownSec > 0 ? (
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  {verifyCooldownSec}s
+                </span>
+              ) : null}
+            </div>
           </div>
         ) : null}
       </div>
@@ -114,9 +147,9 @@ export function SubscribePaymentStep({
       <QuoteStepNavigation
         onPrevious={onBack}
         onNext={onInitiatePayment}
-        nextLabel="Initier le paiement"
-        showNext={collectResult == null}
-        nextDisabled={!canInitierPaiement || initiatePending || isSubmitting}
+        nextLabel={initiateCooldownSec > 0 ? `Réessayer dans ${initiateCooldownSec}s` : "Initier le paiement"}
+        showNext={true}
+        nextDisabled={!canInitierPaiement || initiatePending || isSubmitting || initiateCooldownSec > 0}
         previousDisabled={initiatePending || verifyPending}
         isSubmitting={initiatePending || isSubmitting}
       />

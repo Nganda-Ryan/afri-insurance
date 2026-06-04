@@ -30,6 +30,7 @@ interface QuoteSummaryProps {
     plan: SelectedPlan,
     quoteContext: TravelQuoteContext | undefined,
     quoteCode: string,
+    quoteId: number,
   ) => void;
   onBack: () => void;
 }
@@ -136,9 +137,15 @@ export function QuoteSummary({
             toast.error(res.error?.message ?? "Sélection impossible.");
             return;
         }
-        const quoteCode = (res.data as { quoteCode?: string } | null)?.quoteCode;
+        const selectedProduct = res.data.products[0];
+        const quoteCode = selectedProduct?.quote_code;
+        const quoteId = selectedProduct?.quote_id;
         if (!quoteCode) {
           toast.error("Code de devis manquant. Relancez une cotation.");
+          return;
+        }
+        if (quoteId == null || !Number.isInteger(quoteId) || quoteId <= 0) {
+          toast.error("Identifiant de devis manquant. Relancez une cotation.");
           return;
         }
         onPlanSelect(
@@ -151,6 +158,7 @@ export function QuoteSummary({
             },
             quoteContext,
             quoteCode,
+            quoteId,
         );
     };
 

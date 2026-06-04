@@ -1,4 +1,6 @@
 import type {
+  IGetQuoteResponseDto,
+  SelectTravelQuoteProductActionData,
   TravelQuoteContext,
   TravelQuoteGuaranteeSummary,
   TravelQuoteProductSummary,
@@ -189,4 +191,22 @@ export function extractQuoteCodeAtIndex(
   const p = products[productIndex];
   const code = p?.quote_code;
   return typeof code === "string" && code.length > 0 ? code : null;
+}
+
+/** Extrait le produit sélectionné avec le contexte et l'expiration du devis en cache. */
+export function extractSelectedTravelQuoteProduct(
+  data: IGetQuoteResponseDto,
+  productIndex: number,
+): SelectTravelQuoteProductActionData | null {
+  const product = data.products[productIndex];
+  if (!product) return null;
+
+  const quoteCode = product.quote_code;
+  if (typeof quoteCode !== "string" || !quoteCode.length) return null;
+
+  return {
+    context: data.context,
+    quote_expire_at: data.quote_expire_at,
+    products: [product],
+  };
 }

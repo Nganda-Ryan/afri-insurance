@@ -1,18 +1,16 @@
 import { z } from "zod";
 
-export const s3pInitiatePaymentInputSchema = z.object({
-  policyId: z.string().min(1),
-  amount: z.number().positive(),
-  customerPhonenumber: z
+import {
+  isValidCameroonPhone,
+  normalizeCameroonPhone,
+} from "@/lib/smobilpay/phone";
+
+const cameroonPhoneField = (invalidMessage: string) =>
+  z
     .string()
-    .min(8, "Numero de telephone trop court")
-    .max(15, "Numero de telephone trop long")
-    .regex(/^[0-9]+$/, "Numero de telephone invalide (chiffres uniquement)"),
-  customerEmailaddress: z.string().email(),
-  customerName: z.string().min(1),
-  customerAddress: z.string().optional(),
-  trid: z.string().optional(),
-});
+    .min(8, invalidMessage)
+    .transform(normalizeCameroonPhone)
+    .refine(isValidCameroonPhone, { message: invalidMessage });
 
 export const s3pCollectionInputSchema = z.object({
   quoteId: z.string().min(1),
@@ -36,8 +34,8 @@ export const s3pVerifyInputSchema = z.object({
 export const s3pCashoutCollectInputSchema = z.object({
   amount: z.number().positive(),
   channel: z.enum(["om", "momo"]),
-  walletDestination: z.string().min(8, "Numéro de paiement trop court"),
-  customerPhonenumber: z.string().min(8, "Téléphone souscripteur invalide"),
+  paymentPhone: cameroonPhoneField("Numéro de paiement invalide."),
+  subscriberPhone: cameroonPhoneField("Téléphone souscripteur invalide."),
   customerEmailaddress: z.string().email(),
   customerName: z.string().min(1),
   customerAddress: z.string().optional(),

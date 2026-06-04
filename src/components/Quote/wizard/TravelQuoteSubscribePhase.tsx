@@ -18,6 +18,8 @@ import {
   useSelectTravelQuoteProduct,
   useSubscribeTravelPolicy,
 } from "@/hooks/use-travel-quote-session";
+import { getPaymentInitiatedMessage, getS3pErrorMessage } from "@/lib/errorCode";
+import { normalizeCameroonPhone } from "@/lib/smobilpay/phone";
 import { TRAVEL_QUOTE_FLOW_STEP } from "@/lib/constants/quote-flow";
 import { POLICY_TYPE_TRAVEL } from "@/lib/constants/constant";
 import {
@@ -35,7 +37,6 @@ import {
 import type { ParsedSelectedPlan } from "@/lib/travel/quote-wizard-url";
 import {
   ageFromBirthDate,
-  generatePaymentTrid,
   hasOldestAgeInRange,
   stripDiacritics,
 } from "@/lib/utils";
@@ -88,7 +89,6 @@ export function TravelQuoteSubscribePhase({
   const [recapData, setRecapData] = useState<SubscriberFormData | null>(null);
   const [walletPhone, setWalletPhone] = useState("");
   const [payChannel, setPayChannel] = useState<"" | "om" | "momo">("");
-  const [paymentTrid, setPaymentTrid] = useState<string | null>(null);
   const [collectResult, setCollectResult] = useState<S3pCashoutCollectResult | null>(
     null,
   );
@@ -97,8 +97,21 @@ export function TravelQuoteSubscribePhase({
     message: string;
   } | null>(null);
   const [detailsSubStep, setDetailsSubStep] = useState<Step>(1);
+  const [initiateCooldownSec, setInitiateCooldownSec] = useState(0);
 
-  const { plan, quoteCode, quoteContext } = selection;
+  useEffect(() => {
+    if (initiateCooldownSec <= 0) return;
+    const timer = window.setTimeout(() => {
+      setInitiateCooldownSec((prev) => Math.max(0, prev - 1));
+    }, 1000);
+    return () => window.clearTimeout(timer);
+  }, [initiateCooldownSec]);
+
+  const { plan, quoteCode, quoteContext, quoteId: urlQuoteId } = selection;
+  const quoteIdRef =
+    urlQuoteId != null && Number.isInteger(urlQuoteId) && urlQuoteId > 0
+      ? String(urlQuoteId)
+      : null;
   const expectedOldestAge = travelerInfo.oldest_traveler_age;
   const additionalTravelerCount =
     tripDetails.adult > 1 ? tripDetails.adult - 1 : 0;
@@ -183,11 +196,6 @@ export function TravelQuoteSubscribePhase({
       setRecapData(readQuoteRecapFromStorage());
     }
   }, [flowStep]);
-
-  useEffect(() => {
-    if (flowStep !== TRAVEL_QUOTE_FLOW_STEP.PAYMENT) return;
-    if (!paymentTrid) setPaymentTrid(generatePaymentTrid());
-  }, [flowStep, paymentTrid]);
 
   useEffect(() => {
     const idx = selection.plan.product_index;
@@ -399,17 +407,19 @@ export function TravelQuoteSubscribePhase({
     (payChannel === "om" || payChannel === "momo");
 
   const handleInitierPaiement = () => {
-    if (!recapData || !paymentTrid || !canInitierPaiement) return;
+    if (!recapData || !quoteIdRef || !canInitierPaiement) return;
+    if (payChannel !== "om" && payChannel !== "momo") return;
+
     initiateCashout.mutate(
       {
         amount: plan.price,
         channel: payChannel,
-        walletDestination: walletPhone,
-        customerPhonenumber: recapData.phone_number,
+        paymentPhone: normalizeCameroonPhone(walletPhone),
+        subscriberPhone: normalizeCameroonPhone(recapData.phone_number),
         customerEmailaddress: recapData.email,
         customerName: `${recapData.first_name} ${recapData.last_name}`.trim(),
         customerAddress: `${recapData.address}, ${recapData.city}`,
-        trid: paymentTrid,
+        trid: quoteIdRef,
       },
       {
         onSuccess: (res) => {
@@ -423,16 +433,16 @@ export function TravelQuoteSubscribePhase({
           setCollectResult(res.data);
           setPaymentInitFeedback({
             tone: "success",
-            message:
-              "Paiement initié. Suivez les instructions sur votre téléphone puis vérifiez le statut.",
+            message: getPaymentInitiatedMessage(payChannel),
           });
+          setInitiateCooldownSec(120);
         },
       },
     );
   };
 
   const handleVerifierStatutPaiement = () => {
-    const trid = collectResult?.trid ?? paymentTrid;
+    const trid = collectResult?.trid ?? quoteIdRef;
     if (!trid || !recapData) {
       toast.error("Référence de transaction manquante.");
       return;
@@ -442,19 +452,43 @@ export function TravelQuoteSubscribePhase({
       {
         onSuccess: (res) => {
           if (!res.ok) {
-            toast.error(res.error?.message ?? "Vérification impossible.");
+            toast.error(
+              getS3pErrorMessage(
+                res.error?.code,
+                res.error?.message ?? "Vérification impossible.",
+              ),
+            );
             return;
           }
-          const st = res.data?.status;
-          if (st === "SUCCESS" || st === "DEBITED" || st === "ERRORED") {
+          if (!res.data) {
+            toast.message("Aucune transaction trouvée pour le moment.");
+            return;
+          }
+          const { status, errorCode } = res.data;
+          if (errorCode != null && errorCode !== 0) {
+            toast.error(getS3pErrorMessage(errorCode));
+            return;
+          }
+          if (status === "SUCCESS" || status === "DEBITED") {
             completeSubscriptionAfterPayment(recapData);
             return;
           }
-          if (st) {
-            toast.message(`Statut du paiement : ${st}`);
-          } else {
-            toast.message("Aucune transaction trouvée pour le moment.");
+          if (
+            status === "ERRORED" ||
+            status === "REVERSED" ||
+            status === "ERROREDREFUNDED"
+          ) {
+            toast.error(
+              getS3pErrorMessage(
+                errorCode,
+                `Paiement : statut « ${status} ».`,
+              ),
+            );
+            return;
           }
+          toast.message(
+            "Paiement en cours de traitement. Réessayez dans quelques instants.",
+          );
         },
       },
     );
@@ -548,10 +582,10 @@ export function TravelQuoteSubscribePhase({
     );
   }
 
-  if (flowStep === TRAVEL_QUOTE_FLOW_STEP.PAYMENT && recapData && paymentTrid) {
+  if (flowStep === TRAVEL_QUOTE_FLOW_STEP.PAYMENT && recapData && quoteIdRef) {
     return (
       <SubscribePaymentStep
-        paymentTrid={paymentTrid}
+        quoteId={quoteIdRef}
         walletPhone={walletPhone}
         payChannel={payChannel}
         canInitierPaiement={canInitierPaiement}
@@ -561,7 +595,10 @@ export function TravelQuoteSubscribePhase({
         subscribePending={subscribe.isPending}
         collectResult={collectResult}
         paymentInitFeedback={paymentInitFeedback}
-        onWalletPhoneChange={setWalletPhone}
+        initiateCooldownSec={initiateCooldownSec}
+        onWalletPhoneChange={(value) =>
+          setWalletPhone(normalizeCameroonPhone(value))
+        }
         onPayChannelChange={setPayChannel}
         onBack={onBack}
         onInitiatePayment={() => void handleInitierPaiement()}

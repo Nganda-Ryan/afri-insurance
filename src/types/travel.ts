@@ -150,6 +150,12 @@ export type TravelQuoteActionData = {
   quoteContext: TravelQuoteContext | undefined;
 };
 
+/** Données métier renvoyées par `selectTravelQuoteProductAction` en cas de succès. */
+export type SelectTravelQuoteProductActionData = Pick<
+  IGetQuoteResponseDto,
+  "context" | "quote_expire_at" | "products"
+>;
+
 /**
  * Offre devis affichée (agrégat à partir de `TravelQuoteProductSummary` + contexte).
  * `guarantees` : uniquement les libellés issus de l’API ; vide si l’API n’en renvoie pas.

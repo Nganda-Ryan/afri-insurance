@@ -3,26 +3,8 @@ import type { z } from "zod";
 import type {
   s3pCashoutCollectInputSchema,
   s3pCollectionInputSchema,
-  s3pInitiatePaymentInputSchema,
   s3pVerifyInputSchema,
 } from "@/schemas/smobilpay";
-
-export interface S3pSubscriptionDto {
-  payItemId: string;
-  serviceNumber: string;
-  serviceid: string | number;
-  merchant: string;
-  amountType: "FIXED" | "CUSTOM" | "PARTIAL" | "OVERPAY";
-  name: string;
-  localCur: string;
-  amountLocalCur: number;
-  customerReference?: string;
-  customerName?: string;
-  customerNumber?: string;
-  startDate?: string;
-  dueDate?: string;
-  endDate?: string;
-}
 
 export interface S3pServiceDto {
   serviceid: number;
@@ -68,13 +50,6 @@ export interface S3pCashoutLineDto {
   optNmb?: string | null;
 }
 
-/** Réponse GET /validate?destination=&serviceId=. */
-export interface S3pValidateDestinationDto {
-  destination: string;
-  status: string;
-  name: string | null;
-}
-
 export type S3pCollectionStatus =
   | "REVERSED"
   | "PENDING"
@@ -110,28 +85,35 @@ export type S3pPaymentStatusEnum =
   | "ERROREDREFUNDED"
   | "SUCCESS";
 
-export interface S3pPaymentStatusDto {
-  ptn?: string;
-  serviceid?: string;
-  merchant?: string;
-  timestamp: string;
-  receiptNumber?: string;
-  veriCode?: string;
-  clearingDate?: string | null;
-  trid?: string;
-  priceLocalCur?: number | string;
-  priceSystemCur?: number | string;
-  localCur?: string;
-  systemCur?: string;
-  pin?: string | null;
-  status: S3pPaymentStatusEnum;
-  payItemId?: string;
-  payItemDescr?: string | null;
-  errorCode?: number;
-  tag?: string | null;
+/** Bloc commission renvoyé par GET /verifytx. */
+export interface S3pPaymentCommissionDto {
+  earnings: number;
+  currency: string;
 }
 
-export type S3pInitiatePaymentInput = z.infer<typeof s3pInitiatePaymentInputSchema>;
+/** Réponse GET /verifytx (un élément du tableau). */
+export interface S3pPaymentStatusDto {
+  ptn: string;
+  serviceid: string;
+  merchant: string;
+  timestamp: string;
+  receiptNumber: string;
+  veriCode: string;
+  clearingDate: string | null;
+  trid: string;
+  priceLocalCur: number | string;
+  priceSystemCur: number | string;
+  localCur: string;
+  systemCur: string;
+  pin: string | null;
+  tag: string | null;
+  status: S3pPaymentStatusEnum;
+  payItemDescr: string | null;
+  payItemId: string;
+  errorCode?: number;
+  commission?: S3pPaymentCommissionDto;
+}
+
 export type S3pVerifyInput = z.infer<typeof s3pVerifyInputSchema>;
 export type S3pCollectionInput = z.infer<typeof s3pCollectionInputSchema>;
 export type S3pCashoutCollectInput = z.infer<typeof s3pCashoutCollectInputSchema>;

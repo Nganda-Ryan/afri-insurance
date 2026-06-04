@@ -4,7 +4,6 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 
 import {
   initiateCashoutCollectionAction,
-  initiateTravelPolicyPaymentAction,
   verifyTravelPolicyPaymentAction,
 } from "@/actions/smobilpay.actions";
 import { actionFail } from "@/lib/http/action-result";
@@ -12,17 +11,9 @@ import { toError } from "@/lib/http/errors";
 import type { ActionResult } from "@/types/action-result";
 import type {
   S3pCashoutCollectInput,
-  S3pInitiatePaymentInput,
   S3pPaymentStatusDto,
   S3pVerifyInput,
 } from "@/types/smobilpay";
-
-export function useInitiateTravelPayment() {
-  return useMutation({
-    mutationFn: (payload: S3pInitiatePaymentInput) =>
-      initiateTravelPolicyPaymentAction(payload),
-  });
-}
 
 export function useInitiateCashoutCollection() {
   return useMutation({

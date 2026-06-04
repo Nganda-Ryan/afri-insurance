@@ -26,6 +26,7 @@ import {
   URL_PARAM_PRODUCT,
   URL_PARAM_PRODUCT_INDEX,
   URL_PARAM_QUOTE_CODE,
+  URL_PARAM_QUOTE_ID,
   URL_PARAM_RETURN,
   URL_PARAM_STEP,
 } from "@/lib/constants/constant";
@@ -50,6 +51,7 @@ export type QuoteWizardStepIndex = 0 | 1 | 2 | 3 | 4;
 export interface ParsedSelectedPlan {
   plan: SelectedPlan;
   quoteCode: string;
+  quoteId?: number;
   quoteContext: TravelQuoteContext;
 }
 
@@ -173,6 +175,14 @@ export function parseSelectedPlanFromSearchParams(
   if (!planName || !Number.isFinite(planPrice) || planPrice <= 0) return null;
   if (!Number.isInteger(productIndex) || productIndex < 0) return null;
 
+  const quoteIdRaw = sp.get(URL_PARAM_QUOTE_ID);
+  const quoteIdParsed =
+    quoteIdRaw != null ? Number.parseInt(quoteIdRaw, 10) : Number.NaN;
+  const quoteId =
+    Number.isInteger(quoteIdParsed) && quoteIdParsed > 0
+      ? quoteIdParsed
+      : undefined;
+
   return {
     plan: {
       name: planName,
@@ -182,6 +192,7 @@ export function parseSelectedPlanFromSearchParams(
       source: "api",
     },
     quoteCode: sp.get(URL_PARAM_QUOTE_CODE)?.trim() ?? "",
+    quoteId,
     quoteContext: {
       currency: sp.get(URL_PARAM_CURRENCY) ?? undefined,
       country: sp.get(URL_PARAM_COUNTRY) ?? undefined,
@@ -246,6 +257,13 @@ function appendPlanToSearchParams(
   if (selection.quoteCode.trim()) {
     sp.set(URL_PARAM_QUOTE_CODE, selection.quoteCode);
   }
+  if (
+    selection.quoteId != null &&
+    Number.isInteger(selection.quoteId) &&
+    selection.quoteId > 0
+  ) {
+    sp.set(URL_PARAM_QUOTE_ID, String(selection.quoteId));
+  }
   if (selection.quoteContext.currency?.trim()) {
     sp.set(URL_PARAM_CURRENCY, selection.quoteContext.currency);
   }
@@ -304,6 +322,8 @@ export function migrateLegacySubscribeParams(sp: URLSearchParams): URLSearchPara
     ["planPrice", URL_PARAM_PLAN_PRICE],
     ["productIndex", URL_PARAM_PRODUCT_INDEX],
     ["quoteCode", URL_PARAM_QUOTE_CODE],
+    ["quoteId", URL_PARAM_QUOTE_ID],
+    ["quote_id", URL_PARAM_QUOTE_ID],
     ["currency", URL_PARAM_CURRENCY],
     ["country", URL_PARAM_COUNTRY],
     ["language", URL_PARAM_LANGUAGE],

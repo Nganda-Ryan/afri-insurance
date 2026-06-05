@@ -99,7 +99,7 @@ export function TravelQuoteSubscribePhase({
   const [detailsSubStep, setDetailsSubStep] = useState<Step>(1);
   const [initiateCooldownSec, setInitiateCooldownSec] = useState(0);
 
-  const INITIATE_PAYMENT_COOLDOWN_SEC = 120;
+  const INITIATE_PAYMENT_COOLDOWN_SEC = 30;
 
   useEffect(() => {
     if (initiateCooldownSec <= 0) return;

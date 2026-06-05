@@ -22,6 +22,8 @@ interface PaymentStepProps {
   collectResult: S3pCashoutCollectResult | null;
   paymentInitFeedback: { tone: "success" | "error"; message: string } | null;
   initiateCooldownSec: number;
+  pollingActive: boolean;
+  showVerifyButton: boolean;
   onWalletPhoneChange: (value: string) => void;
   onPayChannelChange: (value: "" | "om" | "momo") => void;
   onBack: () => void;
@@ -43,6 +45,8 @@ export function SubscribePaymentStep({
   collectResult,
   paymentInitFeedback,
   initiateCooldownSec,
+  pollingActive,
+  showVerifyButton,
   onWalletPhoneChange,
   onPayChannelChange,
   onBack,
@@ -62,10 +66,10 @@ export function SubscribePaymentStep({
   const verifyBlocked =
     verifyPending || subscribePending || verifyCooldownSec > 0;
 
-  /** Verrouillage formulaire uniquement pendant l'appel ou le délai avant réessai. */
-  const paymentFormLocked = initiatePending || initiateCooldownSec > 0;
+  /** Verrouillage formulaire pendant l'appel d'initiation ou tant que le polling est actif. */
+  const paymentFormLocked = initiatePending || pollingActive;
   const canRetryInitiate =
-    canInitierPaiement && !initiatePending && !isSubmitting && initiateCooldownSec <= 0;
+    canInitierPaiement && !initiatePending && !isSubmitting && !pollingActive && initiateCooldownSec <= 0;
 
   const handleVerifyPayment = () => {
     if (verifyBlocked) return;
@@ -129,22 +133,24 @@ export function SubscribePaymentStep({
             <p className="mb-3 text-sm text-text-main">
               {getPaymentInitiatedMessage(payChannel)}
             </p>
-            <div className="flex flex-wrap items-center gap-3">
-              <Button
-                type="button"
-                variant="primary"
-                onClick={handleVerifyPayment}
-                disabled={verifyBlocked}
-                className="w-full sm:w-auto"
-              >
-                {verifyPending ? "Vérification…" : "Vérifier le statut du paiement"}
-              </Button>
-              {verifyCooldownSec > 0 ? (
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  {verifyCooldownSec}s
-                </span>
-              ) : null}
-            </div>
+            {showVerifyButton && (
+              <div className="flex flex-wrap items-center gap-3">
+                <Button
+                  type="button"
+                  variant="primary"
+                  onClick={handleVerifyPayment}
+                  disabled={verifyBlocked}
+                  className="w-full sm:w-auto"
+                >
+                  {verifyPending ? "Vérification…" : "Vérifier le statut du paiement"}
+                </Button>
+                {verifyCooldownSec > 0 ? (
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    {verifyCooldownSec}s
+                  </span>
+                ) : null}
+              </div>
+            )}
           </div>
         ) : null}
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -12,6 +12,7 @@ import { SubscribePersonFields } from "@/components/Policy/SubscribePersonFields
 import { SubscribeRecapStep } from "@/components/Policy/SubscribeRecapStep";
 import {
   useInitiateCashoutCollection,
+  usePaymentStatus,
   useVerifyTravelPayment,
 } from "@/hooks/use-smobilpay";
 import {
@@ -98,8 +99,26 @@ export function TravelQuoteSubscribePhase({
   } | null>(null);
   const [detailsSubStep, setDetailsSubStep] = useState<Step>(1);
   const [initiateCooldownSec, setInitiateCooldownSec] = useState(0);
+  const [pollingEnabled, setPollingEnabled] = useState(false);
+  const [verifyButtonVisible, setVerifyButtonVisible] = useState(false);
+  const lastKnownStatusRef = useRef<string | null>(null);
+  const pollingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const verifyVisibleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const INITIATE_PAYMENT_COOLDOWN_SEC = 120;
+  const INITIATE_PAYMENT_COOLDOWN_SEC = 60;
+
+  const { plan, quoteCode, quoteContext, quoteId: urlQuoteId } = selection;
+  const quoteIdRef =
+    urlQuoteId != null && Number.isInteger(urlQuoteId) && urlQuoteId > 0
+      ? String(urlQuoteId)
+      : null;
+
+  const { status: polledStatus } = usePaymentStatus({
+    ptn: collectResult?.ptn ?? null,
+    trid: collectResult?.trid ?? quoteIdRef,
+    enabled: pollingEnabled,
+    intervalMs: 5000,
+  });
 
   useEffect(() => {
     if (initiateCooldownSec <= 0) return;
@@ -109,11 +128,44 @@ export function TravelQuoteSubscribePhase({
     return () => window.clearTimeout(timer);
   }, [initiateCooldownSec]);
 
-  const { plan, quoteCode, quoteContext, quoteId: urlQuoteId } = selection;
-  const quoteIdRef =
-    urlQuoteId != null && Number.isInteger(urlQuoteId) && urlQuoteId > 0
-      ? String(urlQuoteId)
-      : null;
+  useEffect(() => {
+    if (!pollingEnabled || polledStatus == null) return;
+    if (polledStatus === lastKnownStatusRef.current) return;
+    lastKnownStatusRef.current = polledStatus;
+
+    if (polledStatus === "SUCCESS" || polledStatus === "DEBITED") {
+      setPollingEnabled(false);
+      clearTimeout(pollingTimeoutRef.current ?? undefined);
+      clearTimeout(verifyVisibleTimerRef.current ?? undefined);
+      setVerifyButtonVisible(false);
+      if (recapData) completeSubscriptionAfterPayment(recapData);
+      return;
+    }
+    if (
+      polledStatus === "ERRORED" ||
+      polledStatus === "REVERSED" ||
+      polledStatus === "ERROREDREFUNDED"
+    ) {
+      setPollingEnabled(false);
+      clearTimeout(pollingTimeoutRef.current ?? undefined);
+      clearTimeout(verifyVisibleTimerRef.current ?? undefined);
+      setVerifyButtonVisible(false);
+      setPaymentInitFeedback({
+        tone: "error",
+        message: getS3pErrorMessage(null, `Paiement échoué — statut : ${polledStatus}.`),
+      });
+    }
+  // completeSubscriptionAfterPayment is defined later but is a stable function reference.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [polledStatus, pollingEnabled]);
+
+  useEffect(() => {
+    return () => {
+      clearTimeout(pollingTimeoutRef.current ?? undefined);
+      clearTimeout(verifyVisibleTimerRef.current ?? undefined);
+    };
+  }, []);
+
   const expectedOldestAge = travelerInfo.oldest_traveler_age;
   const additionalTravelerCount =
     tripDetails.adult > 1 ? tripDetails.adult - 1 : 0;
@@ -413,6 +465,13 @@ export function TravelQuoteSubscribePhase({
     if (payChannel !== "om" && payChannel !== "momo") return;
     if (initiateCooldownSec > 0 || initiateCashout.isPending) return;
 
+    // Reset any previous polling state before starting a new initiation
+    setPollingEnabled(false);
+    setVerifyButtonVisible(false);
+    clearTimeout(pollingTimeoutRef.current ?? undefined);
+    clearTimeout(verifyVisibleTimerRef.current ?? undefined);
+    lastKnownStatusRef.current = null;
+
     setCollectResult(null);
     setPaymentInitFeedback(null);
 
@@ -442,6 +501,26 @@ export function TravelQuoteSubscribePhase({
             message: getPaymentInitiatedMessage(payChannel),
           });
           setInitiateCooldownSec(INITIATE_PAYMENT_COOLDOWN_SEC);
+
+          // Start automatic polling
+          lastKnownStatusRef.current = null;
+          setPollingEnabled(true);
+
+          // Stop polling and unlock form after 3 minutes if no terminal state reached
+          pollingTimeoutRef.current = setTimeout(() => {
+            setPollingEnabled(false);
+            setVerifyButtonVisible(false);
+            setPaymentInitFeedback({
+              tone: "error",
+              message:
+                "Aucune réponse reçue après 3 minutes. Vérifiez votre téléphone et réessayez.",
+            });
+          }, 3 * 60 * 1000);
+
+          // Show the "Vérifier" button only after 15 seconds
+          verifyVisibleTimerRef.current = setTimeout(() => {
+            setVerifyButtonVisible(true);
+          }, 15000);
         },
       },
     );
@@ -471,11 +550,23 @@ export function TravelQuoteSubscribePhase({
             return;
           }
           const { status, errorCode } = res.data;
+
+          // Only react on status transitions
+          if (status === lastKnownStatusRef.current) {
+            toast.message("Statut inchangé — paiement en attente de traitement.");
+            return;
+          }
+          lastKnownStatusRef.current = status;
+
           if (errorCode != null && errorCode !== 0) {
             toast.error(getS3pErrorMessage(errorCode));
             return;
           }
           if (status === "SUCCESS" || status === "DEBITED") {
+            setPollingEnabled(false);
+            clearTimeout(pollingTimeoutRef.current ?? undefined);
+            clearTimeout(verifyVisibleTimerRef.current ?? undefined);
+            setVerifyButtonVisible(false);
             completeSubscriptionAfterPayment(recapData);
             return;
           }
@@ -484,17 +575,17 @@ export function TravelQuoteSubscribePhase({
             status === "REVERSED" ||
             status === "ERROREDREFUNDED"
           ) {
-            toast.error(
-              getS3pErrorMessage(
-                errorCode,
-                `Paiement : statut « ${status} ».`,
-              ),
-            );
+            setPollingEnabled(false);
+            clearTimeout(pollingTimeoutRef.current ?? undefined);
+            clearTimeout(verifyVisibleTimerRef.current ?? undefined);
+            setVerifyButtonVisible(false);
+            setPaymentInitFeedback({
+              tone: "error",
+              message: getS3pErrorMessage(errorCode, `Paiement : statut « ${status} ».`),
+            });
             return;
           }
-          toast.message(
-            "Paiement en cours de traitement. Réessayez dans quelques instants.",
-          );
+          // PENDING / INPROCESS — no UI change needed
         },
       },
     );
@@ -602,6 +693,8 @@ export function TravelQuoteSubscribePhase({
         collectResult={collectResult}
         paymentInitFeedback={paymentInitFeedback}
         initiateCooldownSec={initiateCooldownSec}
+        pollingActive={pollingEnabled}
+        showVerifyButton={verifyButtonVisible}
         onWalletPhoneChange={(value) =>
           setWalletPhone(normalizeCameroonPhone(value))
         }

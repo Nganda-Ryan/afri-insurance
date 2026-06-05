@@ -609,9 +609,16 @@ export function TravelQuoteSubscribePhase({
         collectResult={collectResult}
         paymentInitFeedback={paymentInitFeedback}
         initiateCooldownSec={initiateCooldownSec}
-        onWalletPhoneChange={(value) =>
-          setWalletPhone(normalizeCameroonPhone(value))
-        }
+        onWalletPhoneChange={(value) => {
+          const normalized = normalizeCameroonPhone(value);
+          setWalletPhone((prev) => {
+            if (prev !== normalized) {
+              setCollectResult(null);
+              setPaymentInitFeedback(null);
+            }
+            return normalized;
+          });
+        }}
         onPayChannelChange={setPayChannel}
         onBack={onBack}
         onInitiatePayment={() => void handleInitierPaiement()}

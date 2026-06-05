@@ -57,10 +57,15 @@ export function destinationLabel(value: string): string {
 }
 
 export function generatePaymentTrid(): string {
-  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
-    return crypto.randomUUID();
+  let n = 0;
+  if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") {
+    const buf = new Uint32Array(1);
+    crypto.getRandomValues(buf);
+    n = buf[0]! % 1_000_000;
+  } else {
+    n = Math.floor(Math.random() * 1_000_000);
   }
-  return `tr-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+  return String(n).padStart(6, "0");
 }
 
 export function ageFromBirthDate(value: string): number | null {

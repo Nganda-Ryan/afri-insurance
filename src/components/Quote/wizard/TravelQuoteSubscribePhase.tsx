@@ -99,6 +99,8 @@ export function TravelQuoteSubscribePhase({
   const [detailsSubStep, setDetailsSubStep] = useState<Step>(1);
   const [initiateCooldownSec, setInitiateCooldownSec] = useState(0);
 
+  const INITIATE_PAYMENT_COOLDOWN_SEC = 120;
+
   useEffect(() => {
     if (initiateCooldownSec <= 0) return;
     const timer = window.setTimeout(() => {
@@ -409,6 +411,10 @@ export function TravelQuoteSubscribePhase({
   const handleInitierPaiement = () => {
     if (!recapData || !quoteIdRef || !canInitierPaiement) return;
     if (payChannel !== "om" && payChannel !== "momo") return;
+    if (initiateCooldownSec > 0 || initiateCashout.isPending) return;
+
+    setCollectResult(null);
+    setPaymentInitFeedback(null);
 
     initiateCashout.mutate(
       {
@@ -435,7 +441,7 @@ export function TravelQuoteSubscribePhase({
             tone: "success",
             message: getPaymentInitiatedMessage(payChannel),
           });
-          setInitiateCooldownSec(120);
+          setInitiateCooldownSec(INITIATE_PAYMENT_COOLDOWN_SEC);
         },
       },
     );

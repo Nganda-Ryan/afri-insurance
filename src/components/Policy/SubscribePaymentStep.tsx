@@ -62,6 +62,11 @@ export function SubscribePaymentStep({
   const verifyBlocked =
     verifyPending || subscribePending || verifyCooldownSec > 0;
 
+  /** Verrouillage formulaire uniquement pendant l'appel ou le délai avant réessai. */
+  const paymentFormLocked = initiatePending || initiateCooldownSec > 0;
+  const canRetryInitiate =
+    canInitierPaiement && !initiatePending && !isSubmitting && initiateCooldownSec <= 0;
+
   const handleVerifyPayment = () => {
     if (verifyBlocked) return;
     setVerifyCooldownSec(VERIFY_PAYMENT_COOLDOWN_SEC);
@@ -87,7 +92,7 @@ export function SubscribePaymentStep({
               placeholder="2376XXXXXXXX"
               value={walletPhone}
               onChange={(e) => onWalletPhoneChange(e.target.value)}
-              disabled={collectResult != null}
+              disabled={paymentFormLocked}
               className="border bg-white dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
             />
           </div>
@@ -99,7 +104,7 @@ export function SubscribePaymentStep({
               id="pay-channel"
               name="payChannel"
               value={payChannel}
-              disabled={collectResult != null}
+              disabled={paymentFormLocked}
               onChange={(v: string) => onPayChannelChange(v as "" | "om" | "momo")}
               options={[
                 { value: "", label: "Choisir…" },
@@ -147,9 +152,13 @@ export function SubscribePaymentStep({
       <QuoteStepNavigation
         onPrevious={onBack}
         onNext={onInitiatePayment}
-        nextLabel={initiateCooldownSec > 0 ? `Réessayer dans ${initiateCooldownSec}s` : "Initier le paiement"}
+        nextLabel={
+          initiateCooldownSec > 0
+            ? `Réessayer dans ${initiateCooldownSec}s`
+            : "Initier le paiement"
+        }
         showNext={true}
-        nextDisabled={!canInitierPaiement || initiatePending || isSubmitting || initiateCooldownSec > 0}
+        nextDisabled={!canRetryInitiate}
         previousDisabled={initiatePending || verifyPending}
         isSubmitting={initiatePending || isSubmitting}
       />

@@ -19,7 +19,11 @@ import {
   useSubscribeTravelPolicy,
 } from "@/hooks/use-travel-quote-session";
 import { getPaymentInitiatedMessage, getS3pErrorMessage } from "@/lib/errorCode";
-import { normalizeCameroonPhone } from "@/lib/smobilpay/phone";
+import {
+  isValidCameroonPhone,
+  normalizeCameroonPhone,
+  validateCameroonPhoneInput,
+} from "@/lib/smobilpay/phone";
 import { TRAVEL_QUOTE_FLOW_STEP } from "@/lib/constants/quote-flow";
 import { POLICY_TYPE_TRAVEL } from "@/lib/constants/constant";
 import {
@@ -54,6 +58,31 @@ import type {
   TripDetailsData,
 } from "@/types/travel";
 import type { S3pCashoutCollectResult } from "@/types/smobilpay";
+
+function getSubscriberPhonesError(data: SubscriberFormData): string | null {
+  const holder = validateCameroonPhoneInput(data.phone_number);
+  if (holder !== true) {
+    return "Le téléphone du souscripteur est invalide. Corrigez-le à l'étape « Vos détails ».";
+  }
+  for (let i = 0; i < data.groupMembers.length; i++) {
+    const memberErr = validateCameroonPhoneInput(data.groupMembers[i].phone_number);
+    if (memberErr !== true) {
+      return `Le téléphone du membre ${i + 2} est invalide. Corrigez-le à l'étape « Vos détails ».`;
+    }
+  }
+  return null;
+}
+
+function normalizeSubscriberPhones(data: SubscriberFormData): SubscriberFormData {
+  return {
+    ...data,
+    phone_number: normalizeCameroonPhone(data.phone_number),
+    groupMembers: data.groupMembers.map((member) => ({
+      ...member,
+      phone_number: normalizeCameroonPhone(member.phone_number),
+    })),
+  };
+}
 
 interface TravelQuoteSubscribePhaseProps {
   flowStep: typeof TRAVEL_QUOTE_FLOW_STEP.DETAILS | typeof TRAVEL_QUOTE_FLOW_STEP.RECAP | typeof TRAVEL_QUOTE_FLOW_STEP.PAYMENT;
@@ -199,6 +228,14 @@ export function TravelQuoteSubscribePhase({
   }, [flowStep]);
 
   useEffect(() => {
+    if (flowStep !== TRAVEL_QUOTE_FLOW_STEP.PAYMENT || !recapData) return;
+    const phoneError = getSubscriberPhonesError(recapData);
+    if (!phoneError) return;
+    toast.error(phoneError);
+    onBack();
+  }, [flowStep, recapData, onBack]);
+
+  useEffect(() => {
     const idx = selection.plan.product_index;
     if (!Number.isInteger(idx) || idx < 0) return;
     if (quoteCode.trim()) return;
@@ -270,24 +307,35 @@ export function TravelQuoteSubscribePhase({
 
   const onDetailsSubmit = (data: SubscriberFormData) => {
     if (!hasValidOldestAge(data)) return;
+    const normalized = normalizeSubscriberPhones(data);
     writeQuoteHolderToStorage({
-      title: data.title,
-      first_name: data.first_name,
-      last_name: data.last_name,
-      birth_date: data.birth_date,
-      email: data.email,
-      phone_number: data.phone_number,
-      address: data.address,
-      city: data.city,
-      passport_number: data.passport_number,
-      passeport_exp_date: data.passeport_exp_date,
-      destination_country: data.destination_country,
-      residence_country: data.residence_country,
-      nationality: data.nationality,
+      title: normalized.title,
+      first_name: normalized.first_name,
+      last_name: normalized.last_name,
+      birth_date: normalized.birth_date,
+      email: normalized.email,
+      phone_number: normalized.phone_number,
+      address: normalized.address,
+      city: normalized.city,
+      passport_number: normalized.passport_number,
+      passeport_exp_date: normalized.passeport_exp_date,
+      destination_country: normalized.destination_country,
+      residence_country: normalized.residence_country,
+      nationality: normalized.nationality,
     });
-    writeQuoteRecapToStorage(data);
-    setRecapData(data);
+    writeQuoteRecapToStorage(normalized);
+    setRecapData(normalized);
     onGoToRecap();
+  };
+
+  const handleContinueToPayment = () => {
+    if (!recapData) return;
+    const phoneError = getSubscriberPhonesError(recapData);
+    if (phoneError) {
+      toast.error(phoneError);
+      return;
+    }
+    onGoToPayment();
   };
 
   const completeSubscriptionAfterPayment = (data: SubscriberFormData) => {
@@ -404,7 +452,7 @@ export function TravelQuoteSubscribePhase({
   };
 
   const canInitierPaiement =
-    walletPhone.replace(/\D/g, "").length >= 8 &&
+    isValidCameroonPhone(normalizeCameroonPhone(walletPhone)) &&
     (payChannel === "om" || payChannel === "momo");
 
   const handleInitierPaiement = () => {
@@ -590,7 +638,7 @@ export function TravelQuoteSubscribePhase({
         recapData={recapData}
         isSubmitting={isSubmitting}
         onBack={onBack}
-        onContinue={onGoToPayment}
+        onContinue={handleContinueToPayment}
       />
     );
   }

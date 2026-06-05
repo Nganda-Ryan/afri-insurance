@@ -11,6 +11,7 @@ import {
   type UseFormRegister,
 } from "react-hook-form";
 
+import { validateCameroonPhoneInput } from "@/lib/smobilpay/phone";
 import { validateUniquePassportNumber, type PassportUniquenessData } from "@/lib/utils";
 
 import { AUTHORIZED_COUNTRIES } from "@/lib/constants/authorized-contry";
@@ -187,7 +188,10 @@ export function PersonFields<T extends PersonFieldsFormValues>({
         <InputField
           type="tel"
           placeholder="+237 6 00 00 00 00"
-          {...register(fieldName("phone_number"), { required: "Telephone obligatoire" })}
+          {...register(fieldName("phone_number"), {
+            required: "Telephone obligatoire",
+            validate: validateCameroonPhoneInput,
+          })}
           error={!!fieldError("phone_number")}
           className="border border-gray-200 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
         />

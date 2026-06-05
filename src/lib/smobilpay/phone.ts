@@ -9,3 +9,16 @@ export function normalizeCameroonPhone(raw: string): string {
 export function isValidCameroonPhone(digits: string): boolean {
   return digits.startsWith("237") && digits.length >= 12;
 }
+
+export const CAMEROON_PHONE_INVALID_MESSAGE =
+  "Numéro de téléphone invalide. Saisissez un numéro camerounais complet (ex. 6XX XXX XXX).";
+
+/** Validation formulaire (react-hook-form) — alignée sur le schéma SmobilPay. */
+export function validateCameroonPhoneInput(raw: string): string | true {
+  const digits = raw.trim().replace(/\D/g, "");
+  if (digits.length < 8) return CAMEROON_PHONE_INVALID_MESSAGE;
+  if (!isValidCameroonPhone(normalizeCameroonPhone(raw))) {
+    return CAMEROON_PHONE_INVALID_MESSAGE;
+  }
+  return true;
+}

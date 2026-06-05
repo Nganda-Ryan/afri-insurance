@@ -37,6 +37,7 @@ import {
 import type { ParsedSelectedPlan } from "@/lib/travel/quote-wizard-url";
 import {
   ageFromBirthDate,
+  generatePaymentTrid,
   hasOldestAgeInRange,
   stripDiacritics,
 } from "@/lib/utils";
@@ -98,6 +99,8 @@ export function TravelQuoteSubscribePhase({
   } | null>(null);
   const [detailsSubStep, setDetailsSubStep] = useState<Step>(1);
   const [initiateCooldownSec, setInitiateCooldownSec] = useState(0);
+  const [paymentTrid, setPaymentTrid] = useState(generatePaymentTrid);
+  const [hasInitiatedPayment, setHasInitiatedPayment] = useState(false);
 
   const INITIATE_PAYMENT_COOLDOWN_SEC = 30;
 
@@ -109,11 +112,7 @@ export function TravelQuoteSubscribePhase({
     return () => window.clearTimeout(timer);
   }, [initiateCooldownSec]);
 
-  const { plan, quoteCode, quoteContext, quoteId: urlQuoteId } = selection;
-  const quoteIdRef =
-    urlQuoteId != null && Number.isInteger(urlQuoteId) && urlQuoteId > 0
-      ? String(urlQuoteId)
-      : null;
+  const { plan, quoteCode, quoteContext } = selection;
   const expectedOldestAge = travelerInfo.oldest_traveler_age;
   const additionalTravelerCount =
     tripDetails.adult > 1 ? tripDetails.adult - 1 : 0;
@@ -409,12 +408,20 @@ export function TravelQuoteSubscribePhase({
     (payChannel === "om" || payChannel === "momo");
 
   const handleInitierPaiement = () => {
-    if (!recapData || !quoteIdRef || !canInitierPaiement) return;
+    if (!recapData || !canInitierPaiement) return;
     if (payChannel !== "om" && payChannel !== "momo") return;
     if (initiateCooldownSec > 0 || initiateCashout.isPending) return;
 
     setCollectResult(null);
     setPaymentInitFeedback(null);
+
+    const tridToSend = hasInitiatedPayment
+      ? generatePaymentTrid()
+      : paymentTrid;
+    if (hasInitiatedPayment) {
+      setPaymentTrid(tridToSend);
+    }
+    setHasInitiatedPayment(true);
 
     initiateCashout.mutate(
       {
@@ -425,7 +432,7 @@ export function TravelQuoteSubscribePhase({
         customerEmailaddress: recapData.email,
         customerName: `${recapData.first_name} ${recapData.last_name}`.trim(),
         customerAddress: `${recapData.address}, ${recapData.city}`,
-        trid: quoteIdRef,
+        trid: tridToSend,
       },
       {
         onSuccess: (res) => {
@@ -448,7 +455,7 @@ export function TravelQuoteSubscribePhase({
   };
 
   const handleVerifierStatutPaiement = () => {
-    const trid = collectResult?.trid ?? quoteIdRef;
+    const trid = collectResult?.trid ?? paymentTrid;
     if (!trid || !recapData) {
       toast.error("Référence de transaction manquante.");
       return;
@@ -588,10 +595,10 @@ export function TravelQuoteSubscribePhase({
     );
   }
 
-  if (flowStep === TRAVEL_QUOTE_FLOW_STEP.PAYMENT && recapData && quoteIdRef) {
+  if (flowStep === TRAVEL_QUOTE_FLOW_STEP.PAYMENT && recapData) {
     return (
       <SubscribePaymentStep
-        quoteId={quoteIdRef}
+        paymentTrid={paymentTrid}
         walletPhone={walletPhone}
         payChannel={payChannel}
         canInitierPaiement={canInitierPaiement}

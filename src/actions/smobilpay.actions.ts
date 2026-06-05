@@ -128,6 +128,7 @@ export async function verifyTravelPolicyPaymentAction(
   }
   try {
     const list = await smobilpayService.verifyTx(parsed.data);
+    console.log("verifyTx.result", list);
     return actionOk(list[0] ?? null);
   } catch (e) {
     const code = readAxiosFeCode(e);

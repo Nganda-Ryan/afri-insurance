@@ -11,7 +11,7 @@ import Button from "@/components/ui/button/Button";
 import type { S3pCashoutCollectResult } from "@/types/smobilpay";
 
 interface PaymentStepProps {
-  quoteId: string;
+  paymentTrid: string;
   walletPhone: string;
   payChannel: "" | "om" | "momo";
   canInitierPaiement: boolean;
@@ -32,7 +32,7 @@ interface PaymentStepProps {
 const VERIFY_PAYMENT_COOLDOWN_SEC = 10;
 
 export function SubscribePaymentStep({
-  quoteId,
+  paymentTrid,
   walletPhone,
   payChannel,
   canInitierPaiement,
@@ -79,7 +79,7 @@ export function SubscribePaymentStep({
         <h2 className="text-xl font-bold text-brand-secondary">Paiement mobile</h2>
         <p className="text-sm text-text-main text-opacity-90">
           Renseignez le numéro du compte à débiter et le réseau. Référence de transaction :{" "}
-          <span className="font-mono text-xs">{quoteId}</span>
+          <span className="font-mono text-xs">{paymentTrid}</span>
         </p>
 
         <div className="space-y-4">

@@ -6,7 +6,6 @@ import {
   readAxiosFeCode,
   readS3pOrAxiosErrorMessage,
 } from "@/lib/http/axios-error-body";
-import { getEurToXafExchangeRate } from "@/lib/env/server";
 import { resolveCashoutPayItem } from "@/lib/smobilpay/cashout-pay-item";
 import { s3pCashoutCollectInputSchema, s3pVerifyInputSchema } from "@/schemas/smobilpay";
 import { smobilpayService } from "@/services/smobilpay.service";
@@ -16,11 +15,6 @@ import type {
   S3pPaymentStatusDto,
   S3pVerifyInput,
 } from "@/types/smobilpay";
-
-function convertEuroToXaf(amountEur: number): number {
-  const rate = getEurToXafExchangeRate();
-  return Math.round(amountEur * rate);
-}
 
 /**
  * Paiement cash-out (OM / MoMo) avant souscription :
@@ -40,8 +34,8 @@ export async function initiateCashoutCollectionAction(
   const data = parsed.data;
   console.log("Payload.parsed", parsed.data);
 
-  const amountXaf = convertEuroToXaf(data.amount);
-  if (!Number.isFinite(amountXaf) || amountXaf <= 0) {
+  const amount = data.amount;
+  if (!Number.isFinite(amount) || amount <= 0) {
     return actionFail("VALIDATION_ERROR", "Montant de paiement invalide.");
   }
 
@@ -60,11 +54,11 @@ export async function initiateCashoutCollectionAction(
   let payItemIdQuoted: string;
   try {
     console.log("requestQuote.payload", {
-      amount: amountXaf,
+      amount,
       payItemId: line.payItemId,
     });
     const quote = await smobilpayService.requestQuote({
-      amount: amountXaf,
+      amount,
       payItemId: line.payItemId,
     });
     console.log("requestQuote.result", quote);

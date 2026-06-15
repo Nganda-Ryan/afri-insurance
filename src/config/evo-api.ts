@@ -33,7 +33,7 @@ export const EVO_DEFAULT_CATALOG = {
 
 /** Surcharges via `NEXT_PUBLIC_EVO_DEFAULT_CURRENCY/COUNTRY/LANGUAGE`. */
 export const EVO_DEFAULT_CONTEXT = {
-  currency: envOrDefault("NEXT_PUBLIC_EVO_DEFAULT_CURRENCY", "EUR"),
+  currency: envOrDefault("NEXT_PUBLIC_EVO_DEFAULT_CURRENCY", "Franc CFA"),
   country: envOrDefault("NEXT_PUBLIC_EVO_DEFAULT_COUNTRY", "Cameroun"),
   language: envOrDefault("NEXT_PUBLIC_EVO_DEFAULT_LANGUAGE", "FR"),
 } as const;

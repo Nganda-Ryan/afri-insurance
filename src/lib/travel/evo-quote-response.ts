@@ -7,9 +7,9 @@ import type {
 } from "@/types/travel";
 
 type EvoPriceBlock = {
-  price_after_discount_incl_tax?: number;
-  price_net?: number;
-  premium_after_discount_excl_tax?: number;
+  price_after_discount_incl_tax?: number | string;
+  price_net?: number | string;
+  premium_after_discount_excl_tax?: number | string;
 };
 
 type EvoProduct = {
@@ -51,28 +51,38 @@ function pickContextCurrency(data: unknown): string | undefined {
   return typeof c === "string" && c.trim() ? c.trim() : undefined;
 }
 
+function parseEvoPriceValue(v: unknown): number | undefined {
+  if (typeof v === "number" && Number.isFinite(v)) return v;
+  if (typeof v === "string") {
+    const normalized = v.trim().replace(/\s/g, "").replace(",", ".");
+    if (!normalized) return undefined;
+    const n = Number.parseFloat(normalized);
+    return Number.isFinite(n) ? n : undefined;
+  }
+  return undefined;
+}
+
 /**
  * Priorité TTC / HT / net, en ignorant les 0 quand un autre champ est &gt; 0
  * (l’API peut renvoyer `price_after_discount_incl_tax: 0` avec `price_net` renseigné).
+ * Les montants peuvent être des chaînes (`"9941.437"`).
  */
 function pickDisplayPriceAmount(prices: EvoPriceBlock | undefined): number {
   if (!prices) {
     throw new Error("Bloc `prices` manquant dans la réponse devis EVO.");
   }
-  const ordered: (number | undefined)[] = [
+  const ordered = [
     prices.price_after_discount_incl_tax,
     prices.premium_after_discount_excl_tax,
     prices.price_net,
   ];
-  for (const n of ordered) {
-    if (typeof n === "number" && Number.isFinite(n) && n > 0) {
-      return n;
-    }
+  for (const raw of ordered) {
+    const n = parseEvoPriceValue(raw);
+    if (n != null && n > 0) return n;
   }
-  for (const n of ordered) {
-    if (typeof n === "number" && Number.isFinite(n)) {
-      return n;
-    }
+  for (const raw of ordered) {
+    const n = parseEvoPriceValue(raw);
+    if (n != null) return n;
   }
   throw new Error("Prix manquant ou invalide dans la réponse devis EVO.");
 }

@@ -32,10 +32,12 @@ export function QuotePlanCard({
     >
       <div className="mb-4 mt-2 text-center">
         <h3 className="mb-2 text-xl font-bold">{plan.name}</h3>
-        <div className="mb-1 text-4xl font-bold text-text-main">
-          {formatQuoteMoney(plan.price)}
+        <div className="mb-1 flex flex-wrap items-baseline justify-center gap-x-2 gap-y-1">
+          <span className="text-4xl font-bold leading-none text-text-main tabular-nums">
+            {formatQuoteMoney(plan.price)}
+          </span>
           {plan.currency ? (
-            <span className="ml-2 text-2xl font-semibold text-gray-500 dark:text-gray-300">
+            <span className="shrink-0 text-base font-semibold leading-none whitespace-nowrap text-gray-500 dark:text-gray-300">
               {plan.currency}
             </span>
           ) : null}

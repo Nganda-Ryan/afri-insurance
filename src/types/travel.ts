@@ -51,11 +51,11 @@ export interface IGetQuoteExpireAtDto {
 
 export interface IGetQuoteProductPricesDto {
   total_taxes?: number;
-  price_after_discount_incl_tax?: number;
-  premium_after_discount_excl_tax?: number;
+  price_after_discount_incl_tax?: number | string;
+  premium_after_discount_excl_tax?: number | string;
   total_discount?: number;
   guarantee_class_prices?: unknown[];
-  price_net?: number;
+  price_net?: number | string;
 }
 
 export interface IGetQuoteProductAttachmentDto {

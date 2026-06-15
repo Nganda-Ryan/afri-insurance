@@ -8,7 +8,11 @@ import {
   EVO_QUOTE_CODE_COOKIE,
   EVO_QUOTE_SESSION_COOKIE,
 } from "@/lib/constants/cookies";
-import { EVO_QUOTE_NOT_FOUND_CODE } from "@/lib/constants/evo-api";
+import {
+  EVO_PRODUCT_NOT_FOUND_CODE,
+  EVO_QUOTE_NOT_FOUND_CODE,
+} from "@/lib/constants/evo-api";
+import { formatQuoteErrorDisplay } from "@/lib/travel/format-quote-error";
 import { actionFail, actionOk } from "@/lib/http/action-result";
 import { readAxiosErrorMessage, readAxiosFeCode } from "@/lib/http/axios-error-body";
 import { toError } from "@/lib/http/errors";
@@ -60,17 +64,25 @@ export async function requestTravelQuoteAction(
     });
   } catch (e) {
     const feCode = readAxiosFeCode(e);
+    const rawMessage = readAxiosErrorMessage(e);
+    const formatted = formatQuoteErrorDisplay(rawMessage, feCode);
+
     if (
       axios.isAxiosError(e) &&
       e.response?.status === 422 &&
-      feCode === EVO_QUOTE_NOT_FOUND_CODE
+      (feCode === EVO_QUOTE_NOT_FOUND_CODE ||
+        feCode === EVO_PRODUCT_NOT_FOUND_CODE)
     ) {
       return actionFail<TravelQuoteActionData>(
-        EVO_QUOTE_NOT_FOUND_CODE,
-        "Aucune formule disponible. Modifiez vos entrées.",
+        feCode,
+        formatted.message,
       );
     }
-    return actionFail<TravelQuoteActionData>(feCode, readAxiosErrorMessage(e));
+
+    return actionFail<TravelQuoteActionData>(
+      formatted.code,
+      formatted.message,
+    );
   }
 }
 

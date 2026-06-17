@@ -7,6 +7,7 @@ import {
   readS3pOrAxiosErrorMessage,
 } from "@/lib/http/axios-error-body";
 import { resolveCashoutPayItem } from "@/lib/smobilpay/cashout-pay-item";
+import { roundPaymentAmountUp } from "@/lib/smobilpay/payment-amount";
 import { s3pCashoutCollectInputSchema, s3pVerifyInputSchema } from "@/schemas/smobilpay";
 import { smobilpayService } from "@/services/smobilpay.service";
 import type { ActionResult } from "@/types/action-result";
@@ -34,7 +35,7 @@ export async function initiateCashoutCollectionAction(
   const data = parsed.data;
   console.log("Payload.parsed", parsed.data);
 
-  const amount = data.amount;
+  const amount = roundPaymentAmountUp(data.amount);
   if (!Number.isFinite(amount) || amount <= 0) {
     return actionFail("VALIDATION_ERROR", "Montant de paiement invalide.");
   }

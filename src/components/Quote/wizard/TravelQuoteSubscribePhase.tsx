@@ -24,6 +24,7 @@ import {
   normalizeCameroonPhone,
   validateCameroonPhoneInput,
 } from "@/lib/smobilpay/phone";
+import { roundPaymentAmountUp } from "@/lib/smobilpay/payment-amount";
 import { TRAVEL_QUOTE_FLOW_STEP } from "@/lib/constants/quote-flow";
 import { POLICY_TYPE_TRAVEL } from "@/lib/constants/constant";
 import {
@@ -473,7 +474,7 @@ export function TravelQuoteSubscribePhase({
 
     initiateCashout.mutate(
       {
-        amount: plan.price,
+        amount: roundPaymentAmountUp(plan.price),
         channel: payChannel,
         paymentPhone: normalizeCameroonPhone(walletPhone),
         subscriberPhone: normalizeCameroonPhone(recapData.phone_number),

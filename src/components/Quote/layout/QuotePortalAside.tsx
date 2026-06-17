@@ -16,6 +16,7 @@ import {
   parseSelectedPlanFromSearchParams,
   parseTripDetailsFromSearchParams,
 } from "@/lib/travel/quote-wizard-url";
+import { roundPaymentAmountUp } from "@/lib/smobilpay/payment-amount";
 
 export function QuotePortalAside() {
   const searchParams = useSearchParams();
@@ -35,15 +36,19 @@ export function QuotePortalAside() {
     const selection = parseSelectedPlanFromSearchParams(searchParams);
     if (!trip || !selection) return null;
     const currencyLabel = selection.quoteContext.currency?.trim();
+    const displayPrice =
+      flowStep >= TRAVEL_QUOTE_FLOW_STEP.RECAP
+        ? roundPaymentAmountUp(selection.plan.price)
+        : selection.plan.price;
     return {
       planName: selection.plan.name,
-      totalPremiumLabel: `${selection.plan.price.toLocaleString("fr-FR")}${currencyLabel ? ` ${currencyLabel}` : ""}`,
+      totalPremiumLabel: `${displayPrice.toLocaleString("fr-FR")}${currencyLabel ? ` ${currencyLabel}` : ""}`,
       destination: trip.destination_area,
       startDate: trip.start_date,
       endDate: trip.end_date,
       adult: String(trip.adult),
     };
-  }, [searchParams, showPlanRecap]);
+  }, [searchParams, showPlanRecap, flowStep]);
 
   return (
     <div className="space-y-4">

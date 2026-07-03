@@ -63,6 +63,16 @@ export const QUOTE_WIZARD_STEP_CODE_DETAILS = "details";
 export const QUOTE_WIZARD_STEP_CODE_RECAP = "recap";
 export const QUOTE_WIZARD_STEP_CODE_PAYMENT = "paiement";
 
+/** Codes URL pour le wizard devis automobile. */
+export const AUTO_QUOTE_WIZARD_STEP_CODE_FORM = "cotation";
+export const AUTO_QUOTE_WIZARD_STEP_CODE_RECAP = "recap-auto";
+export const AUTO_QUOTE_WIZARD_STEP_CODE_PAYMENT = "paiement-auto";
+
+/** Codes URL pour le wizard devis multirisque habitation. */
+export const MRH_QUOTE_WIZARD_STEP_CODE_FORM = "cotation-mrh";
+export const MRH_QUOTE_WIZARD_STEP_CODE_RECAP = "recap-mrh";
+export const MRH_QUOTE_WIZARD_STEP_CODE_PAYMENT = "paiement-mrh";
+
 /** Clés des query params pour le parcours devis (URL courte/lisible). */
 export const URL_PARAM_PRODUCT = "p";
 export const URL_PARAM_STEP = "e";
@@ -81,6 +91,19 @@ export const URL_PARAM_DEPART = "dep";
 export const URL_PARAM_RETURN = "ret";
 export const URL_PARAM_ADULTS = "adv";
 export const URL_PARAM_AGE = "age";
+
+/** Query params du parcours devis automobile. */
+export const URL_PARAM_AUTO_ZONE = "az";
+export const URL_PARAM_AUTO_CATEGORY = "acat";
+export const URL_PARAM_AUTO_DURATION = "adur";
+export const URL_PARAM_AUTO_FUEL = "afuel";
+export const URL_PARAM_AUTO_POWER = "apwr";
+export const URL_PARAM_AUTO_POWER_LABEL = "apwl";
+export const URL_PARAM_AUTO_MOTO = "amoto";
+
+/** Query params du parcours devis multirisque habitation. */
+export const URL_PARAM_MRH_PROFIL = "mprof";
+export const URL_PARAM_MRH_TARIF = "mtar";
 
 /** Liens des logos Afri Insurance (1) et Afrilife (2). */
 export const AFRI_INSURANCE_LOGO_HREF = `https://afri-insurance.vercel.app/?${URL_PARAM_PRODUCT}=${QUOTE_PRODUCT_CODE_TRAVEL}&${URL_PARAM_STEP}=${QUOTE_WIZARD_STEP_CODE_TRIP}`;

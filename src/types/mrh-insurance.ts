@@ -49,6 +49,7 @@ export interface MrhQuoteResult {
   profilLabel: string;
   garanties: string[];
   tarifIndex: number;
+  tarifLabel: string;
   devise: string;
   breakdown: MrhQuoteBreakdown;
 }

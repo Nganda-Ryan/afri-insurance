@@ -28,6 +28,31 @@ function buildBreakdown(tarif: MrhTarifRow) {
   };
 }
 
+export function formatMrhCompactAmount(value: number): string {
+  if (value >= 1_000_000 && value % 1_000_000 === 0) {
+    return `${value / 1_000_000} M`;
+  }
+  if (value >= 1_000 && value % 1_000 === 0) {
+    return `${value / 1_000} k`;
+  }
+  return value.toLocaleString("fr-FR");
+}
+
+export function formatMrhTarifLabel(profilId: string, tarif: MrhTarifRow): string {
+  const devise = MRH_INSURANCE_DATA.document_info.devise;
+  const primeLabel = `${tarif.prime_ttc.toLocaleString("fr-FR")} ${devise} TTC`;
+
+  if (isMrhLocataireTarif(tarif)) {
+    return `Loyer ${tarif.loyer_mensuel.toLocaleString("fr-FR")} ${devise} · Contenu ${formatMrhCompactAmount(tarif.valeur_contenu)} — ${primeLabel}`;
+  }
+
+  return `Bâtiment ${formatMrhCompactAmount(tarif.valeur_batiment)} · Contenu ${formatMrhCompactAmount(tarif.valeur_contenu)} — ${primeLabel}`;
+}
+
+export function formatMrhTarifSummary(quote: MrhQuoteResult): string {
+  return quote.tarifLabel;
+}
+
 export function calculateMrhQuote(input: MrhQuoteFormInput): MrhQuoteResult | null {
   const profil = findProfil(input.profilId);
   if (!profil) return null;
@@ -40,6 +65,7 @@ export function calculateMrhQuote(input: MrhQuoteFormInput): MrhQuoteResult | nu
     profilLabel: profil.label,
     garanties: profil.garanties_incluses,
     tarifIndex: input.tarifIndex,
+    tarifLabel: formatMrhTarifLabel(profil.id, tarif),
     devise: MRH_INSURANCE_DATA.document_info.devise,
     breakdown: buildBreakdown(tarif),
   };
@@ -50,13 +76,6 @@ export function getMrhProfilOptions() {
     value: profil.id,
     label: profil.label,
   }));
-}
-
-export function formatMrhTarifLabel(profilId: string, tarif: MrhTarifRow): string {
-  if (isMrhLocataireTarif(tarif)) {
-    return `Loyer ${tarif.loyer_mensuel.toLocaleString("fr-FR")} FCFA / Contenu ${tarif.valeur_contenu.toLocaleString("fr-FR")} FCFA`;
-  }
-  return `Bâtiment ${tarif.valeur_batiment.toLocaleString("fr-FR")} FCFA / Contenu ${tarif.valeur_contenu.toLocaleString("fr-FR")} FCFA`;
 }
 
 export function getMrhTarifOptions(profilId: string) {

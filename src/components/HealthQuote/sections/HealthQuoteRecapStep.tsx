@@ -1,17 +1,13 @@
 "use client";
 
-import { MrhGarantieBadges } from "@/components/MrhQuote/shared/MrhGarantieBadges";
 import { QuoteAmountBreakdownTable } from "@/components/Quote/layout/QuoteAmountBreakdownTable";
 import { QuoteStepNavigation } from "@/components/Quote/layout/QuoteStepNavigation";
-import {
-  isMrhLocataireProfil,
-} from "@/lib/mrh/calculate-mrh-quote";
-import { getMrhBreakdownTableRows } from "@/lib/mrh/mrh-breakdown-display";
-import { MRH_INSURANCE_DATA } from "@/lib/constants/mrh_insurance";
-import type { MrhQuoteResult } from "@/types/mrh-insurance";
+import { formatHealthCoverageRate } from "@/lib/constants/health_insurance";
+import { getHealthBreakdownTableRows } from "@/lib/health/health-breakdown-display";
+import type { HealthQuoteResult } from "@/types/health-insurance";
 
-interface MrhQuoteRecapStepProps {
-  quote: MrhQuoteResult;
+interface HealthQuoteRecapStepProps {
+  quote: HealthQuoteResult;
   isSubmitting?: boolean;
   onBack: () => void;
   onContinue: () => void;
@@ -26,17 +22,14 @@ function RecapRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function MrhQuoteRecapStep({
+export function HealthQuoteRecapStep({
   quote,
   isSubmitting = false,
   onBack,
   onContinue,
-}: MrhQuoteRecapStepProps) {
+}: HealthQuoteRecapStepProps) {
   const { breakdown, devise } = quote;
-  const isLocataire = isMrhLocataireProfil(quote.profilId);
-  const breakdownTableRows = getMrhBreakdownTableRows(breakdown, devise, {
-    isLocataire,
-  });
+  const breakdownTableRows = getHealthBreakdownTableRows(breakdown, devise);
 
   return (
     <div className="space-y-4">
@@ -47,25 +40,23 @@ export function MrhQuoteRecapStep({
         </p>
 
         <div className="rounded-lg border border-border bg-card p-4">
-          <h3 className="mb-3 text-base font-semibold">Profil</h3>
+          <h3 className="mb-3 text-base font-semibold">Formule</h3>
           <div className="space-y-3">
-            <RecapRow label="Profil d'assurance" value={quote.profilLabel} />
-            <RecapRow label="Tranche tarifaire" value={quote.tarifLabel} />
-            <div className="border-b border-gray-200 pb-3 last:border-0 last:pb-0">
-              <span className="font-semibold text-text-main">Garanties incluses</span>
-              <div className="mt-2">
-                <MrhGarantieBadges garanties={quote.garanties} />
-              </div>
-            </div>
+            <RecapRow label="Formule" value={quote.planLabel} />
+            <RecapRow
+              label="Taux de couverture"
+              value={formatHealthCoverageRate(breakdown.taux_couverture)}
+            />
+            <RecapRow
+              label="Effectif"
+              value={`${breakdown.adultCount} adulte${breakdown.adultCount > 1 ? "s" : ""}, ${breakdown.childCount} enfant${breakdown.childCount > 1 ? "s" : ""}`}
+            />
           </div>
         </div>
 
         <div className="rounded-lg border border-border bg-card p-4">
-          <h3 className="mb-3 text-base font-semibold">Détail de la prime</h3>
+          <h3 className="mb-3 text-base font-semibold">Détail de la cotisation</h3>
           <QuoteAmountBreakdownTable rows={breakdownTableRows} />
-          <p className="mt-4 text-xs text-gray-500">
-            {MRH_INSURANCE_DATA.note_bas_de_page}
-          </p>
         </div>
       </div>
 

@@ -16,6 +16,7 @@ export function MrhQuoteRecapCard({ quote }: MrhQuoteRecapCardProps) {
       <div className="space-y-3 p-4 text-sm sm:p-5">
         {[
           { label: "Profil", value: quote.profilLabel, highlight: true },
+          { label: "Tranche", value: quote.tarifLabel },
           {
             label: "Prime TTC",
             value: formatAutoAmount(quote.breakdown.prime_ttc, quote.devise),
@@ -34,6 +35,14 @@ export function MrhQuoteRecapCard({ quote }: MrhQuoteRecapCardProps) {
                 {
                   label: "Loyer mensuel",
                   value: formatAutoAmount(quote.breakdown.loyer_mensuel, quote.devise),
+                },
+              ]
+            : []),
+          ...(quote.breakdown.valeur_contenu != null
+            ? [
+                {
+                  label: "Valeur contenu",
+                  value: formatAutoAmount(quote.breakdown.valeur_contenu, quote.devise),
                 },
               ]
             : []),

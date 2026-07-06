@@ -5,6 +5,7 @@ import { HomeIcon } from "lucide-react";
 
 import Label from "@/components/form/Label";
 import Select from "@/components/form/Select";
+import { MrhGarantieBadges } from "@/components/MrhQuote/shared/MrhGarantieBadges";
 import { QuoteAmountBreakdownTable } from "@/components/Quote/layout/QuoteAmountBreakdownTable";
 import { QuoteFormSection } from "@/components/Quote/layout/QuoteFormSection";
 import { QuoteStepNavigation } from "@/components/Quote/layout/QuoteStepNavigation";
@@ -15,7 +16,7 @@ import {
   isMrhLocataireProfil,
 } from "@/lib/mrh/calculate-mrh-quote";
 import { getMrhBreakdownTableRows } from "@/lib/mrh/mrh-breakdown-display";
-import { MRH_GARANTIE_LABELS, MRH_INSURANCE_DATA } from "@/lib/constants/mrh_insurance";
+import { MRH_INSURANCE_DATA } from "@/lib/constants/mrh_insurance";
 import type { MrhQuoteFormInput, MrhQuoteResult } from "@/types/mrh-insurance";
 
 interface MrhQuoteFormStepProps {
@@ -50,16 +51,18 @@ export function MrhQuoteFormStep({ initialForm, onSubmit }: MrhQuoteFormStepProp
     () => getMrhTarifOptions(effectiveProfilId),
     [effectiveProfilId],
   );
-  const effectiveTarifIndex = useMemo(
-    () => pickOptionValue(tarifIndex, tarifOptions),
-    [tarifIndex, tarifOptions],
-  );
+
   const isLocataire = useMemo(
     () => isMrhLocataireProfil(effectiveProfilId),
     [effectiveProfilId],
   );
 
-  const parsedTarifIndex = Number.parseInt(effectiveTarifIndex, 10);
+  const hasExplicitTarifSelection =
+    tarifIndex !== "" && tarifOptions.some((option) => option.value === tarifIndex);
+  const parsedTarifIndex = hasExplicitTarifSelection
+    ? Number.parseInt(tarifIndex, 10)
+    : NaN;
+
   const quoteResult = useMemo(() => {
     if (!effectiveProfilId || !Number.isFinite(parsedTarifIndex) || parsedTarifIndex < 0) {
       return null;
@@ -77,13 +80,6 @@ export function MrhQuoteFormStep({ initialForm, onSubmit }: MrhQuoteFormStepProp
     [breakdown, devise, isLocataire],
   );
   const canSubmit = quoteResult != null;
-
-  const garantiesLabel = useMemo(() => {
-    if (!quoteResult) return "";
-    return quoteResult.garanties
-      .map((code) => MRH_GARANTIE_LABELS[code] ?? code)
-      .join(", ");
-  }, [quoteResult]);
 
   const handleSubmit = () => {
     if (!quoteResult) return;
@@ -115,7 +111,7 @@ export function MrhQuoteFormStep({ initialForm, onSubmit }: MrhQuoteFormStepProp
             <Label htmlFor="mrh-tarif">Grille tarifaire</Label>
             <Select
               id="mrh-tarif"
-              value={effectiveTarifIndex}
+              value={hasExplicitTarifSelection ? tarifIndex : ""}
               onChange={setTarifIndex}
               options={tarifOptions}
               placeholder="Choisir une tranche"
@@ -126,7 +122,9 @@ export function MrhQuoteFormStep({ initialForm, onSubmit }: MrhQuoteFormStepProp
         {quoteResult ? (
           <div className="mt-4 rounded-lg border border-brand-primary/20 bg-brand-primary/5 px-4 py-3">
             <p className="text-sm font-medium text-gray-700">Garanties incluses</p>
-            <p className="mt-1 text-sm text-gray-600">{garantiesLabel}</p>
+            <div className="mt-2">
+              <MrhGarantieBadges garanties={quoteResult.garanties} />
+            </div>
           </div>
         ) : null}
       </QuoteFormSection>

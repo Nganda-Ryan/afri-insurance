@@ -3,6 +3,15 @@
 import React, { Suspense, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 
+import { AutoQuotePortalAside } from "@/components/AutoQuote/layout/AutoQuotePortalAside";
+import { AutoQuoteFlowProgressBar } from "@/components/AutoQuote/wizard/AutoQuoteFlowProgressBar";
+import { AutoQuotationWizard } from "@/components/AutoQuote/wizard/AutoQuotationWizard";
+import { HealthQuotePortalAside } from "@/components/HealthQuote/layout/HealthQuotePortalAside";
+import { HealthQuoteFlowProgressBar } from "@/components/HealthQuote/wizard/HealthQuoteFlowProgressBar";
+import { HealthQuotationWizard } from "@/components/HealthQuote/wizard/HealthQuotationWizard";
+import { MrhQuotePortalAside } from "@/components/MrhQuote/layout/MrhQuotePortalAside";
+import { MrhQuoteFlowProgressBar } from "@/components/MrhQuote/wizard/MrhQuoteFlowProgressBar";
+import { MrhQuotationWizard } from "@/components/MrhQuote/wizard/MrhQuotationWizard";
 import { QuotePageLayout } from "@/components/Quote/layout/QuotePageLayout";
 import { QuotePortalAside } from "@/components/Quote/layout/QuotePortalAside";
 import { QuoteFlowProgressBar } from "@/components/Quote/wizard/QuoteFlowProgressBar";
@@ -13,10 +22,9 @@ import { usePlanStore } from "@/store/planStore";
 import { useWizardStore } from "@/store/wizardStore";
 
 const COMING_SOON_LABELS: Record<string, string> = {
-  home: "Assurance habitation",
   auto: "Assurance automobile",
-  health: "Assurance santé",
   pet: "Assurance individuelle accidents",
+  prevoyance: "Prévoyance individuelle",
 };
 
 function HomeQuotationPageContent() {
@@ -24,10 +32,11 @@ function HomeQuotationPageContent() {
   const fetchPlans = usePlanStore((s) => s.fetchPlans);
   const setWizardInProgress = useWizardStore((s) => s.setWizardInProgress);
 
-  const currentProduct = useMemo(
-    () => quoteProductIdFromUrlCode(searchParams.get(URL_PARAM_PRODUCT)) ?? "travel",
-    [searchParams],
-  );
+  const currentProduct = useMemo(() => {
+    const productParam = searchParams.get(URL_PARAM_PRODUCT);
+    if (!productParam) return "travel";
+    return quoteProductIdFromUrlCode(productParam) ?? productParam.trim().toLowerCase();
+  }, [searchParams]);
 
   useEffect(() => {
     if (currentProduct === "travel") {
@@ -47,6 +56,27 @@ function HomeQuotationPageContent() {
           aside={<QuotePortalAside />}
         >
           <QuotationWizard onWizardStateChange={setWizardInProgress} />
+        </QuotePageLayout>
+      ) : currentProduct === "auto" ? (
+        <QuotePageLayout
+          progress={<AutoQuoteFlowProgressBar />}
+          aside={<AutoQuotePortalAside />}
+        >
+          <AutoQuotationWizard onWizardStateChange={setWizardInProgress} />
+        </QuotePageLayout>
+      ) : currentProduct === "home" ? (
+        <QuotePageLayout
+          progress={<MrhQuoteFlowProgressBar />}
+          aside={<MrhQuotePortalAside />}
+        >
+          <MrhQuotationWizard onWizardStateChange={setWizardInProgress} />
+        </QuotePageLayout>
+      ) : currentProduct === "health" ? (
+        <QuotePageLayout
+          progress={<HealthQuoteFlowProgressBar />}
+          aside={<HealthQuotePortalAside />}
+        >
+          <HealthQuotationWizard onWizardStateChange={setWizardInProgress} />
         </QuotePageLayout>
       ) : (
         <div className="rounded-lg border border-border bg-white px-6 py-16 text-center shadow-sm">

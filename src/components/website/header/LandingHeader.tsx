@@ -8,6 +8,13 @@ import { usePathname } from "next/navigation";
 import {
   AFRI_INSURANCE_LOGO_HREF,
   AFRILIFE_LOGO_HREF,
+  QUOTE_PRODUCT_CODE_AUTO,
+  QUOTE_PRODUCT_CODE_HEALTH,
+  QUOTE_PRODUCT_CODE_HOME,
+  QUOTE_PRODUCT_CODE_TRAVEL,
+  QUOTE_WIZARD_STEP_CODE_TRIP,
+  URL_PARAM_PRODUCT,
+  URL_PARAM_STEP,
 } from "@/lib/constants/constant";
 
 type NavItem = {
@@ -74,8 +81,30 @@ const LandingHeader = () => {
     { href: "/contact", label: "Contact" },
   ];
 
+  const quoteItems: NavItem[] = [
+    {
+      href: `/?${URL_PARAM_PRODUCT}=${QUOTE_PRODUCT_CODE_TRAVEL}&${URL_PARAM_STEP}=${QUOTE_WIZARD_STEP_CODE_TRIP}`,
+      label: "Assurance Voyage",
+    },
+    {
+      href: `/?${URL_PARAM_PRODUCT}=${QUOTE_PRODUCT_CODE_AUTO}`,
+      label: "Assurance Automobile",
+    },
+    {
+      href: `/?${URL_PARAM_PRODUCT}=${QUOTE_PRODUCT_CODE_HOME}`,
+      label: "Multirisque habitation",
+    },
+    {
+      href: `/?${URL_PARAM_PRODUCT}=prevoyance`,
+      label: "Prevoyance individuelle",
+    },
+    {
+      href: `/?${URL_PARAM_PRODUCT}=${QUOTE_PRODUCT_CODE_HEALTH}`,
+      label: "Assurance sante",
+    },
+  ];
+
   const actionItems = [
-    { href: "/quote", label: "Obtenir devis", borderClass: "border-brand-secondary/80" },
     { href: "/claims", label: "Declarer sinistre", borderClass: "border-red-500/80" },
     { href: "/signin", label: "Espace client", borderClass: "border-brand-primary/90" },
   ];
@@ -165,6 +194,26 @@ const LandingHeader = () => {
             </div>
           ))}
           <div className="ml-2 flex items-center gap-2">
+            <div className="group relative">
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-brand-secondary/80 px-3 py-1 text-sm font-normal text-white/95 transition hover:border-orange-500 hover:text-orange-500"
+              >
+                Obtenir devis
+                <span className="text-[10px]">▼</span>
+              </button>
+              <div className="invisible absolute right-0 top-full z-50 mt-3 min-w-[240px] border border-white/10 bg-black p-2 opacity-0 shadow-2xl transition-all duration-150 group-hover:visible group-hover:opacity-100">
+                {quoteItems.map((item) => (
+                  <Link
+                    key={item.label}
+                    href={item.href ?? "#"}
+                    className="block px-3 py-2 text-sm text-white/90 transition hover:bg-brand-primary/15 hover:text-orange-500"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
             {actionItems.map((item) => (
               <Link
                 key={item.label}
@@ -273,6 +322,30 @@ const LandingHeader = () => {
             );
           })}
           <div className="mt-2 space-y-2">
+            <div className="border border-brand-secondary/80">
+              <button
+                type="button"
+                onClick={() => toggleMobileSubmenu("quote")}
+                className="flex w-full items-center justify-between rounded-full px-4 py-2 text-sm font-normal text-white transition hover:border-orange-500 hover:text-orange-500"
+              >
+                <span>Obtenir devis</span>
+                <span className="text-sm">{openMobileMenus.quote ? "▲" : "▼"}</span>
+              </button>
+              {openMobileMenus.quote ? (
+                <div className="space-y-1 border-t border-white/10 px-2 py-2">
+                  {quoteItems.map((item) => (
+                    <Link
+                      key={item.label}
+                      href={item.href ?? "#"}
+                      onClick={() => setIsMenuOpen(false)}
+                      className="block rounded px-3 py-2 text-sm text-white/90 hover:bg-brand-primary/15 hover:text-orange-500"
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              ) : null}
+            </div>
             {actionItems.map((item) => (
               <Link
                 key={item.label}

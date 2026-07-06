@@ -1,16 +1,30 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
+
+import { URL_PARAM_PRODUCT } from "@/lib/constants/constant";
+import {
+  getQuoteHeroContent,
+  type QuoteHeroProductId,
+} from "@/lib/constants/quote-hero-content";
+
 interface QuoteHeroProps {
   badge?: string;
   title?: string;
   description?: string;
+  productId?: QuoteHeroProductId;
 }
 
 export function QuoteHero({
   badge = "100% digital",
-  title = "Achetez votre assurance voyage en quelques clics",
-  description = "Renseignez vos informations et recevez une proposition adaptée à votre voyage.",
+  title,
+  description,
+  productId,
 }: QuoteHeroProps) {
+  const searchParams = useSearchParams();
+  const productFromUrl = searchParams.get(URL_PARAM_PRODUCT);
+  const content = getQuoteHeroContent(productId ?? productFromUrl);
+
   return (
     <section
       className="bg-brand-primary px-4 pb-10 pt-20 sm:px-6 sm:pb-8 sm:pt-20 lg:pb-10 lg:pt-22"
@@ -24,10 +38,10 @@ export function QuoteHero({
           id="quote-hero-title"
           className="mt-3 text-2xl font-bold leading-tight text-white sm:text-3xl lg:text-4xl"
         >
-          {title}
+          {title ?? content.title}
         </h1>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/85 sm:text-base">
-          {description}
+          {description ?? content.description}
         </p>
       </div>
     </section>

@@ -9,6 +9,7 @@ import {
   type ProductType,
 } from "@/components/Quote/layout/QuotationProductNav";
 import { URL_PARAM_PRODUCT } from "@/lib/constants/constant";
+import { normalizeQuoteHeroProductId } from "@/lib/constants/quote-hero-content";
 import {
   quoteProductCodeFromId,
   quoteProductIdFromUrlCode,
@@ -27,8 +28,11 @@ export function QuoteCotationChrome() {
   const [showSwitchWarning, setShowSwitchWarning] = useState(false);
   const [pendingProduct, setPendingProduct] = useState<ProductType | null>(null);
 
+  const productParam = searchParams.get(URL_PARAM_PRODUCT);
+  const heroProductId = normalizeQuoteHeroProductId(productParam);
+
   const currentProduct: ProductType =
-    quoteProductIdFromUrlCode(searchParams.get(URL_PARAM_PRODUCT)) ?? "travel";
+    quoteProductIdFromUrlCode(productParam) ?? "travel";
 
   const replaceProductInUrl = (product: ProductType) => {
     const sp = new URLSearchParams();
@@ -63,7 +67,7 @@ export function QuoteCotationChrome() {
 
   return (
     <>
-      <QuoteHero />
+      <QuoteHero productId={heroProductId} />
       {/* <QuotationProductNav
         currentProduct={currentProduct}
         onProductChange={handleProductSwitch}

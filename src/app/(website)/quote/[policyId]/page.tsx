@@ -16,12 +16,6 @@ import { PolicyLoadingState } from "@/components/Policy/PolicyLoadingState";
 import { PolicyOverviewCard } from "@/components/Policy/PolicyOverviewCard";
 import { PolicySuccessBanner } from "@/components/Policy/PolicySuccessBanner";
 
-const POLICY_HERO = {
-  badge: "Souscription confirmée",
-  title: "Police confirmée",
-  description: "Votre assurance voyage est maintenant active.",
-} as const;
-
 /**
  * Layout partagé : Hero + grille 8/4 (contenu | récapitulatif).
  * Aucun bouton Retour : toute tentative de navigation arrière
@@ -46,7 +40,7 @@ export default function Page() {
   if (isLoading) {
     return (
       <>
-        <PolicyHero {...POLICY_HERO} />
+        <PolicyHero productId="travel" />
         <main
           id="policy-detail"
           className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:py-10"
@@ -63,7 +57,7 @@ export default function Page() {
   if (!result?.ok || !result.data) {
     return (
       <>
-        <PolicyHero {...POLICY_HERO} />
+        <PolicyHero productId="travel" />
         <main
           id="policy-detail"
           className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:py-10"
@@ -84,7 +78,7 @@ export default function Page() {
 
   return (
     <>
-      <PolicyHero {...POLICY_HERO} />
+      <PolicyHero productId="travel" />
       <main
         id="policy-detail"
         className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:py-10"

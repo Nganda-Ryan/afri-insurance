@@ -1,13 +1,13 @@
 export const MRH_QUOTE_FLOW_STEP_LABELS = [
   "Cotation",
   "Récapitulatif",
-  "Paiement",
+  "Devis",
 ] as const;
 
 export const MRH_QUOTE_FLOW_STEP = {
   FORM: 0,
   RECAP: 1,
-  PAYMENT: 2,
+  DEVIS: 2,
 } as const;
 
 export type MrhQuoteFlowStepIndex =

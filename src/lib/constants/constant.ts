@@ -66,17 +66,17 @@ export const QUOTE_WIZARD_STEP_CODE_PAYMENT = "paiement";
 /** Codes URL pour le wizard devis automobile. */
 export const AUTO_QUOTE_WIZARD_STEP_CODE_FORM = "cotation";
 export const AUTO_QUOTE_WIZARD_STEP_CODE_RECAP = "recap-auto";
-export const AUTO_QUOTE_WIZARD_STEP_CODE_PAYMENT = "paiement-auto";
+export const AUTO_QUOTE_WIZARD_STEP_CODE_DEVIS = "devis-auto";
 
 /** Codes URL pour le wizard devis multirisque habitation. */
 export const MRH_QUOTE_WIZARD_STEP_CODE_FORM = "cotation-mrh";
 export const MRH_QUOTE_WIZARD_STEP_CODE_RECAP = "recap-mrh";
-export const MRH_QUOTE_WIZARD_STEP_CODE_PAYMENT = "paiement-mrh";
+export const MRH_QUOTE_WIZARD_STEP_CODE_DEVIS = "devis-mrh";
 
 /** Codes URL pour le wizard devis assurance santé. */
 export const HEALTH_QUOTE_WIZARD_STEP_CODE_FORM = "cotation-sante";
 export const HEALTH_QUOTE_WIZARD_STEP_CODE_RECAP = "recap-sante";
-export const HEALTH_QUOTE_WIZARD_STEP_CODE_PAYMENT = "paiement-sante";
+export const HEALTH_QUOTE_WIZARD_STEP_CODE_DEVIS = "devis-sante";
 
 /** Clés des query params pour le parcours devis (URL courte/lisible). */
 export const URL_PARAM_PRODUCT = "p";

@@ -35,51 +35,105 @@ const LandingHeader = () => {
   };
 
   const navItems: NavItem[] = [
-    { href: "/", label: "Accueil" },
+    { href: "https://afri-insurance.com/", label: "Accueil" },
     {
       label: "A propos",
       children: [
-        { href: "/about", label: "A propos" },
-        { href: "/reseau", label: "Reseau" },
+        { href: "https://afri-insurance.com/about/", label: "A propos" },
+        { href: "https://afri-insurance.com/reseau/", label: "Réseau" },
       ],
     },
     {
       label: "Nos produits",
       children: [
         {
-          href: "/afrilife",
+          href: "https://afri-insurance.com/afrilife/",
           label: "AFRILIFE",
           children: [
-            { href: "/afrilife/afrilife-etude-enfants", label: "AFRILIFE etude enfants" },
-            { href: "/afrilife/afrilife-indemite-fin-carriere", label: "AFRILIFE indemite fin carriere" },
-            { href: "/afrilife/afrilife-retraite-complementaire-collective", label: "AFRILIFE retraite complementaire collective" },
-            { href: "/afrilife/afrilife-retraite-individuelle-plus", label: "AFRILIFE retraite individuelle plus" },
-            { href: "/afrilife/afrilife-retraite", label: "AFRILIFE retraite" },
-            { href: "/afrilife/afrilife-libre-retraite", label: "AFRILIFE libre retraite" },
-            { href: "/afrilife/afrilife-prevoyance-deces-individuel", label: "AFRILIFE prevoyance deces individuel" },
-            { href: "/afrilife/afrilife-prevoyance-deces-groupe", label: "Assurance Prevoyance Deces Groupe" },
-            { href: "/afriinsurance-home/assurance-prevoyance-collective", label: "Assurance prevoyance collective" },
+            {
+              href: "https://afri-insurance.com/afrilife/afrilife-etude-enfants/",
+              label: "AFRILIFE étude enfants",
+            },
+            {
+              href: "https://afri-insurance.com/afrilife/afrilife-indemite-fin-carriere/",
+              label: "AFRILIFE indemité fin carriere",
+            },
+            {
+              href: "https://afri-insurance.com/afrilife/afrilife-retraite-complementaire-collective/",
+              label: "AFRILIFE retraite complémentaire collective",
+            },
+            {
+              href: "https://afri-insurance.com/afrilife/afrilife-retraite-individuelle-plus/",
+              label: "AFRILIFE retraite individuelle plus",
+            },
+            {
+              href: "https://afri-insurance.com/afrilife/afrilife-retraite/",
+              label: "AFRILIFE retraite",
+            },
+            {
+              href: "https://afri-insurance.com/afrilife/afrilife-libre-retraite/",
+              label: "AFRILIFE libre retraite",
+            },
+            {
+              href: "https://afri-insurance.com/afrilife/afrilife-prevoyance-deces-individuel/",
+              label: "AFRILIFE prévoyance décés individuel",
+            },
+            {
+              href: "https://afri-insurance.com/afrilife/afrilife-prevoyance-deces-groupe/",
+              label: "Assurance Prévoyance Décès Groupe",
+            },
+            {
+              href: "https://afri-insurance.com/afriinsurance-home/assurance-prevoyance-collective/",
+              label: "Assurance prévoyance collective",
+            },
           ],
         },
         {
-          href: "/afriinsurance-home",
+          href: "https://afri-insurance.com/afriinsurance-home/",
           label: "AFRI INSURANCE",
           children: [
-            { href: "/afriinsurance-home/afri-assistance-voyage", label: "Afri assistance voyage" },
-            { href: "/afri-automobile", label: "Afri automobile" },
-            { href: "/afriinsurance-home/afri-caution", label: "AFRI CAUTION" },
-            { href: "/afriinsurance-home/afri-individuelle-accidents", label: "Afri individuelle accidents" },
-            { href: "/afriinsurance-home/afri-multitrisque-habitation", label: "Afri multitrisque habitation" },
-            { href: "/afriinsurance-home/afri-responsabilite-civile-chef-dentreprise", label: "Afri responsabilite civile chef d'entreprise" },
-            { href: "/afriinsurance-home/afri-responsabilite-civile-chef-de-famille", label: "Afri responsabilite civile chef de famille" },
-            { href: "/afri-transport-des-marchandises", label: "Afri transport des marchandises" },
-            { href: "/afriinsurance-home/afri-sante", label: "AFRI SANTE" },
+            {
+              href: "https://afri-insurance.com/afriinsurance-home/afri-assistance-voyage/",
+              label: "Afri assistance voyage",
+            },
+            {
+              href: "https://afri-insurance.com/assurance-automobile/",
+              label: "Afri automobile",
+            },
+            {
+              href: "https://afri-insurance.com/afriinsurance-home/afri-caution/",
+              label: "AFRI CAUTION",
+            },
+            {
+              href: "https://afri-insurance.com/afriinsurance-home/afri-individuelle-accidents/",
+              label: "Afri individuelle accidents",
+            },
+            {
+              href: "https://afri-insurance.com/afriinsurance-home/afri-multitrisque-habitation/",
+              label: "Afri multitrisque habitation",
+            },
+            {
+              href: "https://afri-insurance.com/afriinsurance-home/afri-responsabilite-civile-chef-dentreprise/",
+              label: "Afri responsabilité civile chef d'entreprise",
+            },
+            {
+              href: "https://afri-insurance.com/afriinsurance-home/afri-responsabilite-civile-chef-de-famille/",
+              label: "Afri responsabilité civile chef de famille",
+            },
+            {
+              href: "https://afri-insurance.com/afri-transport-des-marchandises/",
+              label: "Afri transport des marchandises",
+            },
+            {
+              href: "https://afri-insurance.com/afriinsurance-home/afri-sante/",
+              label: "AFRI SANTE",
+            },
           ],
         },
       ],
     },
-    { href: "/news", label: "Actualité" },
-    { href: "/contact", label: "Contact" },
+    { href: "https://afri-insurance.com/news/", label: "Actualité" },
+    { href: "https://afri-insurance.com/contact/", label: "Contact" },
   ];
 
   const quoteItems: NavItem[] = [

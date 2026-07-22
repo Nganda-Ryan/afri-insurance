@@ -11,6 +11,7 @@ import {
   QUOTE_PRODUCT_CODE_AUTO,
   QUOTE_PRODUCT_CODE_HEALTH,
   QUOTE_PRODUCT_CODE_HOME,
+  QUOTE_PRODUCT_CODE_PREVOYANCE,
   QUOTE_PRODUCT_CODE_TRAVEL,
   QUOTE_WIZARD_STEP_CODE_TRIP,
   URL_PARAM_PRODUCT,
@@ -95,7 +96,7 @@ const LandingHeader = () => {
       label: "Multirisque habitation",
     },
     {
-      href: `/?${URL_PARAM_PRODUCT}=prevoyance`,
+      href: `/?${URL_PARAM_PRODUCT}=${QUOTE_PRODUCT_CODE_PREVOYANCE}`,
       label: "Prevoyance individuelle",
     },
     {
@@ -197,7 +198,7 @@ const LandingHeader = () => {
             <div className="group relative">
               <button
                 type="button"
-                className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-brand-secondary/80 px-3 py-1 text-sm font-normal text-white/95 transition hover:border-orange-500 hover:text-orange-500"
+                className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-red-500/80 px-3 py-1 text-sm font-normal text-white/95 transition hover:border-orange-500 hover:text-orange-500"
               >
                 Obtenir devis
                 <span className="text-[10px]">▼</span>
@@ -322,11 +323,11 @@ const LandingHeader = () => {
             );
           })}
           <div className="mt-2 space-y-2">
-            <div className="border border-brand-secondary/80">
+            <div className="rounded-full border border-red-500/80">
               <button
                 type="button"
                 onClick={() => toggleMobileSubmenu("quote")}
-                className="flex w-full items-center justify-between rounded-full px-4 py-2 text-sm font-normal text-white transition hover:border-orange-500 hover:text-orange-500"
+                className="flex w-full items-center justify-between rounded-full px-4 py-2 text-sm font-normal text-white/95 transition hover:border-orange-500 hover:text-orange-500"
               >
                 <span>Obtenir devis</span>
                 <span className="text-sm">{openMobileMenus.quote ? "▲" : "▼"}</span>

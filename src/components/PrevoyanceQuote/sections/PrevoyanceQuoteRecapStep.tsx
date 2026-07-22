@@ -2,12 +2,12 @@
 
 import { QuoteAmountBreakdownTable } from "@/components/Quote/layout/QuoteAmountBreakdownTable";
 import { QuoteStepNavigation } from "@/components/Quote/layout/QuoteStepNavigation";
-import { formatHealthCoverageRate } from "@/lib/constants/health_insurance";
-import { getHealthBreakdownTableRows } from "@/lib/health/health-breakdown-display";
-import type { HealthQuoteResult } from "@/types/health-insurance";
+import { formatAutoAmount } from "@/lib/auto/format-auto-amount";
+import { getPrevoyanceBreakdownTableRows } from "@/lib/prevoyance/prevoyance-breakdown-display";
+import type { PrevoyanceQuoteResult } from "@/types/prevoyance-insurance";
 
-interface HealthQuoteRecapStepProps {
-  quote: HealthQuoteResult;
+interface PrevoyanceQuoteRecapStepProps {
+  quote: PrevoyanceQuoteResult;
   isSubmitting?: boolean;
   onBack: () => void;
   onContinue: () => void;
@@ -22,14 +22,18 @@ function RecapRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function HealthQuoteRecapStep({
+export function PrevoyanceQuoteRecapStep({
   quote,
   isSubmitting = false,
   onBack,
   onContinue,
-}: HealthQuoteRecapStepProps) {
+}: PrevoyanceQuoteRecapStepProps) {
   const { breakdown, devise } = quote;
-  const breakdownTableRows = getHealthBreakdownTableRows(breakdown, devise);
+  const breakdownTableRows = getPrevoyanceBreakdownTableRows(breakdown, devise);
+  const durationLabel =
+    breakdown.durationYears === 1
+      ? "1 an"
+      : `${breakdown.durationYears} ans`;
 
   return (
     <div className="space-y-4">
@@ -40,22 +44,20 @@ export function HealthQuoteRecapStep({
         </p>
 
         <div className="rounded-lg border border-border bg-card p-4">
-          <h3 className="mb-3 text-base font-semibold">Formule</h3>
+          <h3 className="mb-3 text-base font-semibold">Contrat</h3>
           <div className="space-y-3">
-            <RecapRow label="Formule" value={quote.planLabel} />
+            <RecapRow label="Produit" value={quote.productName} />
+            <RecapRow label="Âge" value={`${breakdown.age} ans`} />
+            <RecapRow label="Durée" value={durationLabel} />
             <RecapRow
-              label="Taux de couverture"
-              value={formatHealthCoverageRate(breakdown.taux_couverture)}
-            />
-            <RecapRow
-              label="Effectif"
-              value={`${breakdown.adultCount} adulte${breakdown.adultCount > 1 ? "s" : ""}, ${breakdown.childCount} enfant${breakdown.childCount > 1 ? "s" : ""}`}
+              label="Capital assuré"
+              value={formatAutoAmount(breakdown.capital, devise)}
             />
           </div>
         </div>
 
         <div className="rounded-lg border border-border bg-card p-4">
-          <h3 className="mb-3 text-base font-semibold">Détail de la cotisation</h3>
+          <h3 className="mb-3 text-base font-semibold">Détail de la prime</h3>
           <QuoteAmountBreakdownTable rows={breakdownTableRows} />
         </div>
       </div>

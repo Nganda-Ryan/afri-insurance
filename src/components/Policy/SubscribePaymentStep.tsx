@@ -22,7 +22,9 @@ interface PaymentStepProps {
   collectResult: S3pCashoutCollectResult | null;
   paymentInitFeedback: { tone: "success" | "error"; message: string } | null;
   initiateCooldownSec: number;
+  /** Verrouille le formulaire pendant le suivi automatique du paiement. */
   pollingActive: boolean;
+  /** Affiche le bouton de vérification manuelle après le délai. */
   showVerifyButton: boolean;
   onWalletPhoneChange: (value: string) => void;
   onPayChannelChange: (value: "" | "om" | "momo") => void;
@@ -30,6 +32,8 @@ interface PaymentStepProps {
   onInitiatePayment: () => void;
   onVerifyPayment: () => void;
 }
+
+export type { PaymentStepProps };
 
 const VERIFY_PAYMENT_COOLDOWN_SEC = 10;
 

@@ -12,6 +12,9 @@ import { HealthQuotationWizard } from "@/components/HealthQuote/wizard/HealthQuo
 import { MrhQuotePortalAside } from "@/components/MrhQuote/layout/MrhQuotePortalAside";
 import { MrhQuoteFlowProgressBar } from "@/components/MrhQuote/wizard/MrhQuoteFlowProgressBar";
 import { MrhQuotationWizard } from "@/components/MrhQuote/wizard/MrhQuotationWizard";
+import { PrevoyanceQuotePortalAside } from "@/components/PrevoyanceQuote/layout/PrevoyanceQuotePortalAside";
+import { PrevoyanceQuoteFlowProgressBar } from "@/components/PrevoyanceQuote/wizard/PrevoyanceQuoteFlowProgressBar";
+import { PrevoyanceQuotationWizard } from "@/components/PrevoyanceQuote/wizard/PrevoyanceQuotationWizard";
 import { QuotePageLayout } from "@/components/Quote/layout/QuotePageLayout";
 import { QuotePortalAside } from "@/components/Quote/layout/QuotePortalAside";
 import { QuoteFlowProgressBar } from "@/components/Quote/wizard/QuoteFlowProgressBar";
@@ -22,9 +25,7 @@ import { usePlanStore } from "@/store/planStore";
 import { useWizardStore } from "@/store/wizardStore";
 
 const COMING_SOON_LABELS: Record<string, string> = {
-  auto: "Assurance automobile",
   pet: "Assurance individuelle accidents",
-  prevoyance: "Prévoyance individuelle",
 };
 
 function HomeQuotationPageContent() {
@@ -77,6 +78,13 @@ function HomeQuotationPageContent() {
           aside={<HealthQuotePortalAside />}
         >
           <HealthQuotationWizard onWizardStateChange={setWizardInProgress} />
+        </QuotePageLayout>
+      ) : currentProduct === "prevoyance" ? (
+        <QuotePageLayout
+          progress={<PrevoyanceQuoteFlowProgressBar />}
+          aside={<PrevoyanceQuotePortalAside />}
+        >
+          <PrevoyanceQuotationWizard onWizardStateChange={setWizardInProgress} />
         </QuotePageLayout>
       ) : (
         <div className="rounded-lg border border-border bg-white px-6 py-16 text-center shadow-sm">

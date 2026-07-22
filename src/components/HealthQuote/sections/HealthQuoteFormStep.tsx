@@ -6,15 +6,12 @@ import { HeartPulseIcon } from "lucide-react";
 import InputField from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import Select from "@/components/form/Select";
-import { QuoteAmountBreakdownTable } from "@/components/Quote/layout/QuoteAmountBreakdownTable";
 import { QuoteFormSection } from "@/components/Quote/layout/QuoteFormSection";
 import { QuoteStepNavigation } from "@/components/Quote/layout/QuoteStepNavigation";
-import { formatHealthCoverageRate, HEALTH_INSURANCE_PRODUCT_DATA } from "@/lib/constants/health_insurance";
 import {
   calculateHealthQuote,
   getHealthPlanOptions,
 } from "@/lib/health/calculate-health-quote";
-import { getHealthBreakdownTableRows } from "@/lib/health/health-breakdown-display";
 import type { HealthPlanId, HealthQuoteFormInput, HealthQuoteResult } from "@/types/health-insurance";
 
 interface HealthQuoteFormStepProps {
@@ -65,17 +62,7 @@ export function HealthQuoteFormStep({ initialForm, onSubmit }: HealthQuoteFormSt
     [effectivePlanId, parsedAdultCount, parsedChildCount],
   );
 
-  const devise = HEALTH_INSURANCE_PRODUCT_DATA.document_info.devise;
-  const breakdown = quoteResult?.breakdown;
-  const breakdownTableRows = useMemo(
-    () => (breakdown ? getHealthBreakdownTableRows(breakdown, devise) : []),
-    [breakdown, devise],
-  );
   const canSubmit = quoteResult != null;
-
-  const coverageLabel = breakdown
-    ? formatHealthCoverageRate(breakdown.taux_couverture)
-    : "";
 
   const handleSubmit = () => {
     if (!quoteResult) return;
@@ -128,29 +115,12 @@ export function HealthQuoteFormStep({ initialForm, onSubmit }: HealthQuoteFormSt
             />
           </div>
         </div>
-
-        {quoteResult ? (
-          <div className="mt-4 rounded-lg border border-brand-primary/20 bg-brand-primary/5 px-4 py-3">
-            <p className="text-sm font-medium text-gray-700">Taux de couverture</p>
-            <p className="mt-1 text-sm text-gray-600">{coverageLabel}</p>
-          </div>
-        ) : (
-          <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-            Indiquez au moins un assuré (adulte ou enfant) pour calculer la cotisation.
-          </p>
-        )}
       </QuoteFormSection>
-
-      {breakdown ? (
-        <QuoteFormSection title="Détail de la cotisation" icon={HeartPulseIcon}>
-          <QuoteAmountBreakdownTable rows={breakdownTableRows} />
-        </QuoteFormSection>
-      ) : null}
 
       <QuoteStepNavigation
         showPrevious={false}
         onNext={handleSubmit}
-        nextLabel="Voir le récapitulatif"
+        nextLabel="Générer devis"
         nextDisabled={!canSubmit}
       />
     </div>

@@ -5,18 +5,13 @@ import { HomeIcon } from "lucide-react";
 
 import Label from "@/components/form/Label";
 import Select from "@/components/form/Select";
-import { MrhGarantieBadges } from "@/components/MrhQuote/shared/MrhGarantieBadges";
-import { QuoteAmountBreakdownTable } from "@/components/Quote/layout/QuoteAmountBreakdownTable";
 import { QuoteFormSection } from "@/components/Quote/layout/QuoteFormSection";
 import { QuoteStepNavigation } from "@/components/Quote/layout/QuoteStepNavigation";
 import {
   calculateMrhQuote,
   getMrhProfilOptions,
   getMrhTarifOptions,
-  isMrhLocataireProfil,
 } from "@/lib/mrh/calculate-mrh-quote";
-import { getMrhBreakdownTableRows } from "@/lib/mrh/mrh-breakdown-display";
-import { MRH_INSURANCE_DATA } from "@/lib/constants/mrh_insurance";
 import type { MrhQuoteFormInput, MrhQuoteResult } from "@/types/mrh-insurance";
 
 interface MrhQuoteFormStepProps {
@@ -52,11 +47,6 @@ export function MrhQuoteFormStep({ initialForm, onSubmit }: MrhQuoteFormStepProp
     [effectiveProfilId],
   );
 
-  const isLocataire = useMemo(
-    () => isMrhLocataireProfil(effectiveProfilId),
-    [effectiveProfilId],
-  );
-
   const hasExplicitTarifSelection =
     tarifIndex !== "" && tarifOptions.some((option) => option.value === tarifIndex);
   const parsedTarifIndex = hasExplicitTarifSelection
@@ -70,15 +60,6 @@ export function MrhQuoteFormStep({ initialForm, onSubmit }: MrhQuoteFormStepProp
     return calculateMrhQuote({ profilId: effectiveProfilId, tarifIndex: parsedTarifIndex });
   }, [effectiveProfilId, parsedTarifIndex]);
 
-  const devise = MRH_INSURANCE_DATA.document_info.devise;
-  const breakdown = quoteResult?.breakdown;
-  const breakdownTableRows = useMemo(
-    () =>
-      breakdown
-        ? getMrhBreakdownTableRows(breakdown, devise, { isLocataire })
-        : [],
-    [breakdown, devise, isLocataire],
-  );
   const canSubmit = quoteResult != null;
 
   const handleSubmit = () => {
@@ -118,34 +99,12 @@ export function MrhQuoteFormStep({ initialForm, onSubmit }: MrhQuoteFormStepProp
             />
           </div>
         </div>
-
-        {quoteResult ? (
-          <div className="mt-4 rounded-lg border border-brand-primary/20 bg-brand-primary/5 px-4 py-3">
-            <p className="text-sm font-medium text-gray-700">Garanties incluses</p>
-            <div className="mt-2">
-              <MrhGarantieBadges garanties={quoteResult.garanties} />
-            </div>
-          </div>
-        ) : null}
       </QuoteFormSection>
-
-      {breakdown ? (
-        <QuoteFormSection title="Détail de la prime" icon={HomeIcon}>
-          <QuoteAmountBreakdownTable rows={breakdownTableRows} />
-          <p className="mt-4 text-xs text-gray-500">
-            {MRH_INSURANCE_DATA.note_bas_de_page}
-          </p>
-        </QuoteFormSection>
-      ) : (
-        <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          Sélectionnez un profil et une tranche tarifaire pour afficher le détail de la prime.
-        </p>
-      )}
 
       <QuoteStepNavigation
         showPrevious={false}
         onNext={handleSubmit}
-        nextLabel="Voir le récapitulatif"
+        nextLabel="Générer devis"
         nextDisabled={!canSubmit}
       />
     </div>

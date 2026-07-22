@@ -37,6 +37,7 @@ export const QUOTE_PRODUCT_CODE_HOME = "habitation";
 export const QUOTE_PRODUCT_CODE_AUTO = "auto";
 export const QUOTE_PRODUCT_CODE_PET = "animaux";
 export const QUOTE_PRODUCT_CODE_HEALTH = "sante";
+export const QUOTE_PRODUCT_CODE_PREVOYANCE = "prevoyance";
 
 /* POLICY TYPES (source de vérité DB) */
 export const POLICY_TYPE_TRAVEL = "travel";
@@ -78,6 +79,11 @@ export const HEALTH_QUOTE_WIZARD_STEP_CODE_FORM = "cotation-sante";
 export const HEALTH_QUOTE_WIZARD_STEP_CODE_RECAP = "recap-sante";
 export const HEALTH_QUOTE_WIZARD_STEP_CODE_DEVIS = "devis-sante";
 
+/** Codes URL pour le wizard devis prévoyance individuelle. */
+export const PREVOYANCE_QUOTE_WIZARD_STEP_CODE_FORM = "cotation-prev";
+export const PREVOYANCE_QUOTE_WIZARD_STEP_CODE_RECAP = "recap-prev";
+export const PREVOYANCE_QUOTE_WIZARD_STEP_CODE_DEVIS = "devis-prev";
+
 /** Clés des query params pour le parcours devis (URL courte/lisible). */
 export const URL_PARAM_PRODUCT = "p";
 export const URL_PARAM_STEP = "e";
@@ -114,6 +120,11 @@ export const URL_PARAM_MRH_TARIF = "mtar";
 export const URL_PARAM_HEALTH_PLAN = "hpln";
 export const URL_PARAM_HEALTH_ADULTS = "hadv";
 export const URL_PARAM_HEALTH_CHILDREN = "henf";
+
+/** Query params du parcours devis prévoyance individuelle. */
+export const URL_PARAM_PREVOYANCE_AGE = "pvage";
+export const URL_PARAM_PREVOYANCE_DURATION = "pvdur";
+export const URL_PARAM_PREVOYANCE_CAPITAL = "pvcap";
 
 /** Liens des logos Afri Insurance (1) et Afrilife (2). */
 export const AFRI_INSURANCE_LOGO_HREF = `https://afri-insurance.vercel.app/?${URL_PARAM_PRODUCT}=${QUOTE_PRODUCT_CODE_TRAVEL}&${URL_PARAM_STEP}=${QUOTE_WIZARD_STEP_CODE_TRIP}`;

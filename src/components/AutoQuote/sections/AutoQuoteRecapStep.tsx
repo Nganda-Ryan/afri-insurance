@@ -72,7 +72,7 @@ export function AutoQuoteRecapStep({
       <QuoteStepNavigation
         onPrevious={onBack}
         onNext={onContinue}
-        nextLabel="Voir le devis"
+        nextLabel="Télécharger"
         isSubmitting={isSubmitting}
       />
     </div>

@@ -5,7 +5,6 @@ import { CarIcon } from "lucide-react";
 
 import Label from "@/components/form/Label";
 import Select from "@/components/form/Select";
-import { QuoteAmountBreakdownTable } from "@/components/Quote/layout/QuoteAmountBreakdownTable";
 import { QuoteFormSection } from "@/components/Quote/layout/QuoteFormSection";
 import { QuoteStepNavigation } from "@/components/Quote/layout/QuoteStepNavigation";
 import {
@@ -19,8 +18,6 @@ import {
   isAutoMotoCategory,
 } from "@/lib/auto/calculate-auto-quote";
 import { representativePowerCvFromLabel } from "@/lib/auto/parse-power-range";
-import { getAutoBreakdownTableRows } from "@/lib/auto/auto-breakdown-display";
-import { AUTO_INSURANCE_PRODUCT_DATA } from "@/lib/constants/auto_insurance";
 import type { AutoFuelType, AutoQuoteFormInput, AutoQuoteResult } from "@/types/auto-insurance";
 
 interface AutoQuoteFormStepProps {
@@ -148,15 +145,6 @@ export function AutoQuoteFormStep({ initialForm, onSubmit }: AutoQuoteFormStepPr
     effectiveMotoCharacteristic,
   ]);
 
-  const devise = AUTO_INSURANCE_PRODUCT_DATA.document_info.devise;
-  const breakdown = quoteResult?.breakdown;
-  const breakdownTableRows = useMemo(
-    () =>
-      breakdown
-        ? getAutoBreakdownTableRows(breakdown, devise, { isMoto })
-        : [],
-    [breakdown, devise, isMoto],
-  );
   const canSubmit = quoteResult != null;
 
   const handleZoneChange = (value: string) => {
@@ -291,20 +279,10 @@ export function AutoQuoteFormStep({ initialForm, onSubmit }: AutoQuoteFormStepPr
         </div>
       </QuoteFormSection>
 
-      {breakdown ? (
-        <QuoteFormSection title="Détail de la prime" icon={CarIcon}>
-          <QuoteAmountBreakdownTable rows={breakdownTableRows} />
-        </QuoteFormSection>
-      ) : (
-        <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          Complétez les critères pour afficher le détail de la prime.
-        </p>
-      )}
-
       <QuoteStepNavigation
         showPrevious={false}
         onNext={handleSubmit}
-        nextLabel="Voir le récapitulatif"
+        nextLabel="Générer devis"
         nextDisabled={!canSubmit}
       />
     </div>

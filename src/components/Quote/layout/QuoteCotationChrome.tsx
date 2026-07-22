@@ -24,6 +24,7 @@ export function QuoteCotationChrome() {
 
   const wizardInProgress = useWizardStore((s) => s.wizardInProgress);
   const isQuoteHome = pathname === "/";
+  const isClaimsPage = pathname === "/claims";
 
   const [showSwitchWarning, setShowSwitchWarning] = useState(false);
   const [pendingProduct, setPendingProduct] = useState<ProductType | null>(null);
@@ -63,11 +64,24 @@ export function QuoteCotationChrome() {
     setPendingProduct(null);
   };
 
-  if (!isQuoteHome) return null;
+  if (!isQuoteHome && !isClaimsPage) return null;
 
   return (
     <>
-      <QuoteHero productId={heroProductId} />
+      <QuoteHero
+        productId={isClaimsPage ? undefined : heroProductId}
+        badge={isClaimsPage ? "Sinistre" : undefined}
+        title={
+          isClaimsPage
+            ? "Déclarez votre sinistre en quelques clics"
+            : undefined
+        }
+        description={
+          isClaimsPage
+            ? "Renseignez les informations de l’accident et joignez vos pièces pour une prise en charge rapide."
+            : undefined
+        }
+      />
       {/* <QuotationProductNav
         currentProduct={currentProduct}
         onProductChange={handleProductSwitch}

@@ -132,6 +132,8 @@ export function TravelQuoteSubscribePhase({
   const [initiateCooldownSec, setInitiateCooldownSec] = useState(0);
   const [pollingEnabled, setPollingEnabled] = useState(false);
   const [verifyButtonVisible, setVerifyButtonVisible] = useState(false);
+  const [paymentTrid, setPaymentTrid] = useState(generatePaymentTrid);
+  const [hasInitiatedPayment, setHasInitiatedPayment] = useState(false);
   const lastKnownStatusRef = useRef<string | null>(null);
   const pollingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const verifyVisibleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -758,8 +760,12 @@ export function TravelQuoteSubscribePhase({
         }
         onPayChannelChange={setPayChannel}
         onBack={onBack}
-        onInitiatePayment={() => void handleInitierPaiement()}
-        onVerifyPayment={() => void handleVerifierStatutPaiement()}
+        onInitiatePayment={() => {
+          void handleInitierPaiement();
+        }}
+        onVerifyPayment={() => {
+          void handleVerifierStatutPaiement();
+        }}
       />
     );
   }

@@ -61,7 +61,7 @@ export function getMomoServiceId(): string {
   return v && v.length > 0 ? v : "20053";
 }
 
-/** Service S3P cash-out Orange Money — obligatoire en prod (variable d'environnement). */
+/** Service S3P cash-out Orange Money - obligatoire en prod (variable d'environnement). */
 export function getOmServiceId(): string {
   const v =
     process.env.OM_SERVICE_ID?.trim() ||

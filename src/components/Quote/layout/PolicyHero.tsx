@@ -20,7 +20,7 @@ interface PolicyHeroProps {
  * (ex: /quote/[policyId]).
  *
  * Sur ces pages, `WebsiteLayoutContent` ajoute déjà `pt-16 lg:pt-20`
- * pour compenser le header fixe — ce composant n'a donc pas besoin
+ * pour compenser le header fixe - ce composant n'a donc pas besoin
  * de grand padding supérieur et évite le double-espace visible.
  */
 export function PolicyHero({

@@ -12,7 +12,7 @@ import type {
   ISubscribePolicyResponseDto,
 } from "@/types/travel";
 
-/** POST `travel/quotes_requests` — Postman « 02 - Get Quote » */
+/** POST `travel/quotes_requests` - Postman « 02 - Get Quote » */
 export async function postTravelQuotesRequest(
   body: IGetQuotePayload,
 ): Promise<IGetQuoteResponseDto> {
@@ -29,7 +29,7 @@ export async function postTravelQuotesRequest(
   }
 }
 
-/** POST `travel/policies` — Postman « 03 - Subscribe Policy » */
+/** POST `travel/policies` - Postman « 03 - Subscribe Policy » */
 export async function postTravelPolicy(
   body: ISubscribePolicyRequestBody,
 ): Promise<ISubscribePolicyResponseDto> {
@@ -45,7 +45,7 @@ export async function postTravelPolicy(
   }
 }
 
-/** GET `travel/policies/:policyId` — Postman « 04 - Get Policy Data » */
+/** GET `travel/policies/:policyId` - Postman « 04 - Get Policy Data » */
 export async function getTravelPolicy(
   policyId: string,
   headers?: Record<string, string>,
@@ -61,7 +61,7 @@ export async function getTravelPolicy(
   }
 }
 
-/** GET `travel/policies/:policyId/certificate` — Postman « 05 - Get Certificate » */
+/** GET `travel/policies/:policyId/certificate` - Postman « 05 - Get Certificate » */
 export async function getTravelPolicyCertificate(
   policyId: string,
 ): Promise<ArrayBuffer> {
@@ -77,7 +77,7 @@ export async function getTravelPolicyCertificate(
   }
 }
 
-/** PATCH `travel/policies/:policyId` — Postman « 06 - Update Policy » */
+/** PATCH `travel/policies/:policyId` - Postman « 06 - Update Policy » */
 export async function patchTravelPolicy(
   policyId: string,
   body: Record<string, unknown>,
@@ -94,7 +94,7 @@ export async function patchTravelPolicy(
   }
 }
 
-/** POST `travel/policies/:policyId/cancel` — Postman « 07 - Cancel Policy » */
+/** POST `travel/policies/:policyId/cancel` - Postman « 07 - Cancel Policy » */
 export async function postTravelPolicyCancel(
   policyId: string,
   body: Record<string, unknown>,
@@ -111,7 +111,7 @@ export async function postTravelPolicyCancel(
   }
 }
 
-/** POST `travel/getPolicysbyDate` — Postman « 08 - Policies by Date » (orthographe API) */
+/** POST `travel/getPolicysbyDate` - Postman « 08 - Policies by Date » (orthographe API) */
 export async function postTravelPoliciesByDate(
   body: Record<string, unknown>,
 ): Promise<unknown> {
@@ -124,7 +124,7 @@ export async function postTravelPoliciesByDate(
   }
 }
 
-/** GET `travel/plans` — Postman « 09 - Get Plans » */
+/** GET `travel/plans` - Postman « 09 - Get Plans » */
 export async function getTravelPlans(): Promise<IGetPlanResponseDto> {
   const client = getEvoApiClient();
   try {

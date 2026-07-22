@@ -49,12 +49,12 @@ export function PolicyOverviewCard({ policy }: PolicyOverviewCardProps) {
           />
           <InfoRow
             label="Produit"
-            value={`${policy.product.name} — ${policy.product.category}`}
+            value={`${policy.product.name} - ${policy.product.category}`}
             icon={<PlaneIcon className="w-4 h-4" />}
           />
           <InfoRow
             label="Période de couverture"
-            value={`${formatDate(policy.coverage_period.start_date)} — ${formatDate(policy.coverage_period.end_date)}`}
+            value={`${formatDate(policy.coverage_period.start_date)} - ${formatDate(policy.coverage_period.end_date)}`}
             icon={<CalendarIcon className="w-4 h-4" />}
           />
           <InfoRow

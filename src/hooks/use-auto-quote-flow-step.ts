@@ -13,7 +13,7 @@ import {
 import type { AutoQuoteSession } from "@/types/auto-insurance";
 import { parseAutoQuoteSessionFromSearchParams } from "@/lib/auto/auto-quote-wizard-url";
 
-/** Ancien code URL paiement — toujours reconnu pour compatibilité. */
+/** Ancien code URL paiement - toujours reconnu pour compatibilité. */
 const LEGACY_PAYMENT_STEP_CODE = "paiement-auto";
 
 const STEP_CODE_TO_INDEX: Record<string, number> = {

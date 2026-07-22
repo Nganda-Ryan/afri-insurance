@@ -19,32 +19,20 @@ interface MrhQuoteFormStepProps {
   onSubmit: (form: MrhQuoteFormInput, quote: MrhQuoteResult) => void;
 }
 
-function pickOptionValue(
-  value: string,
-  options: { value: string }[],
-): string {
-  return options.some((option) => option.value === value)
-    ? value
-    : (options[0]?.value ?? "");
-}
-
 export function MrhQuoteFormStep({ initialForm, onSubmit }: MrhQuoteFormStepProps) {
   const profilOptions = useMemo(() => getMrhProfilOptions(), []);
-  const defaultProfil = initialForm?.profilId ?? profilOptions[0]?.value ?? "";
 
-  const [profilId, setProfilId] = useState(defaultProfil);
+  const [profilId, setProfilId] = useState(initialForm?.profilId ?? "");
   const [tarifIndex, setTarifIndex] = useState(
     initialForm?.tarifIndex != null ? String(initialForm.tarifIndex) : "",
   );
 
-  const effectiveProfilId = useMemo(
-    () => pickOptionValue(profilId, profilOptions),
-    [profilId, profilOptions],
-  );
+  const hasExplicitProfil =
+    profilId !== "" && profilOptions.some((option) => option.value === profilId);
 
   const tarifOptions = useMemo(
-    () => getMrhTarifOptions(effectiveProfilId),
-    [effectiveProfilId],
+    () => (hasExplicitProfil ? getMrhTarifOptions(profilId) : []),
+    [hasExplicitProfil, profilId],
   );
 
   const hasExplicitTarifSelection =
@@ -54,18 +42,18 @@ export function MrhQuoteFormStep({ initialForm, onSubmit }: MrhQuoteFormStepProp
     : NaN;
 
   const quoteResult = useMemo(() => {
-    if (!effectiveProfilId || !Number.isFinite(parsedTarifIndex) || parsedTarifIndex < 0) {
+    if (!hasExplicitProfil || !Number.isFinite(parsedTarifIndex) || parsedTarifIndex < 0) {
       return null;
     }
-    return calculateMrhQuote({ profilId: effectiveProfilId, tarifIndex: parsedTarifIndex });
-  }, [effectiveProfilId, parsedTarifIndex]);
+    return calculateMrhQuote({ profilId, tarifIndex: parsedTarifIndex });
+  }, [hasExplicitProfil, profilId, parsedTarifIndex]);
 
   const canSubmit = quoteResult != null;
 
   const handleSubmit = () => {
-    if (!quoteResult) return;
+    if (!quoteResult || !hasExplicitProfil) return;
     onSubmit(
-      { profilId: effectiveProfilId, tarifIndex: parsedTarifIndex },
+      { profilId, tarifIndex: parsedTarifIndex },
       quoteResult,
     );
   };
@@ -78,7 +66,7 @@ export function MrhQuoteFormStep({ initialForm, onSubmit }: MrhQuoteFormStepProp
             <Label htmlFor="mrh-profil">Profil d&apos;assurance</Label>
             <Select
               id="mrh-profil"
-              value={effectiveProfilId}
+              value={hasExplicitProfil ? profilId : ""}
               onChange={(value) => {
                 setProfilId(value);
                 setTarifIndex("");
@@ -96,6 +84,7 @@ export function MrhQuoteFormStep({ initialForm, onSubmit }: MrhQuoteFormStepProp
               onChange={setTarifIndex}
               options={tarifOptions}
               placeholder="Choisir une tranche"
+              disabled={!hasExplicitProfil || tarifOptions.length === 0}
             />
           </div>
         </div>
@@ -104,7 +93,7 @@ export function MrhQuoteFormStep({ initialForm, onSubmit }: MrhQuoteFormStepProp
       <QuoteStepNavigation
         showPrevious={false}
         onNext={handleSubmit}
-        nextLabel="Générer devis"
+        nextLabel="Obtenir un devis"
         nextDisabled={!canSubmit}
       />
     </div>

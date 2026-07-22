@@ -1,7 +1,7 @@
 export const errorCode = {
   "0": {
     description:
-      "Le traitement de la transaction n'a pas généré d'erreur — elle est en cours ou a déjà été traitée avec succès.",
+      "Le traitement de la transaction n'a pas généré d'erreur - elle est en cours ou a déjà été traitée avec succès.",
     action: "Aucune erreur. Vérifiez le statut du paiement.",
   },
   "2": {

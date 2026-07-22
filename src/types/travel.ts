@@ -42,7 +42,7 @@ export interface IGetQuotePayload {
   };
 }
 
-/** Réponse POST `travel/quotes_requests` (Get Quote) — DTO API. */
+/** Réponse POST `travel/quotes_requests` (Get Quote) - DTO API. */
 export interface IGetQuoteExpireAtDto {
   date: string;
   timezone_type: number;

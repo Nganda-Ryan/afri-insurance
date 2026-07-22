@@ -11,21 +11,13 @@ import { QuoteStepNavigation } from "@/components/Quote/layout/QuoteStepNavigati
 import {
   calculateHealthQuote,
   getHealthPlanOptions,
+  parseHealthPlanId,
 } from "@/lib/health/calculate-health-quote";
-import type { HealthPlanId, HealthQuoteFormInput, HealthQuoteResult } from "@/types/health-insurance";
+import type { HealthQuoteFormInput, HealthQuoteResult } from "@/types/health-insurance";
 
 interface HealthQuoteFormStepProps {
   initialForm?: HealthQuoteFormInput | null;
   onSubmit: (form: HealthQuoteFormInput, quote: HealthQuoteResult) => void;
-}
-
-function pickOptionValue(
-  value: string,
-  options: { value: string }[],
-): string {
-  return options.some((option) => option.value === value)
-    ? value
-    : (options[0]?.value ?? "");
 }
 
 function parseCount(value: string): number {
@@ -35,9 +27,8 @@ function parseCount(value: string): number {
 
 export function HealthQuoteFormStep({ initialForm, onSubmit }: HealthQuoteFormStepProps) {
   const planOptions = useMemo(() => getHealthPlanOptions(), []);
-  const defaultPlan = initialForm?.planId ?? planOptions[0]?.value ?? "";
 
-  const [planId, setPlanId] = useState<string>(defaultPlan);
+  const [planId, setPlanId] = useState<string>(initialForm?.planId ?? "");
   const [adultCount, setAdultCount] = useState(
     initialForm?.adultCount != null ? String(initialForm.adultCount) : "1",
   );
@@ -45,30 +36,33 @@ export function HealthQuoteFormStep({ initialForm, onSubmit }: HealthQuoteFormSt
     initialForm?.childCount != null ? String(initialForm.childCount) : "0",
   );
 
-  const effectivePlanId = useMemo(
-    () => pickOptionValue(planId, planOptions) as HealthPlanId,
-    [planId, planOptions],
-  );
+  const selectedPlanId = useMemo(() => {
+    if (!planId) return null;
+    return parseHealthPlanId(planId);
+  }, [planId]);
+
   const parsedAdultCount = parseCount(adultCount);
   const parsedChildCount = parseCount(childCount);
 
   const quoteResult = useMemo(
     () =>
-      calculateHealthQuote({
-        planId: effectivePlanId,
-        adultCount: parsedAdultCount,
-        childCount: parsedChildCount,
-      }),
-    [effectivePlanId, parsedAdultCount, parsedChildCount],
+      selectedPlanId
+        ? calculateHealthQuote({
+            planId: selectedPlanId,
+            adultCount: parsedAdultCount,
+            childCount: parsedChildCount,
+          })
+        : null,
+    [selectedPlanId, parsedAdultCount, parsedChildCount],
   );
 
-  const canSubmit = quoteResult != null;
+  const canSubmit = quoteResult != null && selectedPlanId != null;
 
   const handleSubmit = () => {
-    if (!quoteResult) return;
+    if (!quoteResult || !selectedPlanId) return;
     onSubmit(
       {
-        planId: effectivePlanId,
+        planId: selectedPlanId,
         adultCount: parsedAdultCount,
         childCount: parsedChildCount,
       },
@@ -84,7 +78,7 @@ export function HealthQuoteFormStep({ initialForm, onSubmit }: HealthQuoteFormSt
             <Label htmlFor="health-plan">Formule</Label>
             <Select
               id="health-plan"
-              value={effectivePlanId}
+              value={selectedPlanId ?? ""}
               onChange={setPlanId}
               options={planOptions}
               placeholder="Choisir une formule"
@@ -120,7 +114,7 @@ export function HealthQuoteFormStep({ initialForm, onSubmit }: HealthQuoteFormSt
       <QuoteStepNavigation
         showPrevious={false}
         onNext={handleSubmit}
-        nextLabel="Générer devis"
+        nextLabel="Obtenir un devis"
         nextDisabled={!canSubmit}
       />
     </div>

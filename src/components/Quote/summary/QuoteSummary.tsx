@@ -57,7 +57,7 @@ function guaranteeLinesFromSummaries(
     const name = typeof g.name === "string" ? g.name.trim() : "";
     if (!name) continue;
     const limit = typeof g.limit === "string" ? g.limit.trim() : "";
-    out.push(limit ? `${name} — ${limit}` : name);
+    out.push(limit ? `${name} - ${limit}` : name);
   }
   return out;
 }

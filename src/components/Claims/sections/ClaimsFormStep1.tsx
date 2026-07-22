@@ -90,7 +90,7 @@ export function ClaimsFormStep1({ form, onChange, onNext }: ClaimsFormStep1Props
           <div>
             <DatePicker
               id="claims-coverage-start"
-              label="Période de couverture — effet"
+              label="Période de couverture - effet"
               value={form.coverageStart}
               onChange={(value: string) => onChange({ coverageStart: value })}
               placeholder="Date d'effet"
@@ -100,7 +100,7 @@ export function ClaimsFormStep1({ form, onChange, onNext }: ClaimsFormStep1Props
           <div>
             <DatePicker
               id="claims-coverage-end"
-              label="Période de couverture — échéance"
+              label="Période de couverture - échéance"
               value={form.coverageEnd}
               onChange={(value: string) => onChange({ coverageEnd: value })}
               placeholder="Date d'échéance"

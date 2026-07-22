@@ -13,7 +13,7 @@ import {
 import { parseMrhQuoteSessionFromSearchParams } from "@/lib/mrh/mrh-quote-wizard-url";
 import type { MrhQuoteSession } from "@/types/mrh-insurance";
 
-/** Ancien code URL paiement — toujours reconnu pour compatibilité. */
+/** Ancien code URL paiement - toujours reconnu pour compatibilité. */
 const LEGACY_PAYMENT_STEP_CODE = "paiement-mrh";
 
 const STEP_CODE_TO_INDEX: Record<string, number> = {

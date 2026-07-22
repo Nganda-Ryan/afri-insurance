@@ -33,7 +33,7 @@ export function buildS3pAuthorizationHeader(input: BuildAuthInput): string {
   const timestamp = String(ts);
   const nonce = String(ts);
 
-  /** Ordre Postman : {...query/body, ...s3pParams} — champs oauth écrasent le reste. */
+  /** Ordre Postman : {...query/body, ...s3pParams} - champs oauth écrasent le reste. */
   const allParams: Record<string, string> = {};
 
   if (bodyParams) {

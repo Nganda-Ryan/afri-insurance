@@ -7,7 +7,6 @@ import Label from "@/components/form/Label";
 import Select from "@/components/form/Select";
 import { QuoteFormSection } from "@/components/Quote/layout/QuoteFormSection";
 import { QuoteStepNavigation } from "@/components/Quote/layout/QuoteStepNavigation";
-import { PREVOYANCE_INDIVIDUELLE_INSURANCE_DATA } from "@/lib/constants/prevoyance_individuelle_insurance";
 import {
   calculatePrevoyanceQuote,
   getPrevoyanceAgeOptions,
@@ -24,15 +23,6 @@ interface PrevoyanceQuoteFormStepProps {
   onSubmit: (form: PrevoyanceQuoteFormInput, quote: PrevoyanceQuoteResult) => void;
 }
 
-function pickOptionValue(
-  value: string,
-  options: { value: string }[],
-): string {
-  return options.some((option) => option.value === value)
-    ? value
-    : (options[0]?.value ?? "");
-}
-
 export function PrevoyanceQuoteFormStep({
   initialForm,
   onSubmit,
@@ -47,16 +37,12 @@ export function PrevoyanceQuoteFormStep({
     initialForm?.durationYears != null ? String(initialForm.durationYears) : "",
   );
   const [capital, setCapital] = useState(
-    initialForm?.capital != null
-      ? String(initialForm.capital)
-      : String(PREVOYANCE_INDIVIDUELLE_INSURANCE_DATA.base_capital),
+    initialForm?.capital != null ? String(initialForm.capital) : "",
   );
 
-  const effectiveAge = useMemo(
-    () => pickOptionValue(age, ageOptions),
-    [age, ageOptions],
-  );
-  const parsedAge = Number.parseInt(effectiveAge, 10);
+  const hasExplicitAge =
+    age !== "" && ageOptions.some((option) => option.value === age);
+  const parsedAge = hasExplicitAge ? Number.parseInt(age, 10) : NaN;
 
   const durationOptions = useMemo(
     () =>
@@ -64,22 +50,17 @@ export function PrevoyanceQuoteFormStep({
     [parsedAge],
   );
 
-  const effectiveCapital = useMemo(
-    () => pickOptionValue(capital, capitalOptions),
-    [capital, capitalOptions],
-  );
-
-  const hasExplicitAge =
-    age !== "" && ageOptions.some((option) => option.value === age);
   const hasExplicitDuration =
     durationYears !== "" &&
     durationOptions.some((option) => option.value === durationYears);
+  const hasExplicitCapital =
+    capital !== "" && capitalOptions.some((option) => option.value === capital);
 
   const formInput = useMemo((): PrevoyanceQuoteFormInput | null => {
-    if (!hasExplicitAge || !hasExplicitDuration) return null;
+    if (!hasExplicitAge || !hasExplicitDuration || !hasExplicitCapital) return null;
     const ageValue = Number.parseInt(age, 10);
     const durationValue = Number.parseInt(durationYears, 10);
-    const capitalValue = Number.parseInt(effectiveCapital, 10);
+    const capitalValue = Number.parseInt(capital, 10);
     if (
       !Number.isFinite(ageValue) ||
       !Number.isFinite(durationValue) ||
@@ -92,7 +73,14 @@ export function PrevoyanceQuoteFormStep({
       durationYears: durationValue,
       capital: capitalValue,
     };
-  }, [age, durationYears, effectiveCapital, hasExplicitAge, hasExplicitDuration]);
+  }, [
+    age,
+    durationYears,
+    capital,
+    hasExplicitAge,
+    hasExplicitDuration,
+    hasExplicitCapital,
+  ]);
 
   const quoteResult = useMemo(
     () => (formInput ? calculatePrevoyanceQuote(formInput) : null),
@@ -140,7 +128,7 @@ export function PrevoyanceQuoteFormStep({
             <Label htmlFor="prevoyance-capital">Capital assuré</Label>
             <Select
               id="prevoyance-capital"
-              value={effectiveCapital}
+              value={hasExplicitCapital ? capital : ""}
               onChange={setCapital}
               options={capitalOptions}
               placeholder="Choisir le capital"
@@ -152,7 +140,7 @@ export function PrevoyanceQuoteFormStep({
       <QuoteStepNavigation
         showPrevious={false}
         onNext={handleSubmit}
-        nextLabel="Générer devis"
+        nextLabel="Obtenir un devis"
         nextDisabled={!canSubmit}
       />
     </div>

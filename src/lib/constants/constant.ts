@@ -2,7 +2,7 @@
 
 export const SAFETY_BUFFER_MS = 60_000;
 
-/* TRIP CATEGORIES — valeurs API + codes URL courts */
+/* TRIP CATEGORIES - valeurs API + codes URL courts */
 
 export const TRIP_PRODUCT_CATEGORY_STANDARD = "Standard";
 export const TRIP_PRODUCT_CATEGORY_STUDENT = "Etudiant";
@@ -56,7 +56,7 @@ export type PolicyType = (typeof POLICY_TYPE_VALUES)[number];
 
 /** Codes URL pour chaque étape du wizard devis voyage. */
 export const QUOTE_WIZARD_STEP_CODE_TRIP = "voyage";
-/** @deprecated Alias historique — étape 0 (détails du voyage) */
+/** @deprecated Alias historique - étape 0 (détails du voyage) */
 export const QUOTE_WIZARD_STEP_CODE_FORM = QUOTE_WIZARD_STEP_CODE_TRIP;
 export const QUOTE_WIZARD_STEP_CODE_TRAVELER = "voyageur";
 export const QUOTE_WIZARD_STEP_CODE_QUOTE = "devis";

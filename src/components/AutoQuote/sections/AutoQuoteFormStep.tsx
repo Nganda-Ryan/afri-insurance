@@ -282,7 +282,7 @@ export function AutoQuoteFormStep({ initialForm, onSubmit }: AutoQuoteFormStepPr
       <QuoteStepNavigation
         showPrevious={false}
         onNext={handleSubmit}
-        nextLabel="Générer devis"
+        nextLabel="Obtenir un devis"
         nextDisabled={!canSubmit}
       />
     </div>

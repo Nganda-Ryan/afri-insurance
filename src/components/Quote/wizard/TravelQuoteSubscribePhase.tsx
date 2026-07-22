@@ -185,7 +185,7 @@ export function TravelQuoteSubscribePhase({
       setVerifyButtonVisible(false);
       setPaymentInitFeedback({
         tone: "error",
-        message: getS3pErrorMessage(null, `Paiement échoué — statut : ${polledStatus}.`),
+        message: getS3pErrorMessage(null, `Paiement échoué - statut : ${polledStatus}.`),
       });
     }
   // completeSubscriptionAfterPayment is defined later but is a stable function reference.
@@ -613,7 +613,7 @@ export function TravelQuoteSubscribePhase({
 
           // Only react on status transitions
           if (status === lastKnownStatusRef.current) {
-            toast.message("Statut inchangé — paiement en attente de traitement.");
+            toast.message("Statut inchangé - paiement en attente de traitement.");
             return;
           }
           lastKnownStatusRef.current = status;
@@ -645,7 +645,7 @@ export function TravelQuoteSubscribePhase({
             });
             return;
           }
-          // PENDING / INPROCESS — no UI change needed
+          // PENDING / INPROCESS - no UI change needed
         },
       },
     );

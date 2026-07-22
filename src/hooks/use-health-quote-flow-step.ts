@@ -13,7 +13,7 @@ import {
 import { parseHealthQuoteSessionFromSearchParams } from "@/lib/health/health-quote-wizard-url";
 import type { HealthQuoteSession } from "@/types/health-insurance";
 
-/** Ancien code URL paiement — toujours reconnu pour compatibilité. */
+/** Ancien code URL paiement - toujours reconnu pour compatibilité. */
 const LEGACY_PAYMENT_STEP_CODE = "paiement-sante";
 
 const STEP_CODE_TO_INDEX: Record<string, number> = {

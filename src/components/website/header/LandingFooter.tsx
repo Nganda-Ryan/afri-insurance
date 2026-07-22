@@ -72,7 +72,7 @@ const LandingFooter = () => {
               </a>
             </div>
 
-            {/* Colonne Entreprise — masquée sur mobile comme sur WordPress */}
+            {/* Colonne Entreprise - masquée sur mobile comme sur WordPress */}
             <div className="hidden flex-col gap-6 md:flex">
               <h6 className="text-base font-bold text-gray-900">Entreprise</h6>
               <CompanyInfo title="AFRI INSURANCE" href="/afriinsurance-home">
@@ -189,7 +189,7 @@ const LandingFooter = () => {
         </div>
       </div>
 
-      {/* Barre copyright — sans sélecteur de langue */}
+      {/* Barre copyright - sans sélecteur de langue */}
       <div className="bg-brand-secondary px-4 py-4 text-white">
         <p className="mx-auto max-w-[1500px] text-center text-xs leading-relaxed sm:text-sm">
           Copyright © {year} AFRILIFE - AFRI INSURANCE | Tous droits réservés – site

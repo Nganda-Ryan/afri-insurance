@@ -63,7 +63,7 @@ export function MrhQuoteFormStep({ initialForm, onSubmit }: MrhQuoteFormStepProp
       <QuoteFormSection title="Cotation multirisque habitation" icon={HomeIcon}>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <div className="sm:col-span-2">
-            <Label htmlFor="mrh-profil">Profil d&apos;assurance</Label>
+            <Label htmlFor="mrh-profil">Profil du client</Label>
             <Select
               id="mrh-profil"
               value={hasExplicitProfil ? profilId : ""}
@@ -77,13 +77,13 @@ export function MrhQuoteFormStep({ initialForm, onSubmit }: MrhQuoteFormStepProp
           </div>
 
           <div className="sm:col-span-2">
-            <Label htmlFor="mrh-tarif">Grille tarifaire</Label>
+            <Label htmlFor="mrh-tarif">Valeur du batiment</Label>
             <Select
               id="mrh-tarif"
               value={hasExplicitTarifSelection ? tarifIndex : ""}
               onChange={setTarifIndex}
               options={tarifOptions}
-              placeholder="Choisir une tranche"
+              placeholder="Choisir une valeur"
               disabled={!hasExplicitProfil || tarifOptions.length === 0}
             />
           </div>

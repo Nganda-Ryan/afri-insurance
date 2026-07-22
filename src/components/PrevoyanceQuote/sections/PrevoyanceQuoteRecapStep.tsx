@@ -50,7 +50,7 @@ export function PrevoyanceQuoteRecapStep({
             <RecapRow label="Âge" value={`${breakdown.age} ans`} />
             <RecapRow label="Durée" value={durationLabel} />
             <RecapRow
-              label="Capital assuré"
+              label="Capital à assuré"
               value={formatAutoAmount(breakdown.capital, devise)}
             />
           </div>

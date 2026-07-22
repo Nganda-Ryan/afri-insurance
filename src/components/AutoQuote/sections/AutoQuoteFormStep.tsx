@@ -270,7 +270,7 @@ export function AutoQuoteFormStep({ initialForm, onSubmit }: AutoQuoteFormStepPr
                   value={effectivePowerLabel}
                   onChange={setPowerLabel}
                   options={powerOptions}
-                  placeholder="Choisir une tranche de puissance"
+                  placeholder="Choisir une valeur de puissance"
                   disabled={powerOptions.length === 0}
                 />
               </div>

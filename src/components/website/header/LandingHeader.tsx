@@ -78,7 +78,7 @@ const LandingHeader = () => {
         },
       ],
     },
-    { href: "/news", label: "Actualite" },
+    { href: "/news", label: "Actualité" },
     { href: "/contact", label: "Contact" },
   ];
 
@@ -101,13 +101,13 @@ const LandingHeader = () => {
     },
     {
       href: `/?${URL_PARAM_PRODUCT}=${QUOTE_PRODUCT_CODE_HEALTH}`,
-      label: "Assurance sante",
+      label: "Assurance santé",
     },
   ];
 
   const actionItems = [
-    { href: "/claims", label: "Declarer sinistre", borderClass: "border-red-500/80" },
-    { href: "/signin", label: "Espace client", borderClass: "border-brand-primary/90" },
+    { href: "/claims", label: "Déclarer sinistre", borderClass: "border-red-500/80" },
+    // { href: "/signin", label: "Espace client", borderClass: "border-brand-primary/90" },
   ];
 
   return (

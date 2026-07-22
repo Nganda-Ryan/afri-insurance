@@ -8,7 +8,7 @@ export function getPrevoyanceBreakdownTableRows(
 ): QuoteAmountBreakdownRow[] {
   return [
     {
-      label: "Capital assuré",
+      label: "Capital à assuré",
       value: formatAutoAmount(breakdown.capital, devise),
     },
     {

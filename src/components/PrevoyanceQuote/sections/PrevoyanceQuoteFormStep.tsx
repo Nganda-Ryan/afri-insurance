@@ -99,7 +99,7 @@ export function PrevoyanceQuoteFormStep({
       <QuoteFormSection title="Cotation prévoyance individuelle" icon={ShieldIcon}>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <div>
-            <Label htmlFor="prevoyance-age">Âge de l&apos;assuré</Label>
+            <Label htmlFor="prevoyance-age">Âge du client</Label>
             <Select
               id="prevoyance-age"
               value={hasExplicitAge ? age : ""}
@@ -125,7 +125,7 @@ export function PrevoyanceQuoteFormStep({
           </div>
 
           <div className="sm:col-span-2">
-            <Label htmlFor="prevoyance-capital">Capital assuré</Label>
+            <Label htmlFor="prevoyance-capital">Capital à assuré</Label>
             <Select
               id="prevoyance-capital"
               value={hasExplicitCapital ? capital : ""}

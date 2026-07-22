@@ -75,7 +75,7 @@ export function HealthQuoteFormStep({ initialForm, onSubmit }: HealthQuoteFormSt
       <QuoteFormSection title="Cotation assurance santé" icon={HeartPulseIcon}>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <div className="sm:col-span-2">
-            <Label htmlFor="health-plan">Formule</Label>
+            <Label htmlFor="health-plan">Formule d&apos;assurance</Label>
             <Select
               id="health-plan"
               value={selectedPlanId ?? ""}

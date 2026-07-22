@@ -26,7 +26,7 @@ export function PrevoyanceQuoteDevisStep({
     { label: "Âge", value: `${breakdown.age} ans` },
     { label: "Durée", value: durationLabel },
     {
-      label: "Capital assuré",
+      label: "Capital à assuré",
       value: formatAutoAmount(breakdown.capital, quote.devise),
     },
     {

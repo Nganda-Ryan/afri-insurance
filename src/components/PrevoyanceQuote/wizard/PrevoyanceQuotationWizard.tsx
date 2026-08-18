@@ -10,8 +10,6 @@ import {
   PREVOYANCE_QUOTE_WIZARD_STEP_CODE_DEVIS,
   PREVOYANCE_QUOTE_WIZARD_STEP_CODE_FORM,
   PREVOYANCE_QUOTE_WIZARD_STEP_CODE_RECAP,
-  QUOTE_PRODUCT_CODE_PREVOYANCE,
-  URL_PARAM_PRODUCT,
   URL_PARAM_STEP,
 } from "@/lib/constants/constant";
 import { PREVOYANCE_QUOTE_FLOW_STEP } from "@/lib/constants/prevoyance-quote-flow";
@@ -46,9 +44,8 @@ export function PrevoyanceQuotationWizard({
   );
 
   useEffect(() => {
-    const product = searchParams.get(URL_PARAM_PRODUCT);
     const step = searchParams.get(URL_PARAM_STEP);
-    if (product === QUOTE_PRODUCT_CODE_PREVOYANCE && step) return;
+    if (step) return;
     const sp = defaultPrevoyanceQuoteWizardSearchParams();
     router.replace(`${pathname}?${sp.toString()}`, { scroll: false });
   }, [pathname, router, searchParams]);

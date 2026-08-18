@@ -10,8 +10,6 @@ import {
   MRH_QUOTE_WIZARD_STEP_CODE_DEVIS,
   MRH_QUOTE_WIZARD_STEP_CODE_FORM,
   MRH_QUOTE_WIZARD_STEP_CODE_RECAP,
-  QUOTE_PRODUCT_CODE_HOME,
-  URL_PARAM_PRODUCT,
   URL_PARAM_STEP,
 } from "@/lib/constants/constant";
 import { MRH_QUOTE_FLOW_STEP } from "@/lib/constants/mrh-quote-flow";
@@ -41,9 +39,8 @@ export function MrhQuotationWizard({ onWizardStateChange }: MrhQuotationWizardPr
   );
 
   useEffect(() => {
-    const product = searchParams.get(URL_PARAM_PRODUCT);
     const step = searchParams.get(URL_PARAM_STEP);
-    if (product === QUOTE_PRODUCT_CODE_HOME && step) return;
+    if (step) return;
     const sp = defaultMrhQuoteWizardSearchParams();
     router.replace(`${pathname}?${sp.toString()}`, { scroll: false });
   }, [pathname, router, searchParams]);

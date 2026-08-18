@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { QuoteHero } from "@/components/Quote/layout/QuoteHero";
@@ -8,37 +8,29 @@ import {
   QuotationProductNav,
   type ProductType,
 } from "@/components/Quote/layout/QuotationProductNav";
-import { URL_PARAM_PRODUCT } from "@/lib/constants/constant";
-import { normalizeQuoteHeroProductId } from "@/lib/constants/quote-hero-content";
 import {
-  quoteProductCodeFromId,
-  quoteProductIdFromUrlCode,
-} from "@/lib/travel/quote-wizard-url";
+  isQuoteProductPath,
+  quoteProductIdFromPathname,
+  quoteProductPathFromId,
+} from "@/lib/constants/quote-product-routes";
 import { useWizardStore } from "@/store/wizardStore";
 
-/** Bandeau hero + navigation produits, affichés sous le header site sur la page cotation. */
+/** Bandeau hero produit sous le header (pages devis et sinistre). Le hub a son propre hero. */
 export function QuoteCotationChrome() {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   const wizardInProgress = useWizardStore((s) => s.wizardInProgress);
-  const isQuoteHome = pathname === "/";
   const isClaimsPage = pathname === "/claims";
+  const isProductQuotePage = isQuoteProductPath(pathname);
 
   const [showSwitchWarning, setShowSwitchWarning] = useState(false);
   const [pendingProduct, setPendingProduct] = useState<ProductType | null>(null);
 
-  const productParam = searchParams.get(URL_PARAM_PRODUCT);
-  const heroProductId = normalizeQuoteHeroProductId(productParam);
+  const currentProduct = quoteProductIdFromPathname(pathname) ?? "travel";
 
-  const currentProduct: ProductType =
-    quoteProductIdFromUrlCode(productParam) ?? "travel";
-
-  const replaceProductInUrl = (product: ProductType) => {
-    const sp = new URLSearchParams();
-    sp.set(URL_PARAM_PRODUCT, quoteProductCodeFromId(product));
-    router.replace(`${pathname}?${sp.toString()}`, { scroll: false });
+  const navigateToProduct = (product: ProductType) => {
+    router.push(quoteProductPathFromId(product));
   };
 
   const handleProductSwitch = (product: ProductType) => {
@@ -47,13 +39,13 @@ export function QuoteCotationChrome() {
       setPendingProduct(product);
       setShowSwitchWarning(true);
     } else {
-      replaceProductInUrl(product);
+      navigateToProduct(product);
     }
   };
 
   const confirmSwitch = () => {
     if (pendingProduct) {
-      replaceProductInUrl(pendingProduct);
+      navigateToProduct(pendingProduct);
     }
     setShowSwitchWarning(false);
     setPendingProduct(null);
@@ -64,12 +56,12 @@ export function QuoteCotationChrome() {
     setPendingProduct(null);
   };
 
-  if (!isQuoteHome && !isClaimsPage) return null;
+  if (!isProductQuotePage && !isClaimsPage) return null;
 
   return (
     <>
       <QuoteHero
-        productId={isClaimsPage ? undefined : heroProductId}
+        productId={isClaimsPage ? undefined : (currentProduct as ProductType)}
         badge={isClaimsPage ? "Sinistre" : undefined}
         title={
           isClaimsPage
@@ -78,7 +70,7 @@ export function QuoteCotationChrome() {
         }
         description={
           isClaimsPage
-            ? "Renseignez les informations de l’accident et joignez vos pièces pour une prise en charge rapide."
+            ? "Renseignez les informations de l'accident et joignez vos pièces pour une prise en charge rapide."
             : undefined
         }
       />

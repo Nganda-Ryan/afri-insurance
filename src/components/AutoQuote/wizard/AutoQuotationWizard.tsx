@@ -10,8 +10,6 @@ import {
   AUTO_QUOTE_WIZARD_STEP_CODE_DEVIS,
   AUTO_QUOTE_WIZARD_STEP_CODE_FORM,
   AUTO_QUOTE_WIZARD_STEP_CODE_RECAP,
-  QUOTE_PRODUCT_CODE_AUTO,
-  URL_PARAM_PRODUCT,
   URL_PARAM_STEP,
 } from "@/lib/constants/constant";
 import { AUTO_QUOTE_FLOW_STEP } from "@/lib/constants/auto-quote-flow";
@@ -41,9 +39,8 @@ export function AutoQuotationWizard({ onWizardStateChange }: AutoQuotationWizard
   );
 
   useEffect(() => {
-    const product = searchParams.get(URL_PARAM_PRODUCT);
     const step = searchParams.get(URL_PARAM_STEP);
-    if (product === QUOTE_PRODUCT_CODE_AUTO && step) return;
+    if (step) return;
     const sp = defaultAutoQuoteWizardSearchParams();
     router.replace(`${pathname}?${sp.toString()}`, { scroll: false });
   }, [pathname, router, searchParams]);

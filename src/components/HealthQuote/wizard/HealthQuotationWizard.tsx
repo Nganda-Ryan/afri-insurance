@@ -10,8 +10,6 @@ import {
   HEALTH_QUOTE_WIZARD_STEP_CODE_DEVIS,
   HEALTH_QUOTE_WIZARD_STEP_CODE_FORM,
   HEALTH_QUOTE_WIZARD_STEP_CODE_RECAP,
-  QUOTE_PRODUCT_CODE_HEALTH,
-  URL_PARAM_PRODUCT,
   URL_PARAM_STEP,
 } from "@/lib/constants/constant";
 import { HEALTH_QUOTE_FLOW_STEP } from "@/lib/constants/health-quote-flow";
@@ -41,9 +39,8 @@ export function HealthQuotationWizard({ onWizardStateChange }: HealthQuotationWi
   );
 
   useEffect(() => {
-    const product = searchParams.get(URL_PARAM_PRODUCT);
     const step = searchParams.get(URL_PARAM_STEP);
-    if (product === QUOTE_PRODUCT_CODE_HEALTH && step) return;
+    if (step) return;
     const sp = defaultHealthQuoteWizardSearchParams();
     router.replace(`${pathname}?${sp.toString()}`, { scroll: false });
   }, [pathname, router, searchParams]);

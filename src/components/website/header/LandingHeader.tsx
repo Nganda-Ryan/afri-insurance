@@ -8,15 +8,9 @@ import { usePathname } from "next/navigation";
 import {
   AFRI_INSURANCE_LOGO_HREF,
   AFRILIFE_LOGO_HREF,
-  QUOTE_PRODUCT_CODE_AUTO,
-  QUOTE_PRODUCT_CODE_HEALTH,
-  QUOTE_PRODUCT_CODE_HOME,
-  QUOTE_PRODUCT_CODE_PREVOYANCE,
-  QUOTE_PRODUCT_CODE_TRAVEL,
-  QUOTE_WIZARD_STEP_CODE_TRIP,
-  URL_PARAM_PRODUCT,
-  URL_PARAM_STEP,
 } from "@/lib/constants/constant";
+import { getQuoteNavItems } from "@/lib/constants/quote-products";
+import { travelQuoteEntryHref } from "@/lib/constants/quote-product-routes";
 
 type NavItem = {
   label: string;
@@ -136,28 +130,12 @@ const LandingHeader = () => {
     { href: "https://afri-insurance.com/contact/", label: "Contact" },
   ];
 
-  const quoteItems: NavItem[] = [
-    {
-      href: `/?${URL_PARAM_PRODUCT}=${QUOTE_PRODUCT_CODE_TRAVEL}&${URL_PARAM_STEP}=${QUOTE_WIZARD_STEP_CODE_TRIP}`,
-      label: "Assurance Voyage",
-    },
-    {
-      href: `/?${URL_PARAM_PRODUCT}=${QUOTE_PRODUCT_CODE_AUTO}`,
-      label: "Assurance Automobile",
-    },
-    {
-      href: `/?${URL_PARAM_PRODUCT}=${QUOTE_PRODUCT_CODE_HOME}`,
-      label: "Multirisque habitation",
-    },
-    {
-      href: `/?${URL_PARAM_PRODUCT}=${QUOTE_PRODUCT_CODE_PREVOYANCE}`,
-      label: "Prevoyance individuelle",
-    },
-    {
-      href: `/?${URL_PARAM_PRODUCT}=${QUOTE_PRODUCT_CODE_HEALTH}`,
-      label: "Assurance santé",
-    },
-  ];
+  const quoteItems: NavItem[] = getQuoteNavItems()
+    .filter((item) => item.status === "active")
+    .map((item) => ({
+      label: item.navLabel,
+      href: item.navLabel === "Assurance Voyage" ? travelQuoteEntryHref() : item.href,
+    }));
 
   const actionItems = [
     { href: "/claims", label: "Déclarer sinistre", borderClass: "border-red-500/80" },
@@ -168,7 +146,7 @@ const LandingHeader = () => {
     <header className="fixed top-0 left-0 z-50 w-full border-b border-white/15 bg-brand-secondary text-white backdrop-blur-[2px]">
       <nav className="mx-auto flex w-full max-w-[1500px] items-center justify-between px-2 py-2 md:px-4 xl:px-6">
         <div className="flex items-center gap-2 sm:gap-3">
-          <a
+          <Link
             href={AFRI_INSURANCE_LOGO_HREF}
             className="transition-opacity hover:opacity-90"
           >
@@ -179,7 +157,7 @@ const LandingHeader = () => {
               width={168}
               className="h-12 w-auto md:h-14"
             />
-          </a>
+          </Link>
           <a
             href={AFRILIFE_LOGO_HREF}
             className="transition-opacity hover:opacity-90"

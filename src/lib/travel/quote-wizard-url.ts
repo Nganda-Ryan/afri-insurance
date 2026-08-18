@@ -24,7 +24,6 @@ import {
   URL_PARAM_LANGUAGE,
   URL_PARAM_PLAN_NAME,
   URL_PARAM_PLAN_PRICE,
-  URL_PARAM_PRODUCT,
   URL_PARAM_PRODUCT_INDEX,
   URL_PARAM_QUOTE_CODE,
   URL_PARAM_QUOTE_ID,
@@ -293,7 +292,6 @@ export function buildQuoteWizardSearchParams(opts: {
   selection?: ParsedSelectedPlan | null;
 }): URLSearchParams {
   const sp = new URLSearchParams();
-  sp.set(URL_PARAM_PRODUCT, quoteProductCodeFromId(opts.productId));
   sp.set(URL_PARAM_STEP, wizardStepUrlCodeFromIndex(opts.stepIndex));
 
   if (opts.trip && isTripDetailsComplete(opts.trip)) {
@@ -346,9 +344,6 @@ export function migrateLegacySubscribeParams(sp: URLSearchParams): URLSearchPara
   }
   if (!next.has(URL_PARAM_STEP) && next.has(URL_PARAM_PLAN_NAME)) {
     next.set(URL_PARAM_STEP, QUOTE_WIZARD_STEP_CODE_DETAILS);
-  }
-  if (!next.has(URL_PARAM_PRODUCT)) {
-    next.set(URL_PARAM_PRODUCT, QUOTE_PRODUCT_CODE_TRAVEL);
   }
   return next;
 }

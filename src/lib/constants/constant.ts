@@ -127,7 +127,7 @@ export const URL_PARAM_PREVOYANCE_DURATION = "pvdur";
 export const URL_PARAM_PREVOYANCE_CAPITAL = "pvcap";
 
 /** Liens des logos Afri Insurance (1) et Afrilife (2). */
-export const AFRI_INSURANCE_LOGO_HREF = `https://afri-insurance.vercel.app/?${URL_PARAM_PRODUCT}=${QUOTE_PRODUCT_CODE_TRAVEL}&${URL_PARAM_STEP}=${QUOTE_WIZARD_STEP_CODE_TRIP}`;
+export const AFRI_INSURANCE_LOGO_HREF = "/";
 export const AFRILIFE_LOGO_HREF = "https://afri-insurance.com/afrilife/";
 
 /* PLAN TYPES */

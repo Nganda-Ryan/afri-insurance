@@ -1,10 +1,8 @@
 import {
   HEALTH_QUOTE_WIZARD_STEP_CODE_FORM,
-  QUOTE_PRODUCT_CODE_HEALTH,
   URL_PARAM_HEALTH_ADULTS,
   URL_PARAM_HEALTH_CHILDREN,
   URL_PARAM_HEALTH_PLAN,
-  URL_PARAM_PRODUCT,
   URL_PARAM_STEP,
 } from "@/lib/constants/constant";
 import { calculateHealthQuote, parseHealthPlanId } from "@/lib/health/calculate-health-quote";
@@ -48,7 +46,6 @@ export function buildHealthQuoteWizardSearchParams(opts: {
   form: HealthQuoteFormInput;
 }): URLSearchParams {
   const sp = new URLSearchParams();
-  sp.set(URL_PARAM_PRODUCT, QUOTE_PRODUCT_CODE_HEALTH);
   sp.set(URL_PARAM_STEP, opts.stepCode);
   sp.set(URL_PARAM_HEALTH_PLAN, opts.form.planId);
   sp.set(URL_PARAM_HEALTH_ADULTS, String(opts.form.adultCount));
@@ -58,7 +55,6 @@ export function buildHealthQuoteWizardSearchParams(opts: {
 
 export function defaultHealthQuoteWizardSearchParams(): URLSearchParams {
   const sp = new URLSearchParams();
-  sp.set(URL_PARAM_PRODUCT, QUOTE_PRODUCT_CODE_HEALTH);
   sp.set(URL_PARAM_STEP, HEALTH_QUOTE_WIZARD_STEP_CODE_FORM);
   return sp;
 }

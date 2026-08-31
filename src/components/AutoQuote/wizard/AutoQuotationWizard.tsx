@@ -3,12 +3,12 @@
 import { useCallback, useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
+import { AutoQuoteDevisStep } from "@/components/AutoQuote/sections/AutoQuoteDevisStep";
 import { AutoQuoteFormStep } from "@/components/AutoQuote/sections/AutoQuoteFormStep";
-import { AutoQuotePaymentStep } from "@/components/AutoQuote/sections/AutoQuotePaymentStep";
 import { AutoQuoteRecapStep } from "@/components/AutoQuote/sections/AutoQuoteRecapStep";
 import {
+  AUTO_QUOTE_WIZARD_STEP_CODE_DEVIS,
   AUTO_QUOTE_WIZARD_STEP_CODE_FORM,
-  AUTO_QUOTE_WIZARD_STEP_CODE_PAYMENT,
   AUTO_QUOTE_WIZARD_STEP_CODE_RECAP,
   QUOTE_PRODUCT_CODE_AUTO,
   URL_PARAM_PRODUCT,
@@ -61,9 +61,9 @@ export function AutoQuotationWizard({ onWizardStateChange }: AutoQuotationWizard
     replaceFlowUrl(AUTO_QUOTE_WIZARD_STEP_CODE_FORM, session.form);
   };
 
-  const handleGoToPayment = () => {
+  const handleGoToDevis = () => {
     if (!session) return;
-    replaceFlowUrl(AUTO_QUOTE_WIZARD_STEP_CODE_PAYMENT, session.form);
+    replaceFlowUrl(AUTO_QUOTE_WIZARD_STEP_CODE_DEVIS, session.form);
   };
 
   const handleBackToRecap = () => {
@@ -84,12 +84,12 @@ export function AutoQuotationWizard({ onWizardStateChange }: AutoQuotationWizard
         <AutoQuoteRecapStep
           quote={session.quote}
           onBack={handleBackToForm}
-          onContinue={handleGoToPayment}
+          onContinue={handleGoToDevis}
         />
       ) : null}
 
-      {flowStep === AUTO_QUOTE_FLOW_STEP.PAYMENT && session ? (
-        <AutoQuotePaymentStep quote={session.quote} onBack={handleBackToRecap} />
+      {flowStep === AUTO_QUOTE_FLOW_STEP.DEVIS && session ? (
+        <AutoQuoteDevisStep quote={session.quote} onBack={handleBackToRecap} />
       ) : null}
     </>
   );

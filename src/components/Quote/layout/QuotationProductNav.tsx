@@ -13,6 +13,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: "travel", label: "Voyage" },
   { id: "auto", label: "Automobile" },
   { id: "health", label: "Santé" },
+  { id: "prevoyance", label: "Prévoyance" },
   { id: "pet", label: "Individuelle accidents" },
   { id: "home", label: "Habitation" },
 ];

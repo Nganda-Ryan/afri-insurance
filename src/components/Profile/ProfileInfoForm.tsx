@@ -74,7 +74,7 @@ export default function ProfileInfoForm({ initialValues }: IProfileInfoFormProps
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-        {/* Email — lecture seule */}
+        {/* Email - lecture seule */}
         <div className="col-span-2">
           <label className={labelClass}>Adresse email</label>
           <div className="relative">

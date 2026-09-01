@@ -1,7 +1,7 @@
 import type { QuoteSidebarProductId } from "@/lib/travel/quote-wizard-url";
 import { quoteProductIdFromUrlCode } from "@/lib/travel/quote-wizard-url";
 
-export type QuoteHeroProductId = QuoteSidebarProductId | "prevoyance";
+export type QuoteHeroProductId = QuoteSidebarProductId;
 
 export interface QuoteHeroContent {
   title: string;

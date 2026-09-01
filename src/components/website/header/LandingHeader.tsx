@@ -8,14 +8,9 @@ import { usePathname } from "next/navigation";
 import {
   AFRI_INSURANCE_LOGO_HREF,
   AFRILIFE_LOGO_HREF,
-  QUOTE_PRODUCT_CODE_AUTO,
-  QUOTE_PRODUCT_CODE_HEALTH,
-  QUOTE_PRODUCT_CODE_HOME,
-  QUOTE_PRODUCT_CODE_TRAVEL,
-  QUOTE_WIZARD_STEP_CODE_TRIP,
-  URL_PARAM_PRODUCT,
-  URL_PARAM_STEP,
 } from "@/lib/constants/constant";
+import { getQuoteNavItems } from "@/lib/constants/quote-products";
+import { travelQuoteEntryHref } from "@/lib/constants/quote-product-routes";
 
 type NavItem = {
   label: string;
@@ -34,87 +29,124 @@ const LandingHeader = () => {
   };
 
   const navItems: NavItem[] = [
-    { href: "/", label: "Accueil" },
+    { href: "https://afri-insurance.com/", label: "Accueil" },
     {
       label: "A propos",
       children: [
-        { href: "/about", label: "A propos" },
-        { href: "/reseau", label: "Reseau" },
+        { href: "https://afri-insurance.com/about/", label: "A propos" },
+        { href: "https://afri-insurance.com/reseau/", label: "Réseau" },
       ],
     },
     {
       label: "Nos produits",
       children: [
         {
-          href: "/afrilife",
+          href: "https://afri-insurance.com/afrilife/",
           label: "AFRILIFE",
           children: [
-            { href: "/afrilife/afrilife-etude-enfants", label: "AFRILIFE etude enfants" },
-            { href: "/afrilife/afrilife-indemite-fin-carriere", label: "AFRILIFE indemite fin carriere" },
-            { href: "/afrilife/afrilife-retraite-complementaire-collective", label: "AFRILIFE retraite complementaire collective" },
-            { href: "/afrilife/afrilife-retraite-individuelle-plus", label: "AFRILIFE retraite individuelle plus" },
-            { href: "/afrilife/afrilife-retraite", label: "AFRILIFE retraite" },
-            { href: "/afrilife/afrilife-libre-retraite", label: "AFRILIFE libre retraite" },
-            { href: "/afrilife/afrilife-prevoyance-deces-individuel", label: "AFRILIFE prevoyance deces individuel" },
-            { href: "/afrilife/afrilife-prevoyance-deces-groupe", label: "Assurance Prevoyance Deces Groupe" },
-            { href: "/afriinsurance-home/assurance-prevoyance-collective", label: "Assurance prevoyance collective" },
+            {
+              href: "https://afri-insurance.com/afrilife/afrilife-etude-enfants/",
+              label: "AFRILIFE étude enfants",
+            },
+            {
+              href: "https://afri-insurance.com/afrilife/afrilife-indemite-fin-carriere/",
+              label: "AFRILIFE indemité fin carriere",
+            },
+            {
+              href: "https://afri-insurance.com/afrilife/afrilife-retraite-complementaire-collective/",
+              label: "AFRILIFE retraite complémentaire collective",
+            },
+            {
+              href: "https://afri-insurance.com/afrilife/afrilife-retraite-individuelle-plus/",
+              label: "AFRILIFE retraite individuelle plus",
+            },
+            {
+              href: "https://afri-insurance.com/afrilife/afrilife-retraite/",
+              label: "AFRILIFE retraite",
+            },
+            {
+              href: "https://afri-insurance.com/afrilife/afrilife-libre-retraite/",
+              label: "AFRILIFE libre retraite",
+            },
+            {
+              href: "https://afri-insurance.com/afrilife/afrilife-prevoyance-deces-individuel/",
+              label: "AFRILIFE prévoyance décés individuel",
+            },
+            {
+              href: "https://afri-insurance.com/afrilife/afrilife-prevoyance-deces-groupe/",
+              label: "Assurance Prévoyance Décès Groupe",
+            },
+            {
+              href: "https://afri-insurance.com/afriinsurance-home/assurance-prevoyance-collective/",
+              label: "Assurance prévoyance collective",
+            },
           ],
         },
         {
-          href: "/afriinsurance-home",
+          href: "https://afri-insurance.com/afriinsurance-home/",
           label: "AFRI INSURANCE",
           children: [
-            { href: "/afriinsurance-home/afri-assistance-voyage", label: "Afri assistance voyage" },
-            { href: "/afri-automobile", label: "Afri automobile" },
-            { href: "/afriinsurance-home/afri-caution", label: "AFRI CAUTION" },
-            { href: "/afriinsurance-home/afri-individuelle-accidents", label: "Afri individuelle accidents" },
-            { href: "/afriinsurance-home/afri-multitrisque-habitation", label: "Afri multitrisque habitation" },
-            { href: "/afriinsurance-home/afri-responsabilite-civile-chef-dentreprise", label: "Afri responsabilite civile chef d'entreprise" },
-            { href: "/afriinsurance-home/afri-responsabilite-civile-chef-de-famille", label: "Afri responsabilite civile chef de famille" },
-            { href: "/afri-transport-des-marchandises", label: "Afri transport des marchandises" },
-            { href: "/afriinsurance-home/afri-sante", label: "AFRI SANTE" },
+            {
+              href: "https://afri-insurance.com/afriinsurance-home/afri-assistance-voyage/",
+              label: "Afri assistance voyage",
+            },
+            {
+              href: "https://afri-insurance.com/assurance-automobile/",
+              label: "Afri automobile",
+            },
+            {
+              href: "https://afri-insurance.com/afriinsurance-home/afri-caution/",
+              label: "AFRI CAUTION",
+            },
+            {
+              href: "https://afri-insurance.com/afriinsurance-home/afri-individuelle-accidents/",
+              label: "Afri individuelle accidents",
+            },
+            {
+              href: "https://afri-insurance.com/afriinsurance-home/afri-multitrisque-habitation/",
+              label: "Afri multitrisque habitation",
+            },
+            {
+              href: "https://afri-insurance.com/afriinsurance-home/afri-responsabilite-civile-chef-dentreprise/",
+              label: "Afri responsabilité civile chef d'entreprise",
+            },
+            {
+              href: "https://afri-insurance.com/afriinsurance-home/afri-responsabilite-civile-chef-de-famille/",
+              label: "Afri responsabilité civile chef de famille",
+            },
+            {
+              href: "https://afri-insurance.com/afri-transport-des-marchandises/",
+              label: "Afri transport des marchandises",
+            },
+            {
+              href: "https://afri-insurance.com/afriinsurance-home/afri-sante/",
+              label: "AFRI SANTE",
+            },
           ],
         },
       ],
     },
-    { href: "/diapora", label: "Diaspora" },
-    { href: "/news", label: "Actualite" },
-    { href: "/contact", label: "Contact" },
+    { href: "https://afri-insurance.com/news/", label: "Actualité" },
+    { href: "https://afri-insurance.com/contact/", label: "Contact" },
   ];
 
-  const quoteItems: NavItem[] = [
-    {
-      href: `/?${URL_PARAM_PRODUCT}=${QUOTE_PRODUCT_CODE_TRAVEL}&${URL_PARAM_STEP}=${QUOTE_WIZARD_STEP_CODE_TRIP}`,
-      label: "Assurance Voyage",
-    },
-    {
-      href: `/?${URL_PARAM_PRODUCT}=${QUOTE_PRODUCT_CODE_AUTO}`,
-      label: "Assurance Automobile",
-    },
-    {
-      href: `/?${URL_PARAM_PRODUCT}=${QUOTE_PRODUCT_CODE_HOME}`,
-      label: "Multirisque habitation",
-    },
-    {
-      href: `/?${URL_PARAM_PRODUCT}=prevoyance`,
-      label: "Prevoyance individuelle",
-    },
-    {
-      href: `/?${URL_PARAM_PRODUCT}=${QUOTE_PRODUCT_CODE_HEALTH}`,
-      label: "Assurance sante",
-    },
-  ];
+  const quoteItems: NavItem[] = getQuoteNavItems()
+    .filter((item) => item.status === "active")
+    .map((item) => ({
+      label: item.navLabel,
+      href: item.navLabel === "Assurance Voyage" ? travelQuoteEntryHref() : item.href,
+    }));
 
   const actionItems = [
-    { href: "/claims", label: "Declarer sinistre", borderClass: "border-red-500/80" },
-    { href: "/signin", label: "Espace client", borderClass: "border-brand-primary/90" },
+    { href: "/claims", label: "Déclarer sinistre", borderClass: "border-red-500/80" },
+    // { href: "/signin", label: "Espace client", borderClass: "border-brand-primary/90" },
   ];
 
   return (
     <header className="fixed top-0 left-0 z-50 w-full border-b border-white/15 bg-brand-secondary text-white backdrop-blur-[2px]">
       <nav className="mx-auto flex w-full max-w-[1500px] items-center justify-between px-2 py-2 md:px-4 xl:px-6">
         <div className="flex items-center gap-2 sm:gap-3">
-          <a
+          <Link
             href={AFRI_INSURANCE_LOGO_HREF}
             className="transition-opacity hover:opacity-90"
           >
@@ -125,7 +157,7 @@ const LandingHeader = () => {
               width={168}
               className="h-12 w-auto md:h-14"
             />
-          </a>
+          </Link>
           <a
             href={AFRILIFE_LOGO_HREF}
             className="transition-opacity hover:opacity-90"
@@ -198,7 +230,7 @@ const LandingHeader = () => {
             <div className="group relative">
               <button
                 type="button"
-                className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-brand-secondary/80 px-3 py-1 text-sm font-normal text-white/95 transition hover:border-orange-500 hover:text-orange-500"
+                className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-red-500/80 px-3 py-1 text-sm font-normal text-white/95 transition hover:border-orange-500 hover:text-orange-500"
               >
                 Obtenir devis
                 <span className="text-[10px]">▼</span>
@@ -323,11 +355,11 @@ const LandingHeader = () => {
             );
           })}
           <div className="mt-2 space-y-2">
-            <div className="border border-brand-secondary/80">
+            <div className="rounded-full border border-red-500/80">
               <button
                 type="button"
                 onClick={() => toggleMobileSubmenu("quote")}
-                className="flex w-full items-center justify-between rounded-full px-4 py-2 text-sm font-normal text-white transition hover:border-orange-500 hover:text-orange-500"
+                className="flex w-full items-center justify-between rounded-full px-4 py-2 text-sm font-normal text-white/95 transition hover:border-orange-500 hover:text-orange-500"
               >
                 <span>Obtenir devis</span>
                 <span className="text-sm">{openMobileMenus.quote ? "▲" : "▼"}</span>

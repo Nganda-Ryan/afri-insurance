@@ -171,7 +171,7 @@ export async function processInsuranceCheckout(
       })),
     });
   } catch (err) {
-    // Email failure is non-fatal — the policy is committed, log and continue.
+    // Email failure is non-fatal - the policy is committed, log and continue.
     console.error("[checkout] Email dispatch failed:", err);
   }
 

@@ -3,15 +3,13 @@
 import { useCallback, useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
+import { MrhQuoteDevisStep } from "@/components/MrhQuote/sections/MrhQuoteDevisStep";
 import { MrhQuoteFormStep } from "@/components/MrhQuote/sections/MrhQuoteFormStep";
-import { MrhQuotePaymentStep } from "@/components/MrhQuote/sections/MrhQuotePaymentStep";
 import { MrhQuoteRecapStep } from "@/components/MrhQuote/sections/MrhQuoteRecapStep";
 import {
+  MRH_QUOTE_WIZARD_STEP_CODE_DEVIS,
   MRH_QUOTE_WIZARD_STEP_CODE_FORM,
-  MRH_QUOTE_WIZARD_STEP_CODE_PAYMENT,
   MRH_QUOTE_WIZARD_STEP_CODE_RECAP,
-  QUOTE_PRODUCT_CODE_HOME,
-  URL_PARAM_PRODUCT,
   URL_PARAM_STEP,
 } from "@/lib/constants/constant";
 import { MRH_QUOTE_FLOW_STEP } from "@/lib/constants/mrh-quote-flow";
@@ -41,9 +39,8 @@ export function MrhQuotationWizard({ onWizardStateChange }: MrhQuotationWizardPr
   );
 
   useEffect(() => {
-    const product = searchParams.get(URL_PARAM_PRODUCT);
     const step = searchParams.get(URL_PARAM_STEP);
-    if (product === QUOTE_PRODUCT_CODE_HOME && step) return;
+    if (step) return;
     const sp = defaultMrhQuoteWizardSearchParams();
     router.replace(`${pathname}?${sp.toString()}`, { scroll: false });
   }, [pathname, router, searchParams]);
@@ -61,9 +58,9 @@ export function MrhQuotationWizard({ onWizardStateChange }: MrhQuotationWizardPr
     replaceFlowUrl(MRH_QUOTE_WIZARD_STEP_CODE_FORM, session.form);
   };
 
-  const handleGoToPayment = () => {
+  const handleGoToDevis = () => {
     if (!session) return;
-    replaceFlowUrl(MRH_QUOTE_WIZARD_STEP_CODE_PAYMENT, session.form);
+    replaceFlowUrl(MRH_QUOTE_WIZARD_STEP_CODE_DEVIS, session.form);
   };
 
   const handleBackToRecap = () => {
@@ -84,12 +81,12 @@ export function MrhQuotationWizard({ onWizardStateChange }: MrhQuotationWizardPr
         <MrhQuoteRecapStep
           quote={session.quote}
           onBack={handleBackToForm}
-          onContinue={handleGoToPayment}
+          onContinue={handleGoToDevis}
         />
       ) : null}
 
-      {flowStep === MRH_QUOTE_FLOW_STEP.PAYMENT && session ? (
-        <MrhQuotePaymentStep quote={session.quote} onBack={handleBackToRecap} />
+      {flowStep === MRH_QUOTE_FLOW_STEP.DEVIS && session ? (
+        <MrhQuoteDevisStep quote={session.quote} onBack={handleBackToRecap} />
       ) : null}
     </>
   );

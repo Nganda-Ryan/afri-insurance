@@ -5,18 +5,22 @@ import { useSearchParams } from "next/navigation";
 
 import { HEALTH_QUOTE_FLOW_STEP } from "@/lib/constants/health-quote-flow";
 import {
+  HEALTH_QUOTE_WIZARD_STEP_CODE_DEVIS,
   HEALTH_QUOTE_WIZARD_STEP_CODE_FORM,
-  HEALTH_QUOTE_WIZARD_STEP_CODE_PAYMENT,
   HEALTH_QUOTE_WIZARD_STEP_CODE_RECAP,
   URL_PARAM_STEP,
 } from "@/lib/constants/constant";
 import { parseHealthQuoteSessionFromSearchParams } from "@/lib/health/health-quote-wizard-url";
 import type { HealthQuoteSession } from "@/types/health-insurance";
 
+/** Ancien code URL paiement - toujours reconnu pour compatibilité. */
+const LEGACY_PAYMENT_STEP_CODE = "paiement-sante";
+
 const STEP_CODE_TO_INDEX: Record<string, number> = {
   [HEALTH_QUOTE_WIZARD_STEP_CODE_FORM]: HEALTH_QUOTE_FLOW_STEP.FORM,
   [HEALTH_QUOTE_WIZARD_STEP_CODE_RECAP]: HEALTH_QUOTE_FLOW_STEP.RECAP,
-  [HEALTH_QUOTE_WIZARD_STEP_CODE_PAYMENT]: HEALTH_QUOTE_FLOW_STEP.PAYMENT,
+  [HEALTH_QUOTE_WIZARD_STEP_CODE_DEVIS]: HEALTH_QUOTE_FLOW_STEP.DEVIS,
+  [LEGACY_PAYMENT_STEP_CODE]: HEALTH_QUOTE_FLOW_STEP.DEVIS,
 };
 
 export function useHealthQuoteFlowStep(): {

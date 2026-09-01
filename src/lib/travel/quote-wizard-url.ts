@@ -3,6 +3,7 @@ import {
   QUOTE_PRODUCT_CODE_HEALTH,
   QUOTE_PRODUCT_CODE_HOME,
   QUOTE_PRODUCT_CODE_PET,
+  QUOTE_PRODUCT_CODE_PREVOYANCE,
   QUOTE_PRODUCT_CODE_TRAVEL,
   QUOTE_WIZARD_STEP_CODE_DETAILS,
   QUOTE_WIZARD_STEP_CODE_FORM,
@@ -23,7 +24,6 @@ import {
   URL_PARAM_LANGUAGE,
   URL_PARAM_PLAN_NAME,
   URL_PARAM_PLAN_PRICE,
-  URL_PARAM_PRODUCT,
   URL_PARAM_PRODUCT_INDEX,
   URL_PARAM_QUOTE_CODE,
   URL_PARAM_QUOTE_ID,
@@ -43,7 +43,13 @@ import type {
   TripDetailsData,
 } from "@/types/travel";
 
-export type QuoteSidebarProductId = "travel" | "home" | "auto" | "pet" | "health";
+export type QuoteSidebarProductId =
+  | "travel"
+  | "home"
+  | "auto"
+  | "pet"
+  | "health"
+  | "prevoyance";
 
 /** Indices d'étape du parcours complet (0–4), alignés sur `TRAVEL_QUOTE_FLOW_STEP`. */
 export type QuoteWizardStepIndex = 0 | 1 | 2 | 3 | 4;
@@ -61,6 +67,7 @@ const PRODUCT_CODE_TO_ID: Record<string, QuoteSidebarProductId> = {
   [QUOTE_PRODUCT_CODE_AUTO]: "auto",
   [QUOTE_PRODUCT_CODE_PET]: "pet",
   [QUOTE_PRODUCT_CODE_HEALTH]: "health",
+  [QUOTE_PRODUCT_CODE_PREVOYANCE]: "prevoyance",
 };
 
 const PRODUCT_ID_TO_CODE: Record<QuoteSidebarProductId, string> = {
@@ -69,6 +76,7 @@ const PRODUCT_ID_TO_CODE: Record<QuoteSidebarProductId, string> = {
   auto: QUOTE_PRODUCT_CODE_AUTO,
   pet: QUOTE_PRODUCT_CODE_PET,
   health: QUOTE_PRODUCT_CODE_HEALTH,
+  prevoyance: QUOTE_PRODUCT_CODE_PREVOYANCE,
 };
 
 export function quoteProductIdFromUrlCode(
@@ -284,7 +292,6 @@ export function buildQuoteWizardSearchParams(opts: {
   selection?: ParsedSelectedPlan | null;
 }): URLSearchParams {
   const sp = new URLSearchParams();
-  sp.set(URL_PARAM_PRODUCT, quoteProductCodeFromId(opts.productId));
   sp.set(URL_PARAM_STEP, wizardStepUrlCodeFromIndex(opts.stepIndex));
 
   if (opts.trip && isTripDetailsComplete(opts.trip)) {
@@ -337,9 +344,6 @@ export function migrateLegacySubscribeParams(sp: URLSearchParams): URLSearchPara
   }
   if (!next.has(URL_PARAM_STEP) && next.has(URL_PARAM_PLAN_NAME)) {
     next.set(URL_PARAM_STEP, QUOTE_WIZARD_STEP_CODE_DETAILS);
-  }
-  if (!next.has(URL_PARAM_PRODUCT)) {
-    next.set(URL_PARAM_PRODUCT, QUOTE_PRODUCT_CODE_TRAVEL);
   }
   return next;
 }

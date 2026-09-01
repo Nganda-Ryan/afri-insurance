@@ -8,8 +8,8 @@ import { WebsiteLayoutContent } from "@/components/website/WebsiteLayoutContent"
 import { WebsiteToaster } from "@/components/providers/website-toaster";
 
 export const metadata: Metadata = {
-  title: "Cotation assurance | Afri Insurance",
-  description: "Demandez un devis en ligne",
+  title: "Devis en ligne | Afri Insurance",
+  description: "Choisissez votre produit et obtenez un devis en quelques minutes",
 };
 
 export default function Layout({

@@ -1,14 +1,14 @@
 "use client";
 
 import { useMemo } from "react";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 
-import { URL_PARAM_PRODUCT, URL_PARAM_STEP } from "@/lib/constants/constant";
+import { quoteProductIdFromPathname } from "@/lib/constants/quote-product-routes";
+import { URL_PARAM_STEP } from "@/lib/constants/constant";
 import {
   parseSelectedPlanFromSearchParams,
   parseTravelerInfoFromSearchParams,
   parseTripDetailsFromSearchParams,
-  quoteProductIdFromUrlCode,
   resolveWizardStepIndex,
   wizardStepIndexFromUrlCode,
   type ParsedSelectedPlan,
@@ -17,10 +17,11 @@ import {
 import type { TravelerInfoData, TripDetailsData } from "@/types/travel";
 
 export function useTravelQuoteFlowStep() {
+  const pathname = usePathname();
   const searchParams = useSearchParams();
 
   return useMemo(() => {
-    const prod = quoteProductIdFromUrlCode(searchParams.get(URL_PARAM_PRODUCT));
+    const prod = quoteProductIdFromPathname(pathname);
     if (prod !== "travel") {
       return {
         flowStep: 0 as QuoteWizardStepIndex,
@@ -42,5 +43,5 @@ export function useTravelQuoteFlowStep() {
     );
 
     return { flowStep, tripDetails, travelerInfo, selection };
-  }, [searchParams]);
+  }, [pathname, searchParams]);
 }

@@ -16,7 +16,7 @@ function normalizeVerifyTxPayload(data: unknown): S3pPaymentStatusDto[] {
   return [];
 }
 
-/** GET /cashout — liste des services cash-out (OM, MoMo, …). */
+/** GET /cashout - liste des services cash-out (OM, MoMo, …). */
 export async function getS3pCashout(): Promise<S3pCashoutLineDto[]> {
   const client = getS3pClient();
   try {
@@ -28,7 +28,7 @@ export async function getS3pCashout(): Promise<S3pCashoutLineDto[]> {
 }
 
 /**
- * POST /quotestd — demande un devis pour un payItem.
+ * POST /quotestd - demande un devis pour un payItem.
  * `payItemId` provient exclusivement de GET /cashout (ligne filtrée par MOMO_SERVICE_ID / OM_SERVICE_ID).
  */
 export async function postS3pQuote(body: {
@@ -44,7 +44,7 @@ export async function postS3pQuote(body: {
   }
 }
 
-/** POST /collectstd — execute la collecte de paiement (declenche USSD/MoMo). */
+/** POST /collectstd - execute la collecte de paiement (declenche USSD/MoMo). */
 export async function postS3pCollect(body: {
   quoteId: string;
   customerPhonenumber: string;
@@ -66,7 +66,7 @@ export async function postS3pCollect(body: {
   }
 }
 
-/** GET /verifytx — recupere le statut courant d'une collecte par PTN ou TRID. */
+/** GET /verifytx - recupere le statut courant d'une collecte par PTN ou TRID. */
 export async function getS3pVerifyTx(params: {
   ptn?: string;
   trid?: string;

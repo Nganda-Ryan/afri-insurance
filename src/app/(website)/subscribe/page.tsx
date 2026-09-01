@@ -3,6 +3,10 @@
 import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
+import {
+  QUOTE_PRODUCT_PATH,
+  travelQuoteEntryHref,
+} from "@/lib/constants/quote-product-routes";
 import { migrateLegacySubscribeParams } from "@/lib/travel/quote-wizard-url";
 
 function SubscribeRedirectContent() {
@@ -13,7 +17,11 @@ function SubscribeRedirectContent() {
     const sp = migrateLegacySubscribeParams(
       new URLSearchParams(searchParams.toString()),
     );
-    router.replace(`/?${sp.toString()}`);
+    sp.delete("p");
+    const query = sp.toString();
+    router.replace(
+      query ? `${QUOTE_PRODUCT_PATH.travel}?${query}` : travelQuoteEntryHref(),
+    );
   }, [router, searchParams]);
 
   return (
@@ -23,7 +31,7 @@ function SubscribeRedirectContent() {
   );
 }
 
-/** Redirige vers le parcours unifié sur la page d'accueil. */
+/** Redirige vers le parcours voyage sur /voyage. */
 export default function SubscribeRedirectPage() {
   return (
     <Suspense

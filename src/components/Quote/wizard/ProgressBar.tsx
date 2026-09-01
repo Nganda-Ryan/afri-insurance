@@ -76,7 +76,7 @@ function MobileSegmentBar({
         </span>
       ) : (
         <span className="text-[10px] leading-none opacity-0" aria-hidden>
-          —
+          -
         </span>
       )}
     </div>

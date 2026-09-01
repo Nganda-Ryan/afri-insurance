@@ -1,8 +1,5 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
-
-import { URL_PARAM_PRODUCT } from "@/lib/constants/constant";
 import {
   getQuoteHeroContent,
   type QuoteHeroProductId,
@@ -21,9 +18,7 @@ export function QuoteHero({
   description,
   productId,
 }: QuoteHeroProps) {
-  const searchParams = useSearchParams();
-  const productFromUrl = searchParams.get(URL_PARAM_PRODUCT);
-  const content = getQuoteHeroContent(productId ?? productFromUrl);
+  const content = productId ? getQuoteHeroContent(productId) : getQuoteHeroContent("travel");
 
   return (
     <section

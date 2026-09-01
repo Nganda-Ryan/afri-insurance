@@ -1,6 +1,5 @@
 import {
   AUTO_QUOTE_WIZARD_STEP_CODE_FORM,
-  QUOTE_PRODUCT_CODE_AUTO,
   URL_PARAM_AUTO_CATEGORY,
   URL_PARAM_AUTO_DURATION,
   URL_PARAM_AUTO_FUEL,
@@ -8,7 +7,6 @@ import {
   URL_PARAM_AUTO_POWER,
   URL_PARAM_AUTO_POWER_LABEL,
   URL_PARAM_AUTO_ZONE,
-  URL_PARAM_PRODUCT,
   URL_PARAM_STEP,
 } from "@/lib/constants/constant";
 import { calculateAutoQuote } from "@/lib/auto/calculate-auto-quote";
@@ -58,7 +56,6 @@ export function buildAutoQuoteWizardSearchParams(opts: {
   form: AutoQuoteFormInput;
 }): URLSearchParams {
   const sp = new URLSearchParams();
-  sp.set(URL_PARAM_PRODUCT, QUOTE_PRODUCT_CODE_AUTO);
   sp.set(URL_PARAM_STEP, opts.stepCode);
   sp.set(URL_PARAM_AUTO_ZONE, opts.form.zoneNom);
   sp.set(URL_PARAM_AUTO_CATEGORY, opts.form.categoryId);
@@ -77,7 +74,6 @@ export function buildAutoQuoteWizardSearchParams(opts: {
 
 export function defaultAutoQuoteWizardSearchParams(): URLSearchParams {
   const sp = new URLSearchParams();
-  sp.set(URL_PARAM_PRODUCT, QUOTE_PRODUCT_CODE_AUTO);
   sp.set(URL_PARAM_STEP, AUTO_QUOTE_WIZARD_STEP_CODE_FORM);
   return sp;
 }

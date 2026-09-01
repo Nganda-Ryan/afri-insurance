@@ -1,9 +1,7 @@
 import {
   MRH_QUOTE_WIZARD_STEP_CODE_FORM,
-  QUOTE_PRODUCT_CODE_HOME,
   URL_PARAM_MRH_PROFIL,
   URL_PARAM_MRH_TARIF,
-  URL_PARAM_PRODUCT,
   URL_PARAM_STEP,
 } from "@/lib/constants/constant";
 import { calculateMrhQuote } from "@/lib/mrh/calculate-mrh-quote";
@@ -35,7 +33,6 @@ export function buildMrhQuoteWizardSearchParams(opts: {
   form: MrhQuoteFormInput;
 }): URLSearchParams {
   const sp = new URLSearchParams();
-  sp.set(URL_PARAM_PRODUCT, QUOTE_PRODUCT_CODE_HOME);
   sp.set(URL_PARAM_STEP, opts.stepCode);
   sp.set(URL_PARAM_MRH_PROFIL, opts.form.profilId);
   sp.set(URL_PARAM_MRH_TARIF, String(opts.form.tarifIndex));
@@ -44,7 +41,6 @@ export function buildMrhQuoteWizardSearchParams(opts: {
 
 export function defaultMrhQuoteWizardSearchParams(): URLSearchParams {
   const sp = new URLSearchParams();
-  sp.set(URL_PARAM_PRODUCT, QUOTE_PRODUCT_CODE_HOME);
   sp.set(URL_PARAM_STEP, MRH_QUOTE_WIZARD_STEP_CODE_FORM);
   return sp;
 }

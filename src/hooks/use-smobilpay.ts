@@ -32,7 +32,7 @@ interface UsePaymentStatusOptions {
   ptn?: string | null;
   trid?: string | null;
   enabled?: boolean;
-  /** Intervalle de polling en ms (par defaut 3s). */
+  /** Intervalle de polling en ms (par defaut 5s). */
   intervalMs?: number;
 }
 
@@ -44,7 +44,7 @@ export function usePaymentStatus({
   ptn = null,
   trid = null,
   enabled = true,
-  intervalMs = 3000,
+  intervalMs = 5000,
 }: UsePaymentStatusOptions) {
   const ptnKey = ptn?.trim() ?? "";
   const tridKey = trid?.trim() ?? "";

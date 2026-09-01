@@ -37,7 +37,7 @@ export function AutoQuoteRecapStep({
       <div className="space-y-6 rounded-lg border border-gray-200 bg-white p-4 text-sm text-text-main sm:p-6">
         <h2 className="text-xl font-bold">Récapitulatif de votre devis</h2>
         <p className="text-text-main text-opacity-80">
-          Vérifiez les informations de cotation avant de passer au paiement.
+          Vérifiez les informations de cotation avant de télécharger votre devis.
         </p>
 
         <div className="rounded-lg border border-border bg-card p-4">
@@ -72,7 +72,7 @@ export function AutoQuoteRecapStep({
       <QuoteStepNavigation
         onPrevious={onBack}
         onNext={onContinue}
-        nextLabel="Passer au paiement"
+        nextLabel="Télécharger"
         isSubmitting={isSubmitting}
       />
     </div>

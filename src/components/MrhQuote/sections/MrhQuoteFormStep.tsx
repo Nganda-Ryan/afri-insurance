@@ -5,18 +5,13 @@ import { HomeIcon } from "lucide-react";
 
 import Label from "@/components/form/Label";
 import Select from "@/components/form/Select";
-import { MrhGarantieBadges } from "@/components/MrhQuote/shared/MrhGarantieBadges";
-import { QuoteAmountBreakdownTable } from "@/components/Quote/layout/QuoteAmountBreakdownTable";
 import { QuoteFormSection } from "@/components/Quote/layout/QuoteFormSection";
 import { QuoteStepNavigation } from "@/components/Quote/layout/QuoteStepNavigation";
 import {
   calculateMrhQuote,
   getMrhProfilOptions,
   getMrhTarifOptions,
-  isMrhLocataireProfil,
 } from "@/lib/mrh/calculate-mrh-quote";
-import { getMrhBreakdownTableRows } from "@/lib/mrh/mrh-breakdown-display";
-import { MRH_INSURANCE_DATA } from "@/lib/constants/mrh_insurance";
 import type { MrhQuoteFormInput, MrhQuoteResult } from "@/types/mrh-insurance";
 
 interface MrhQuoteFormStepProps {
@@ -24,37 +19,20 @@ interface MrhQuoteFormStepProps {
   onSubmit: (form: MrhQuoteFormInput, quote: MrhQuoteResult) => void;
 }
 
-function pickOptionValue(
-  value: string,
-  options: { value: string }[],
-): string {
-  return options.some((option) => option.value === value)
-    ? value
-    : (options[0]?.value ?? "");
-}
-
 export function MrhQuoteFormStep({ initialForm, onSubmit }: MrhQuoteFormStepProps) {
   const profilOptions = useMemo(() => getMrhProfilOptions(), []);
-  const defaultProfil = initialForm?.profilId ?? profilOptions[0]?.value ?? "";
 
-  const [profilId, setProfilId] = useState(defaultProfil);
+  const [profilId, setProfilId] = useState(initialForm?.profilId ?? "");
   const [tarifIndex, setTarifIndex] = useState(
     initialForm?.tarifIndex != null ? String(initialForm.tarifIndex) : "",
   );
 
-  const effectiveProfilId = useMemo(
-    () => pickOptionValue(profilId, profilOptions),
-    [profilId, profilOptions],
-  );
+  const hasExplicitProfil =
+    profilId !== "" && profilOptions.some((option) => option.value === profilId);
 
   const tarifOptions = useMemo(
-    () => getMrhTarifOptions(effectiveProfilId),
-    [effectiveProfilId],
-  );
-
-  const isLocataire = useMemo(
-    () => isMrhLocataireProfil(effectiveProfilId),
-    [effectiveProfilId],
+    () => (hasExplicitProfil ? getMrhTarifOptions(profilId) : []),
+    [hasExplicitProfil, profilId],
   );
 
   const hasExplicitTarifSelection =
@@ -64,27 +42,18 @@ export function MrhQuoteFormStep({ initialForm, onSubmit }: MrhQuoteFormStepProp
     : NaN;
 
   const quoteResult = useMemo(() => {
-    if (!effectiveProfilId || !Number.isFinite(parsedTarifIndex) || parsedTarifIndex < 0) {
+    if (!hasExplicitProfil || !Number.isFinite(parsedTarifIndex) || parsedTarifIndex < 0) {
       return null;
     }
-    return calculateMrhQuote({ profilId: effectiveProfilId, tarifIndex: parsedTarifIndex });
-  }, [effectiveProfilId, parsedTarifIndex]);
+    return calculateMrhQuote({ profilId, tarifIndex: parsedTarifIndex });
+  }, [hasExplicitProfil, profilId, parsedTarifIndex]);
 
-  const devise = MRH_INSURANCE_DATA.document_info.devise;
-  const breakdown = quoteResult?.breakdown;
-  const breakdownTableRows = useMemo(
-    () =>
-      breakdown
-        ? getMrhBreakdownTableRows(breakdown, devise, { isLocataire })
-        : [],
-    [breakdown, devise, isLocataire],
-  );
   const canSubmit = quoteResult != null;
 
   const handleSubmit = () => {
-    if (!quoteResult) return;
+    if (!quoteResult || !hasExplicitProfil) return;
     onSubmit(
-      { profilId: effectiveProfilId, tarifIndex: parsedTarifIndex },
+      { profilId, tarifIndex: parsedTarifIndex },
       quoteResult,
     );
   };
@@ -94,10 +63,10 @@ export function MrhQuoteFormStep({ initialForm, onSubmit }: MrhQuoteFormStepProp
       <QuoteFormSection title="Cotation multirisque habitation" icon={HomeIcon}>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <div className="sm:col-span-2">
-            <Label htmlFor="mrh-profil">Profil d&apos;assurance</Label>
+            <Label htmlFor="mrh-profil">Profil du client</Label>
             <Select
               id="mrh-profil"
-              value={effectiveProfilId}
+              value={hasExplicitProfil ? profilId : ""}
               onChange={(value) => {
                 setProfilId(value);
                 setTarifIndex("");
@@ -108,44 +77,23 @@ export function MrhQuoteFormStep({ initialForm, onSubmit }: MrhQuoteFormStepProp
           </div>
 
           <div className="sm:col-span-2">
-            <Label htmlFor="mrh-tarif">Grille tarifaire</Label>
+            <Label htmlFor="mrh-tarif">Valeur du batiment</Label>
             <Select
               id="mrh-tarif"
               value={hasExplicitTarifSelection ? tarifIndex : ""}
               onChange={setTarifIndex}
               options={tarifOptions}
-              placeholder="Choisir une tranche"
+              placeholder="Choisir une valeur"
+              disabled={!hasExplicitProfil || tarifOptions.length === 0}
             />
           </div>
         </div>
-
-        {quoteResult ? (
-          <div className="mt-4 rounded-lg border border-brand-primary/20 bg-brand-primary/5 px-4 py-3">
-            <p className="text-sm font-medium text-gray-700">Garanties incluses</p>
-            <div className="mt-2">
-              <MrhGarantieBadges garanties={quoteResult.garanties} />
-            </div>
-          </div>
-        ) : null}
       </QuoteFormSection>
-
-      {breakdown ? (
-        <QuoteFormSection title="Détail de la prime" icon={HomeIcon}>
-          <QuoteAmountBreakdownTable rows={breakdownTableRows} />
-          <p className="mt-4 text-xs text-gray-500">
-            {MRH_INSURANCE_DATA.note_bas_de_page}
-          </p>
-        </QuoteFormSection>
-      ) : (
-        <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          Sélectionnez un profil et une tranche tarifaire pour afficher le détail de la prime.
-        </p>
-      )}
 
       <QuoteStepNavigation
         showPrevious={false}
         onNext={handleSubmit}
-        nextLabel="Voir le récapitulatif"
+        nextLabel="Obtenir un devis"
         nextDisabled={!canSubmit}
       />
     </div>

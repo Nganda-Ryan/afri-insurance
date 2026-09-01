@@ -38,15 +38,14 @@ export function formatMrhCompactAmount(value: number): string {
   return value.toLocaleString("fr-FR");
 }
 
-export function formatMrhTarifLabel(profilId: string, tarif: MrhTarifRow): string {
+export function formatMrhTarifLabel(tarif: MrhTarifRow): string {
   const devise = MRH_INSURANCE_DATA.document_info.devise;
-  const primeLabel = `${tarif.prime_ttc.toLocaleString("fr-FR")} ${devise} TTC`;
 
   if (isMrhLocataireTarif(tarif)) {
-    return `Loyer ${tarif.loyer_mensuel.toLocaleString("fr-FR")} ${devise} · Contenu ${formatMrhCompactAmount(tarif.valeur_contenu)} — ${primeLabel}`;
+    return `Loyer ${tarif.loyer_mensuel.toLocaleString("fr-FR")} ${devise}`;
   }
 
-  return `Bâtiment ${formatMrhCompactAmount(tarif.valeur_batiment)} · Contenu ${formatMrhCompactAmount(tarif.valeur_contenu)} — ${primeLabel}`;
+  return `Bâtiment ${formatMrhCompactAmount(tarif.valeur_batiment)} ${devise}`;
 }
 
 export function formatMrhTarifSummary(quote: MrhQuoteResult): string {
@@ -65,7 +64,7 @@ export function calculateMrhQuote(input: MrhQuoteFormInput): MrhQuoteResult | nu
     profilLabel: profil.label,
     garanties: profil.garanties_incluses,
     tarifIndex: input.tarifIndex,
-    tarifLabel: formatMrhTarifLabel(profil.id, tarif),
+    tarifLabel: formatMrhTarifLabel(tarif),
     devise: MRH_INSURANCE_DATA.document_info.devise,
     breakdown: buildBreakdown(tarif),
   };
@@ -83,7 +82,7 @@ export function getMrhTarifOptions(profilId: string) {
   if (!profil) return [];
   return profil.tarifs.map((tarif, index) => ({
     value: String(index),
-    label: formatMrhTarifLabel(profilId, tarif),
+    label: formatMrhTarifLabel(tarif),
   }));
 }
 

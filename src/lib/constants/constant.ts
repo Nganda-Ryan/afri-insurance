@@ -2,7 +2,7 @@
 
 export const SAFETY_BUFFER_MS = 60_000;
 
-/* TRIP CATEGORIES — valeurs API + codes URL courts */
+/* TRIP CATEGORIES - valeurs API + codes URL courts */
 
 export const TRIP_PRODUCT_CATEGORY_STANDARD = "Standard";
 export const TRIP_PRODUCT_CATEGORY_STUDENT = "Etudiant";
@@ -37,6 +37,7 @@ export const QUOTE_PRODUCT_CODE_HOME = "habitation";
 export const QUOTE_PRODUCT_CODE_AUTO = "auto";
 export const QUOTE_PRODUCT_CODE_PET = "animaux";
 export const QUOTE_PRODUCT_CODE_HEALTH = "sante";
+export const QUOTE_PRODUCT_CODE_PREVOYANCE = "prevoyance";
 
 /* POLICY TYPES (source de vérité DB) */
 export const POLICY_TYPE_TRAVEL = "travel";
@@ -55,7 +56,7 @@ export type PolicyType = (typeof POLICY_TYPE_VALUES)[number];
 
 /** Codes URL pour chaque étape du wizard devis voyage. */
 export const QUOTE_WIZARD_STEP_CODE_TRIP = "voyage";
-/** @deprecated Alias historique — étape 0 (détails du voyage) */
+/** @deprecated Alias historique - étape 0 (détails du voyage) */
 export const QUOTE_WIZARD_STEP_CODE_FORM = QUOTE_WIZARD_STEP_CODE_TRIP;
 export const QUOTE_WIZARD_STEP_CODE_TRAVELER = "voyageur";
 export const QUOTE_WIZARD_STEP_CODE_QUOTE = "devis";
@@ -66,17 +67,22 @@ export const QUOTE_WIZARD_STEP_CODE_PAYMENT = "paiement";
 /** Codes URL pour le wizard devis automobile. */
 export const AUTO_QUOTE_WIZARD_STEP_CODE_FORM = "cotation";
 export const AUTO_QUOTE_WIZARD_STEP_CODE_RECAP = "recap-auto";
-export const AUTO_QUOTE_WIZARD_STEP_CODE_PAYMENT = "paiement-auto";
+export const AUTO_QUOTE_WIZARD_STEP_CODE_DEVIS = "devis-auto";
 
 /** Codes URL pour le wizard devis multirisque habitation. */
 export const MRH_QUOTE_WIZARD_STEP_CODE_FORM = "cotation-mrh";
 export const MRH_QUOTE_WIZARD_STEP_CODE_RECAP = "recap-mrh";
-export const MRH_QUOTE_WIZARD_STEP_CODE_PAYMENT = "paiement-mrh";
+export const MRH_QUOTE_WIZARD_STEP_CODE_DEVIS = "devis-mrh";
 
 /** Codes URL pour le wizard devis assurance santé. */
 export const HEALTH_QUOTE_WIZARD_STEP_CODE_FORM = "cotation-sante";
 export const HEALTH_QUOTE_WIZARD_STEP_CODE_RECAP = "recap-sante";
-export const HEALTH_QUOTE_WIZARD_STEP_CODE_PAYMENT = "paiement-sante";
+export const HEALTH_QUOTE_WIZARD_STEP_CODE_DEVIS = "devis-sante";
+
+/** Codes URL pour le wizard devis prévoyance individuelle. */
+export const PREVOYANCE_QUOTE_WIZARD_STEP_CODE_FORM = "cotation-prev";
+export const PREVOYANCE_QUOTE_WIZARD_STEP_CODE_RECAP = "recap-prev";
+export const PREVOYANCE_QUOTE_WIZARD_STEP_CODE_DEVIS = "devis-prev";
 
 /** Clés des query params pour le parcours devis (URL courte/lisible). */
 export const URL_PARAM_PRODUCT = "p";
@@ -115,8 +121,13 @@ export const URL_PARAM_HEALTH_PLAN = "hpln";
 export const URL_PARAM_HEALTH_ADULTS = "hadv";
 export const URL_PARAM_HEALTH_CHILDREN = "henf";
 
+/** Query params du parcours devis prévoyance individuelle. */
+export const URL_PARAM_PREVOYANCE_AGE = "pvage";
+export const URL_PARAM_PREVOYANCE_DURATION = "pvdur";
+export const URL_PARAM_PREVOYANCE_CAPITAL = "pvcap";
+
 /** Liens des logos Afri Insurance (1) et Afrilife (2). */
-export const AFRI_INSURANCE_LOGO_HREF = `https://afri-insurance.vercel.app/?${URL_PARAM_PRODUCT}=${QUOTE_PRODUCT_CODE_TRAVEL}&${URL_PARAM_STEP}=${QUOTE_WIZARD_STEP_CODE_TRIP}`;
+export const AFRI_INSURANCE_LOGO_HREF = "/";
 export const AFRILIFE_LOGO_HREF = "https://afri-insurance.com/afrilife/";
 
 /* PLAN TYPES */

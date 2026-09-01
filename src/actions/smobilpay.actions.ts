@@ -110,7 +110,7 @@ export async function initiateCashoutCollectionAction(
   }
 }
 
-/** GET /verifytx — recupere le statut courant d'une collecte. */
+/** GET /verifytx - recupere le statut courant d'une collecte. */
 export async function verifyTravelPolicyPaymentAction(
   input: S3pVerifyInput,
 ): Promise<ActionResult<S3pPaymentStatusDto | null>> {

@@ -8,9 +8,7 @@ import { QuoteSummary } from "@/components/Quote/summary/QuoteSummary";
 import { TravelQuoteSubscribePhase } from "@/components/Quote/wizard/TravelQuoteSubscribePhase";
 import { TRAVEL_QUOTE_FLOW_STEP } from "@/lib/constants/quote-flow";
 import {
-  QUOTE_PRODUCT_CODE_TRAVEL,
   QUOTE_WIZARD_STEP_CODE_TRIP,
-  URL_PARAM_PRODUCT,
   URL_PARAM_STEP,
 } from "@/lib/constants/constant";
 import { useTravelQuoteFlowStep } from "@/hooks/use-travel-quote-flow-step";
@@ -57,12 +55,10 @@ export function QuotationWizard({ onWizardStateChange }: QuotationWizardProps) {
   );
 
   useEffect(() => {
-    const p = searchParams.get(URL_PARAM_PRODUCT);
     const e = searchParams.get(URL_PARAM_STEP);
-    if (p && e) return;
+    if (e) return;
     const sp = new URLSearchParams(searchParams.toString());
-    if (!p) sp.set(URL_PARAM_PRODUCT, QUOTE_PRODUCT_CODE_TRAVEL);
-    if (!e) sp.set(URL_PARAM_STEP, QUOTE_WIZARD_STEP_CODE_TRIP);
+    sp.set(URL_PARAM_STEP, QUOTE_WIZARD_STEP_CODE_TRIP);
     router.replace(`${pathname}?${sp.toString()}`, { scroll: false });
   }, [pathname, router, searchParams]);
 

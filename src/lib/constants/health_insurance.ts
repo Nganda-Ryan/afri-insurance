@@ -2,7 +2,7 @@ import type { HealthInsuranceProductData, HealthPlanId } from "@/types/health-in
 
 export const HEALTH_INSURANCE_PRODUCT_DATA: HealthInsuranceProductData = {
   document_info: {
-    titre: "TARIF ASSURANCE SANTE",
+    titre: "TARIF Assurance santé",
     compagnie: "AFRI INSURANCE",
     devise: "FCFA",
   },

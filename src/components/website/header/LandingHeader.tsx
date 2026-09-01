@@ -77,6 +77,7 @@ const LandingHeader = () => {
         },
       ],
     },
+    { href: "/diapora", label: "Diaspora" },
     { href: "/news", label: "Actualite" },
     { href: "/contact", label: "Contact" },
   ];

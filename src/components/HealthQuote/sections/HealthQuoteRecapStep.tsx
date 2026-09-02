@@ -28,8 +28,17 @@ export function HealthQuoteRecapStep({
   onBack,
   onContinue,
 }: HealthQuoteRecapStepProps) {
-  const { breakdown, devise } = quote;
+  const { breakdown, devise, garanties } = quote;
   const breakdownTableRows = getHealthBreakdownTableRows(breakdown, devise);
+
+  // Group guarantees by category
+  const garantiesByCategory = (garanties ?? []).reduce<
+    Record<string, NonNullable<typeof garanties>>
+  >((acc, g) => {
+    if (!acc[g.category]) acc[g.category] = [];
+    acc[g.category].push(g);
+    return acc;
+  }, {});
 
   return (
     <div className="space-y-4">
@@ -39,8 +48,8 @@ export function HealthQuoteRecapStep({
           Vérifiez les informations de cotation avant de télécharger votre devis.
         </p>
 
+        {/* Formule */}
         <div className="rounded-lg border border-border bg-card p-4">
-          <h3 className="mb-3 text-base font-semibold">Formule</h3>
           <div className="space-y-3">
             <RecapRow label="Formule" value={quote.planLabel} />
             <RecapRow
@@ -54,10 +63,50 @@ export function HealthQuoteRecapStep({
           </div>
         </div>
 
-        <div className="rounded-lg border border-border bg-card p-4">
+        {/* Détail de la cotisation */}
+        <div className="rounded-lg border border-border bg-card p-3">
           <h3 className="mb-3 text-base font-semibold">Détail de la cotisation</h3>
           <QuoteAmountBreakdownTable rows={breakdownTableRows} />
         </div>
+
+        {/*GARANTIES*/}
+        {garanties && garanties.length > 0 && (
+          <div className="rounded-lg border border-border bg-card p-3">
+            <h3 className="mb-4 text-base font-semibold">
+              Garanties de la formule {quote.planLabel}
+            </h3>
+
+            <div className="space-y-5">
+              {Object.entries(garantiesByCategory).map(([category, items]) => (
+                <div key={category} className="border-t pt-3 bg-card">
+                  <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-primary">
+                    {category}
+                  </h4>
+                  <div className="space-y-2.5">
+                    {items.map((item) => (
+                      <div
+                        key={item.label}
+                        className="flex flex-col gap-0.5 pb-2 last:border-0 last:pb-0 sm:flex-row sm:items-start sm:justify-between sm:gap-4"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-text-main">{item.label}</p>
+                          {item.note && (
+                            <p className="mt-0.5 text-xs text-gray-600">
+                              {item.note}
+                            </p>
+                          )}
+                        </div>
+                        <p className="shrink-0 text-sm font-semibold text-text-main sm:text-right">
+                          {item.value}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <QuoteStepNavigation
@@ -69,3 +118,8 @@ export function HealthQuoteRecapStep({
     </div>
   );
 }
+
+
+
+
+

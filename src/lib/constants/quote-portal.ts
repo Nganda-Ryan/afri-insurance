@@ -1,4 +1,24 @@
+/** Parcours générique (devis sans paiement en ligne). */
 export const QUOTE_PORTAL_HOW_IT_WORKS = [
+  {
+    step: 1,
+    title: "Remplissez le formulaire",
+    subtitle: "Vos informations en 2 min",
+  },
+  {
+    step: 2,
+    title: "Obtenez votre devis",
+    subtitle: "Instantanément en 1 clic",
+  },
+  {
+    step: 3,
+    title: "Téléchargez votre devis",
+    subtitle: "Conservez-le ou partagez-le",
+  },
+] as const;
+
+/** Parcours voyage uniquement — souscription et paiement en ligne. */
+export const QUOTE_PORTAL_HOW_IT_WORKS_TRAVEL = [
   {
     step: 1,
     title: "Remplissez le formulaire",
@@ -20,6 +40,7 @@ export const QUOTE_PORTAL_HOW_IT_WORKS = [
     subtitle: "Immédiatement après paiement",
   },
 ] as const;
+
 export const QUOTE_PORTAL_SUPPORT = {
   phone: "+237 681071414 / 689141414",
   phoneHours: "Lun - Ven, 08h - 17h",

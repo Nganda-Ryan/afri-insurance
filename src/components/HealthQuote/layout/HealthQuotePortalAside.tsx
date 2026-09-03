@@ -21,7 +21,7 @@ export function HealthQuotePortalAside() {
           <h3 className="text-base font-bold text-white">Comment ça marche ?</h3>
         </div>
         <ol className="space-y-5 p-4 sm:p-5">
-          {QUOTE_PORTAL_HOW_IT_WORKS.slice(0, 3).map((item) => (
+          {QUOTE_PORTAL_HOW_IT_WORKS.map((item) => (
             <li key={item.step} className="flex gap-3">
               <span
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-secondary text-sm font-bold text-white"

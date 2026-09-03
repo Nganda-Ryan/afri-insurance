@@ -41,7 +41,7 @@ function QuoteHubHowItWorks() {
       >
         Comment ça marche
       </h2>
-      <ol className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <ol className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {QUOTE_PORTAL_HOW_IT_WORKS.map((item) => (
           <li key={item.step} className="flex gap-3">
             <span

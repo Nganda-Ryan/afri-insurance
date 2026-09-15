@@ -1,5 +1,8 @@
 import {
+  QUOTE_PRODUCT_CODE_ACCIDENTS,
   QUOTE_PRODUCT_CODE_AUTO,
+  QUOTE_PRODUCT_CODE_ETUDES,
+  QUOTE_PRODUCT_CODE_HELEP,
   QUOTE_PRODUCT_CODE_HEALTH,
   QUOTE_PRODUCT_CODE_HOME,
   QUOTE_PRODUCT_CODE_PET,
@@ -18,6 +21,9 @@ export const QUOTE_PRODUCT_PATH: Record<QuoteSidebarProductId, string> = {
   health: "/sante",
   prevoyance: "/prevoyance",
   pet: "/animaux",
+  etudes: "/etudes",
+  accidents: "/accidents",
+  helep: "/helep",
 };
 
 const PATH_TO_PRODUCT_ID: Record<string, QuoteSidebarProductId> = {
@@ -27,6 +33,9 @@ const PATH_TO_PRODUCT_ID: Record<string, QuoteSidebarProductId> = {
   [QUOTE_PRODUCT_PATH.health]: "health",
   [QUOTE_PRODUCT_PATH.prevoyance]: "prevoyance",
   [QUOTE_PRODUCT_PATH.pet]: "pet",
+  [QUOTE_PRODUCT_PATH.etudes]: "etudes",
+  [QUOTE_PRODUCT_PATH.accidents]: "accidents",
+  [QUOTE_PRODUCT_PATH.helep]: "helep",
 };
 
 /** Mapping legacy `?p=` → pathname (redirects). */
@@ -37,6 +46,9 @@ export const LEGACY_PRODUCT_CODE_TO_PATH: Record<string, string> = {
   [QUOTE_PRODUCT_CODE_HEALTH]: QUOTE_PRODUCT_PATH.health,
   [QUOTE_PRODUCT_CODE_PREVOYANCE]: QUOTE_PRODUCT_PATH.prevoyance,
   [QUOTE_PRODUCT_CODE_PET]: QUOTE_PRODUCT_PATH.pet,
+  [QUOTE_PRODUCT_CODE_ETUDES]: QUOTE_PRODUCT_PATH.etudes,
+  [QUOTE_PRODUCT_CODE_ACCIDENTS]: QUOTE_PRODUCT_PATH.accidents,
+  [QUOTE_PRODUCT_CODE_HELEP]: QUOTE_PRODUCT_PATH.helep,
 };
 
 export const QUOTE_HUB_PATH = "/";

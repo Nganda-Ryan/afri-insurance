@@ -1,5 +1,8 @@
 import {
   QUOTE_PRODUCT_CODE_AUTO,
+  QUOTE_PRODUCT_CODE_ACCIDENTS,
+  QUOTE_PRODUCT_CODE_ETUDES,
+  QUOTE_PRODUCT_CODE_HELEP,
   QUOTE_PRODUCT_CODE_HEALTH,
   QUOTE_PRODUCT_CODE_HOME,
   QUOTE_PRODUCT_CODE_PET,
@@ -49,7 +52,10 @@ export type QuoteSidebarProductId =
   | "auto"
   | "pet"
   | "health"
-  | "prevoyance";
+  | "prevoyance"
+  | "etudes"
+  | "accidents"
+  | "helep";
 
 /** Indices d'étape du parcours complet (0–4), alignés sur `TRAVEL_QUOTE_FLOW_STEP`. */
 export type QuoteWizardStepIndex = 0 | 1 | 2 | 3 | 4;
@@ -68,6 +74,9 @@ const PRODUCT_CODE_TO_ID: Record<string, QuoteSidebarProductId> = {
   [QUOTE_PRODUCT_CODE_PET]: "pet",
   [QUOTE_PRODUCT_CODE_HEALTH]: "health",
   [QUOTE_PRODUCT_CODE_PREVOYANCE]: "prevoyance",
+  [QUOTE_PRODUCT_CODE_ETUDES]: "etudes",
+  [QUOTE_PRODUCT_CODE_ACCIDENTS]: "accidents",
+  [QUOTE_PRODUCT_CODE_HELEP]: "helep",
 };
 
 const PRODUCT_ID_TO_CODE: Record<QuoteSidebarProductId, string> = {
@@ -77,6 +86,9 @@ const PRODUCT_ID_TO_CODE: Record<QuoteSidebarProductId, string> = {
   pet: QUOTE_PRODUCT_CODE_PET,
   health: QUOTE_PRODUCT_CODE_HEALTH,
   prevoyance: QUOTE_PRODUCT_CODE_PREVOYANCE,
+  etudes: QUOTE_PRODUCT_CODE_ETUDES,
+  accidents: QUOTE_PRODUCT_CODE_ACCIDENTS,
+  helep: QUOTE_PRODUCT_CODE_HELEP,
 };
 
 export function quoteProductIdFromUrlCode(

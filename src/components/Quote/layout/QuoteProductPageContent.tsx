@@ -14,6 +14,15 @@ import { MrhQuotationWizard } from "@/components/MrhQuote/wizard/MrhQuotationWiz
 import { PrevoyanceQuotePortalAside } from "@/components/PrevoyanceQuote/layout/PrevoyanceQuotePortalAside";
 import { PrevoyanceQuoteFlowProgressBar } from "@/components/PrevoyanceQuote/wizard/PrevoyanceQuoteFlowProgressBar";
 import { PrevoyanceQuotationWizard } from "@/components/PrevoyanceQuote/wizard/PrevoyanceQuotationWizard";
+import { EtudesQuotePortalAside } from "@/components/EtudesQuote/layout/EtudesQuotePortalAside";
+import { EtudesQuoteFlowProgressBar } from "@/components/EtudesQuote/wizard/EtudesQuoteFlowProgressBar";
+import { EtudesQuotationWizard } from "@/components/EtudesQuote/wizard/EtudesQuotationWizard";
+import { AccidentsQuotePortalAside } from "@/components/AccidentsQuote/layout/AccidentsQuotePortalAside";
+import { AccidentsQuoteFlowProgressBar } from "@/components/AccidentsQuote/wizard/AccidentsQuoteFlowProgressBar";
+import { AccidentsQuotationWizard } from "@/components/AccidentsQuote/wizard/AccidentsQuotationWizard";
+import { HelepQuotePortalAside } from "@/components/HelepQuote/layout/HelepQuotePortalAside";
+import { HelepQuoteFlowProgressBar } from "@/components/HelepQuote/wizard/HelepQuoteFlowProgressBar";
+import { HelepQuotationWizard } from "@/components/HelepQuote/wizard/HelepQuotationWizard";
 import { QuotePageLayout } from "@/components/Quote/layout/QuotePageLayout";
 import { QuotePortalAside } from "@/components/Quote/layout/QuotePortalAside";
 import { QuoteProductBreadcrumb } from "@/components/Quote/layout/QuoteProductBreadcrumb";
@@ -84,10 +93,37 @@ function QuoteProductPageInner({ productId }: QuoteProductPageContentProps) {
             <PrevoyanceQuotationWizard onWizardStateChange={setWizardInProgress} />
           </QuotePageLayout>
         );
+      case "etudes":
+        return (
+          <QuotePageLayout
+            progress={<EtudesQuoteFlowProgressBar />}
+            aside={<EtudesQuotePortalAside />}
+          >
+            <EtudesQuotationWizard onWizardStateChange={setWizardInProgress} />
+          </QuotePageLayout>
+        );
+      case "accidents":
+        return (
+          <QuotePageLayout
+            progress={<AccidentsQuoteFlowProgressBar />}
+            aside={<AccidentsQuotePortalAside />}
+          >
+            <AccidentsQuotationWizard onWizardStateChange={setWizardInProgress} />
+          </QuotePageLayout>
+        );
+      case "helep":
+        return (
+          <QuotePageLayout
+            progress={<HelepQuoteFlowProgressBar />}
+            aside={<HelepQuotePortalAside />}
+          >
+            <HelepQuotationWizard onWizardStateChange={setWizardInProgress} />
+          </QuotePageLayout>
+        );
       case "pet":
         return (
           <div className="rounded-lg border border-border bg-white px-6 py-16 text-center shadow-sm">
-            <h2 className="mb-3 text-2xl font-bold">Individuelle accidents</h2>
+            <h2 className="mb-3 text-2xl font-bold">Assurance animaux</h2>
             <p className="text-text-main text-opacity-90">
               Le moteur de cotation pour ce produit arrive prochainement.
             </p>

@@ -38,12 +38,18 @@ export const QUOTE_PRODUCT_CODE_AUTO = "auto";
 export const QUOTE_PRODUCT_CODE_PET = "animaux";
 export const QUOTE_PRODUCT_CODE_HEALTH = "sante";
 export const QUOTE_PRODUCT_CODE_PREVOYANCE = "prevoyance";
+export const QUOTE_PRODUCT_CODE_ETUDES = "etudes";
+export const QUOTE_PRODUCT_CODE_ACCIDENTS = "accidents";
+export const QUOTE_PRODUCT_CODE_HELEP = "helep";
 
 /* POLICY TYPES (source de vérité DB) */
 export const POLICY_TYPE_TRAVEL = "travel";
 export const POLICY_TYPE_HOME = "home";
 export const POLICY_TYPE_AUTO = "auto";
 export const POLICY_TYPE_PET = "pet";
+export const POLICY_TYPE_ETUDES = "etudes";
+export const POLICY_TYPE_ACCIDENTS = "accidents";
+export const POLICY_TYPE_HELEP = "helep";
 
 export const POLICY_TYPE_VALUES = [
   POLICY_TYPE_TRAVEL,
@@ -83,6 +89,21 @@ export const HEALTH_QUOTE_WIZARD_STEP_CODE_DEVIS = "devis-sante";
 export const PREVOYANCE_QUOTE_WIZARD_STEP_CODE_FORM = "cotation-prev";
 export const PREVOYANCE_QUOTE_WIZARD_STEP_CODE_RECAP = "recap-prev";
 export const PREVOYANCE_QUOTE_WIZARD_STEP_CODE_DEVIS = "devis-prev";
+
+/** Codes URL pour le wizard devis AFRIKIDS ETUDES (Rente Éducation). */
+export const ETUDES_QUOTE_WIZARD_STEP_CODE_FORM = "cotation-etudes";
+export const ETUDES_QUOTE_WIZARD_STEP_CODE_RECAP = "recap-etudes";
+export const ETUDES_QUOTE_WIZARD_STEP_CODE_DEVIS = "devis-etudes";
+
+/** Codes URL pour le wizard devis Individuelle Accidents. */
+export const ACCIDENTS_QUOTE_WIZARD_STEP_CODE_FORM = "cotation-accidents";
+export const ACCIDENTS_QUOTE_WIZARD_STEP_CODE_RECAP = "recap-accidents";
+export const ACCIDENTS_QUOTE_WIZARD_STEP_CODE_DEVIS = "devis-accidents";
+
+/** Codes URL pour le wizard devis AFRI HELEP (Protection Tontines). */
+export const HELEP_QUOTE_WIZARD_STEP_CODE_FORM = "cotation-helep";
+export const HELEP_QUOTE_WIZARD_STEP_CODE_RECAP = "recap-helep";
+export const HELEP_QUOTE_WIZARD_STEP_CODE_DEVIS = "devis-helep";
 
 /** Clés des query params pour le parcours devis (URL courte/lisible). */
 export const URL_PARAM_PRODUCT = "p";
@@ -125,6 +146,21 @@ export const URL_PARAM_HEALTH_CHILDREN = "henf";
 export const URL_PARAM_PREVOYANCE_AGE = "pvage";
 export const URL_PARAM_PREVOYANCE_DURATION = "pvdur";
 export const URL_PARAM_PREVOYANCE_CAPITAL = "pvcap";
+
+/** Query params du parcours devis AFRIKIDS ETUDES. */
+export const URL_PARAM_ETUDES_RENTE = "etrente";
+export const URL_PARAM_ETUDES_DUREE = "etduree";
+
+/** Query params du parcours devis Individuelle Accidents. */
+export const URL_PARAM_ACCIDENTS_CLASSE = "acls";
+export const URL_PARAM_ACCIDENTS_CAPITAL_DECES = "acd";
+export const URL_PARAM_ACCIDENTS_CAPITAL_IPT = "acipt";
+export const URL_PARAM_ACCIDENTS_DUREE = "adur";
+export const URL_PARAM_ACCIDENTS_MOTO = "amoto";
+export const URL_PARAM_ACCIDENTS_AGE = "aage";
+
+/** Query params du parcours devis AFRI HELEP. */
+export const URL_PARAM_HELEP_FORMULE = "hform";
 
 /** Liens des logos Afri Insurance (1) et Afrilife (2). */
 export const AFRI_INSURANCE_LOGO_HREF = "/";

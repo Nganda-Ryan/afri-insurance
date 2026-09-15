@@ -40,10 +40,25 @@ const QUOTE_HERO_BY_PRODUCT: Record<QuoteHeroProductId, QuoteHeroContent> = {
     description:
       "Obtenez une proposition adaptée à vos besoins de protection individuelle.",
   },
+  accidents: {
+    title: "Protégez-vous contre les accidents en quelques clics",
+    description:
+      "Choisissez votre classe de risque et vos capitaux pour obtenir votre devis individuelle accidents.",
+  },
   prevoyance: {
     title: "Préparez votre prévoyance en quelques clics",
     description:
       "Obtenez une proposition de prévoyance individuelle adaptée à votre situation.",
+  },
+  etudes: {
+    title: "Protégez l'avenir scolaire de vos enfants en quelques clics",
+    description:
+      "Choisissez la rente éducation adaptée à vos besoins et obtenez votre devis instantanément.",
+  },
+  helep: {
+    title: "Protégez vos membres de tontine en quelques clics",
+    description:
+      "Choisissez votre formule AFRI HELEP et sécurisez famille et engagements de vos membres.",
   },
 };
 
@@ -73,10 +88,25 @@ const POLICY_HERO_BY_PRODUCT: Record<QuoteHeroProductId, PolicyHeroContent> = {
     title: "Police confirmée",
     description: "Votre assurance individuelle accidents est maintenant active.",
   },
+  accidents: {
+    badge: "Souscription confirmée",
+    title: "Police confirmée",
+    description: "Votre assurance individuelle accidents est maintenant active.",
+  },
   prevoyance: {
     badge: "Souscription confirmée",
     title: "Police confirmée",
     description: "Votre contrat de prévoyance est maintenant actif.",
+  },
+  etudes: {
+    badge: "Souscription confirmée",
+    title: "Police confirmée",
+    description: "Votre contrat AFRIKIDS ETUDES est maintenant actif.",
+  },
+  helep: {
+    badge: "Souscription confirmée",
+    title: "Police confirmée",
+    description: "Votre contrat AFRI HELEP est maintenant actif.",
   },
 };
 

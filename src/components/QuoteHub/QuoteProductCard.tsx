@@ -27,10 +27,10 @@ export function QuoteProductCard({ product, priority = false }: QuoteProductCard
         )}
       />
       <div
-        className="absolute inset-0 bg-linear-to-t from-black/80 via-black/25 to-black/5"
+        className="absolute inset-0 bg-linear-to-t from-black/75 via-black/20 to-transparent"
         aria-hidden
       />
-      <div className="absolute inset-0 flex flex-col justify-end p-5 sm:p-6">
+      <div className="absolute inset-x-0 bottom-0 flex flex-col p-5 sm:p-6">
         <span
           className={cn(
             "mb-2 w-fit rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide",
@@ -44,7 +44,7 @@ export function QuoteProductCard({ product, priority = false }: QuoteProductCard
         <h2 className="text-xl font-bold leading-tight text-white sm:text-2xl">
           {product.title}
         </h2>
-        <p className="mt-1.5 max-w-sm text-sm leading-relaxed text-white/85">
+        <p className="mt-1.5 line-clamp-3 max-w-sm text-sm leading-relaxed text-white/85">
           {product.job}
         </p>
         <p className="mt-3 text-xs font-medium text-white/70">
@@ -55,11 +55,11 @@ export function QuoteProductCard({ product, priority = false }: QuoteProductCard
   );
 
   const frameClass =
-    "relative block aspect-[4/3] overflow-hidden rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary";
+    "relative block min-h-[22rem] aspect-3/4 overflow-hidden rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary sm:min-h-[26rem]";
 
   if (!isActive) {
     return (
-      <article className={cn(frameClass, "cursor-not-allowed")} aria-disabled="true">
+      <article className={cn(frameClass, "cursor-not-allowed opacity-80")}>
         {media}
       </article>
     );

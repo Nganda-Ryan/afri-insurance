@@ -48,7 +48,7 @@ export function QuoteProductCard({ product, priority = false }: QuoteProductCard
           {product.job}
         </p>
         <p className="mt-3 text-xs font-medium text-white/70">
-          {isActive ? `${product.durationLabel} → S` : product.durationLabel}
+          {isActive ? `${product.durationLabel} →` : product.durationLabel}
         </p>
       </div>
     </>

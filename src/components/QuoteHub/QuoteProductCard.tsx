@@ -55,7 +55,7 @@ export function QuoteProductCard({ product, priority = false }: QuoteProductCard
   );
 
   const frameClass =
-    "relative block min-h-[22rem] aspect-3/4 overflow-hidden rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary sm:min-h-[26rem]";
+    "relative block aspect-square overflow-hidden rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary";
 
   if (!isActive) {
     return (

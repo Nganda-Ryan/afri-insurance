@@ -72,20 +72,22 @@ export function QuoteProductHub() {
       <QuoteHubMasthead />
       <main
         id="parcours-cotation"
-        className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:py-10"
+        className="w-full bg-brand-25"
         aria-labelledby="quote-hub-products-title"
       >
-        <h2 id="quote-hub-products-title" className="sr-only">
-          Nos produits d&apos;assurance
-        </h2>
-        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
-          {QUOTE_PRODUCT_CATALOG.map((product, index) => (
-            <li key={product.id}>
-              <QuoteProductCard product={product} priority={index < 3} />
-            </li>
-          ))}
-        </ul>
-        <QuoteHubHowItWorks />
+        <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:py-10">
+          <h2 id="quote-hub-products-title" className="sr-only">
+            Nos produits d&apos;assurance
+          </h2>
+          <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+            {QUOTE_PRODUCT_CATALOG.map((product, index) => (
+              <li key={product.id} className="h-full">
+                <QuoteProductCard product={product} priority={index < 3} />
+              </li>
+            ))}
+          </ul>
+          <QuoteHubHowItWorks />
+        </div>
       </main>
     </>
   );

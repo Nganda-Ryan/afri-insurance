@@ -11,6 +11,8 @@ interface QuoteProductCardProps {
 
 export function QuoteProductCard({ product, priority = false }: QuoteProductCardProps) {
   const isActive = product.status === "active";
+  const ctaLabel =
+    product.badge === "Souscription en ligne" ? "Souscrire" : "Obtenir devis";
 
   const body = (
     <>
@@ -52,7 +54,7 @@ export function QuoteProductCard({ product, priority = false }: QuoteProductCard
             isActive ? "text-brand-primary" : "text-gray-400",
           )}
         >
-          {isActive ? "En savoir plus" : product.badge}
+          {isActive ? ctaLabel : product.badge}
         </span>
       </div>
     </>
@@ -75,7 +77,7 @@ export function QuoteProductCard({ product, priority = false }: QuoteProductCard
     <Link
       href={product.href}
       className={cn(frameClass, "group")}
-      aria-label={`${product.title} — En savoir plus`}
+      aria-label={`${product.title} — ${ctaLabel}`}
     >
       {body}
     </Link>

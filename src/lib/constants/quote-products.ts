@@ -57,7 +57,7 @@ const CATALOG: QuoteProductCatalogItem[] = [
     id: "auto",
     navLabel: "Assurance Automobile",
     title: "Assurance Automobile",
-    job: "Obtenez votre prime selon votre véhicule et votre zone.",
+    job: "Elle couvre les dommages causés à autrui, couvre votre véhicule : accident, vol, incendie, couvre les atteintes physiques du conducteur.",
     durationLabel: "Environ 2 min",
     badge: "Devis instantané",
     status: "active",

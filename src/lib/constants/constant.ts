@@ -90,7 +90,7 @@ export const PREVOYANCE_QUOTE_WIZARD_STEP_CODE_FORM = "cotation-prev";
 export const PREVOYANCE_QUOTE_WIZARD_STEP_CODE_RECAP = "recap-prev";
 export const PREVOYANCE_QUOTE_WIZARD_STEP_CODE_DEVIS = "devis-prev";
 
-/** Codes URL pour le wizard devis AFRIKIDS ETUDES (Rente Éducation). */
+/** Codes URL pour le wizard devis Afrikids Etudes (Rente Éducation). */
 export const ETUDES_QUOTE_WIZARD_STEP_CODE_FORM = "cotation-etudes";
 export const ETUDES_QUOTE_WIZARD_STEP_CODE_RECAP = "recap-etudes";
 export const ETUDES_QUOTE_WIZARD_STEP_CODE_DEVIS = "devis-etudes";
@@ -100,7 +100,7 @@ export const ACCIDENTS_QUOTE_WIZARD_STEP_CODE_FORM = "cotation-accidents";
 export const ACCIDENTS_QUOTE_WIZARD_STEP_CODE_RECAP = "recap-accidents";
 export const ACCIDENTS_QUOTE_WIZARD_STEP_CODE_DEVIS = "devis-accidents";
 
-/** Codes URL pour le wizard devis AFRI HELEP (Protection Tontines). */
+/** Codes URL pour le wizard devis Afri Helep (Protection Tontines). */
 export const HELEP_QUOTE_WIZARD_STEP_CODE_FORM = "cotation-helep";
 export const HELEP_QUOTE_WIZARD_STEP_CODE_RECAP = "recap-helep";
 export const HELEP_QUOTE_WIZARD_STEP_CODE_DEVIS = "devis-helep";
@@ -147,7 +147,7 @@ export const URL_PARAM_PREVOYANCE_AGE = "pvage";
 export const URL_PARAM_PREVOYANCE_DURATION = "pvdur";
 export const URL_PARAM_PREVOYANCE_CAPITAL = "pvcap";
 
-/** Query params du parcours devis AFRIKIDS ETUDES. */
+/** Query params du parcours devis Afrikids Etudes. */
 export const URL_PARAM_ETUDES_RENTE = "etrente";
 export const URL_PARAM_ETUDES_DUREE = "etduree";
 
@@ -159,7 +159,7 @@ export const URL_PARAM_ACCIDENTS_DUREE = "adur";
 export const URL_PARAM_ACCIDENTS_MOTO = "amoto";
 export const URL_PARAM_ACCIDENTS_AGE = "aage";
 
-/** Query params du parcours devis AFRI HELEP. */
+/** Query params du parcours devis Afri Helep. */
 export const URL_PARAM_HELEP_FORMULE = "hform";
 
 /** Liens des logos Afri Insurance (1) et Afrilife (2). */

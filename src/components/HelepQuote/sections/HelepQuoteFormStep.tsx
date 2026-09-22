@@ -57,7 +57,7 @@ export function HelepQuoteFormStep({
 
   return (
     <div className="space-y-6">
-      <QuoteFormSection title="Cotation AFRI HELEP" icon={Users}>
+      <QuoteFormSection title="Cotation Afri Helep" icon={Users}>
         <p className="text-sm text-text-main text-opacity-80">
           {HELEP_INSURANCE_DATA.description}
         </p>

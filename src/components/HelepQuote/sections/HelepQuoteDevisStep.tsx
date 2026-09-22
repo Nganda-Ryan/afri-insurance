@@ -35,7 +35,7 @@ export function HelepQuoteDevisStep({
   ];
 
   const documentContent = buildQuoteDocument({
-    title: "DEVIS AFRI HELEP – PROTECTION TONTINES",
+    title: "DEVIS Afri Helep – PROTECTION TONTINES",
     productLabel: quote.productName,
     lines,
     amountLabel: "Prime annuelle",

@@ -31,7 +31,7 @@ export function HealthQuoteDevisStep({ quote, onBack }: HealthQuoteDevisStepProp
 
   const documentContent = buildQuoteDocument({
     title: "DEVIS ASSURANCE SANTÉ",
-    productLabel: "Assurance santé",
+    productLabel: "Afri Assurance santé",
     lines,
     amountLabel: "Cotisation totale",
     amountValue: amount,

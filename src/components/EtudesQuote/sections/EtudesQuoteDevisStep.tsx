@@ -35,7 +35,7 @@ export function EtudesQuoteDevisStep({
   ];
 
   const documentContent = buildQuoteDocument({
-    title: "DEVIS AFRIKIDS ETUDES – RENTE ÉDUCATION",
+    title: "DEVIS Afrikids Etudes – RENTE ÉDUCATION",
     productLabel: quote.productName,
     lines,
     amountLabel: "Cotisation annuelle",

@@ -58,7 +58,7 @@ const QUOTE_HERO_BY_PRODUCT: Record<QuoteHeroProductId, QuoteHeroContent> = {
   helep: {
     title: "Protégez vos membres de tontine en quelques clics",
     description:
-      "Choisissez votre formule AFRI HELEP et sécurisez famille et engagements de vos membres.",
+      "Choisissez votre formule Afri Helep et sécurisez famille et engagements de vos membres.",
   },
 };
 
@@ -101,12 +101,12 @@ const POLICY_HERO_BY_PRODUCT: Record<QuoteHeroProductId, PolicyHeroContent> = {
   etudes: {
     badge: "Souscription confirmée",
     title: "Police confirmée",
-    description: "Votre contrat AFRIKIDS ETUDES est maintenant actif.",
+    description: "Votre contrat Afrikids Etudes est maintenant actif.",
   },
   helep: {
     badge: "Souscription confirmée",
     title: "Police confirmée",
-    description: "Votre contrat AFRI HELEP est maintenant actif.",
+    description: "Votre contrat Afri Helep est maintenant actif.",
   },
 };
 

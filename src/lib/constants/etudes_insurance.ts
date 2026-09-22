@@ -1,7 +1,7 @@
 import type { EtudesInsuranceProductData } from "@/types/etudes-insurance";
 
 /**
- * Données tarifaires du produit AFRIKIDS ETUDES (Rente Éducation).
+ * Données tarifaires du produit Afrikids Etudes (Rente Éducation).
  * Source : Fiche_Produit_AFRIKIDS_ETUDES-Distribution_Ecole.pdf
  *
  * Tableau des cotisations (FCFA) :
@@ -10,7 +10,7 @@ import type { EtudesInsuranceProductData } from "@/types/etudes-insurance";
  */
 export const ETUDES_INSURANCE_PRODUCT_DATA: EtudesInsuranceProductData = {
   document_info: {
-    titre: "AFRIKIDS ETUDES – Rente Éducation",
+    titre: "Afrikids Etudes – Rente Éducation",
     compagnie: "AFRILIFE Insurance",
     devise: "FCFA",
   },
@@ -76,7 +76,7 @@ export const ETUDES_INSURANCE_PRODUCT_DATA: EtudesInsuranceProductData = {
     { rente_annuelle: 1_000_000, duree_service: 15, cotisation: 130_000 },
   ],
   description:
-    "Le produit AFRIKIDS ETUDES garantit le versement d'une rente annuelle pendant la durée choisie, qui servira au paiement des frais de scolarité ainsi que les fournitures scolaires de l'enfant en cas de Décès ou Invalidité Absolue et Définitive (IAD) de son parent ou tuteur.",
+    "Le produit Afrikids Etudes garantit le versement d'une rente annuelle pendant la durée choisie, qui servira au paiement des frais de scolarité ainsi que les fournitures scolaires de l'enfant en cas de Décès ou Invalidité Absolue et Définitive (IAD) de son parent ou tuteur.",
   age_min_souscripteur: 18,
   age_max_souscripteur: 65,
   age_max_beneficiaire: 21,

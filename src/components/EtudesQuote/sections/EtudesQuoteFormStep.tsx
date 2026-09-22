@@ -74,9 +74,9 @@ export function EtudesQuoteFormStep({
 
   return (
     <div className="space-y-6">
-      <QuoteFormSection title="Cotation AFRIKIDS ETUDES" icon={GraduationCap}>
+      <QuoteFormSection title="Cotation Afrikids Etudes" icon={GraduationCap}>
         <p className="text-sm text-text-main text-opacity-80">
-          Le produit AFRIKIDS ETUDES garantit le versement d&apos;une rente
+          Le produit Afrikids Etudes garantit le versement d&apos;une rente
           annuelle pour les frais de scolarité en cas de Décès ou Invalidité
           Absolue et Définitive (IAD) d&apos;un parent ou tuteur.
         </p>

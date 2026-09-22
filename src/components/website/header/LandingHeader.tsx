@@ -134,7 +134,7 @@ const LandingHeader = () => {
     .filter((item) => item.status === "active")
     .map((item) => ({
       label: item.navLabel,
-      href: item.navLabel === "Assurance Voyage" ? travelQuoteEntryHref() : item.href,
+      href: item.navLabel === "Afri Assurance Voyage" ? travelQuoteEntryHref() : item.href,
     }));
 
   const actionItems = [

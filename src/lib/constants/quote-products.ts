@@ -42,9 +42,9 @@ export interface QuoteProductCatalogItem {
 const CATALOG: QuoteProductCatalogItem[] = [
   {
     id: "travel",
-    navLabel: "Assurance Voyage",
-    title: "Assurance Voyage",
-    job: "L'Assurance Voyage vous accompagne en cas de maladie, d'accident ou d'imprévu pendant votre séjour à l'étranger. Vous bénéficierez d'une assistance et d'une prise en charge selon les garanties souscrites.",
+    navLabel: "Afri Assurance Voyage",
+    title: "Afri Assurance Voyage",
+    job: "L'Afri Assurance Voyage vous accompagne en cas de maladie, d'accident ou d'imprévu pendant votre séjour à l'étranger. Vous bénéficierez d'une assistance et d'une prise en charge selon les garanties souscrites.",
     durationLabel: "Environ 3 min",
     badge: "Souscription en ligne",
     status: "active",
@@ -55,8 +55,8 @@ const CATALOG: QuoteProductCatalogItem[] = [
   },
   {
     id: "auto",
-    navLabel: "Assurance Automobile",
-    title: "Assurance Automobile",
+    navLabel: "Afri Assurance Automobile",
+    title: "Afri Assurance Automobile",
     job: "Elle couvre les dommages causés à autrui, couvre votre véhicule : accident, vol, incendie, couvre les atteintes physiques du conducteur.",
     durationLabel: "Environ 2 min",
     badge: "Devis instantané",
@@ -81,8 +81,8 @@ const CATALOG: QuoteProductCatalogItem[] = [
   },
   {
     id: "health",
-    navLabel: "Assurance santé",
-    title: "Assurance santé",
+    navLabel: "Afri Assurance santé",
+    title: "Afri Assurance santé",
     job: "L'Assurance Santé permet de prendre en charge, totalement ou partiellement selon les garanties souscrites, les frais liés à la maladie de l'assuré.",
     durationLabel: "Environ 2 min",
     badge: "Devis instantané",
@@ -120,8 +120,8 @@ const CATALOG: QuoteProductCatalogItem[] = [
   },
   {
     id: "etudes",
-    navLabel: "AFRIKIDS ETUDES",
-    title: "AFRIKIDS ETUDES",
+    navLabel: "Afrikids Etudes",
+    title: "Afrikids Etudes",
     job: "AFRIKIDS ÉTUDES est une solution d'assurance qui permet de préserver la scolarité de votre enfant en cas de décès ou d'Invalidité Absolue et Définitive (IAD) du parent ou tuteur assuré.",
     durationLabel: "Environ 1 min",
     badge: "Devis instantané",
@@ -133,9 +133,9 @@ const CATALOG: QuoteProductCatalogItem[] = [
   },
   {
     id: "helep",
-    navLabel: "AFRI HELEP",
-    title: "AFRI HELEP",
-    job: "AFRI HELEP est une solution d'assurance destinée aux membres de tontines, groupements d'épargne et de solidarité, associations et communautés disposant d'un mécanisme régulier de cotisation.",
+    navLabel: "Afri Helep",
+    title: "Afri Helep",
+    job: "Afri Helep est une solution d'assurance destinée aux membres de tontines, groupements d'épargne et de solidarité, associations et communautés disposant d'un mécanisme régulier de cotisation.",
     durationLabel: "Environ 1 min",
     badge: "Devis instantané",
     status: "active",

@@ -1,7 +1,7 @@
 import type { HelepInsuranceData } from "@/types/helep-insurance";
 
 /**
- * Données du produit AFRI HELEP (Protection des Personnes et des Engagements – Tontines).
+ * Données du produit Afri Helep (Protection des Personnes et des Engagements – Tontines).
  * Source : Fiche_Produit_AFRI_HELEP.pdf
  *
  * 3 formules avec capital forfaitaire identique pour Protection Personnes
@@ -12,7 +12,7 @@ import type { HelepInsuranceData } from "@/types/helep-insurance";
  */
 export const HELEP_INSURANCE_DATA: HelepInsuranceData = {
   document_info: {
-    titre: "AFRI HELEP – Protection Tontines",
+    titre: "Afri Helep – Protection Tontines",
     compagnie: "AFRILIFE Insurance",
     devise: "FCFA",
   },
@@ -40,7 +40,7 @@ export const HELEP_INSURANCE_DATA: HelepInsuranceData = {
     },
   ],
   description:
-    "Le produit AFRI HELEP garantit, en cas de Décès ou d'Invalidité Absolue et Définitive (IAD) d'un membre de tontine, le versement de deux capitaux forfaitaires : un capital Protection des Personnes (versé à la famille) et un capital Protection des Engagements (cotisations et/ou crédit).",
+    "Le produit Afri Helep garantit, en cas de Décès ou d'Invalidité Absolue et Définitive (IAD) d'un membre de tontine, le versement de deux capitaux forfaitaires : un capital Protection des Personnes (versé à la famille) et un capital Protection des Engagements (cotisations et/ou crédit).",
   min_membres_tontine: 20,
   duree_garantie_annees: 1,
 };

@@ -3,6 +3,7 @@ import {
   Car,
   Cross,
   GraduationCap,
+  HandHeart,
   HeartPulse,
   Home,
   Users,
@@ -143,6 +144,19 @@ const CATALOG: QuoteProductCatalogItem[] = [
     href: quoteProductPathFromId("helep"),
     imageSrc: "/images/hub/helep.png",
     imageAlt: "Membres de tontine solidaires",
+  },
+  {
+    id: "hemle",
+    navLabel: "Afri Hemle",
+    title: "Afri Hemle",
+    job: "AFRI HEMLE garantit, en cas de décès toutes causes de l'assuré ou des assurés couverts, le versement au(x) bénéficiaire(s) d'un Capital Frais Funéraires, forfaitaire et connu à l'avance, afin d'offrir à l'assuré ou à ses proches des obsèques dignes.",
+    durationLabel: "Environ 1 min",
+    badge: "Devis instantané",
+    status: "active",
+    icon: HandHeart,
+    href: quoteProductPathFromId("hemle"),
+    imageSrc: "/images/hub/hemle.jpg",
+    imageAlt: "Homme au cri de détermination, gnaque et rage de vaincre",
   },
 ];
 

@@ -60,6 +60,11 @@ const QUOTE_HERO_BY_PRODUCT: Record<QuoteHeroProductId, QuoteHeroContent> = {
     description:
       "Choisissez votre formule Afri Helep et sécurisez famille et engagements de vos membres.",
   },
+  hemle: {
+    title: "Protégez vos proches en quelques clics",
+    description:
+      "Choisissez votre formule Afri Hemle et obtenez votre devis : un Capital Frais Funéraires forfaitaire, versé à vos bénéficiaires en cas de décès toutes causes.",
+  },
 };
 
 const POLICY_HERO_BY_PRODUCT: Record<QuoteHeroProductId, PolicyHeroContent> = {
@@ -107,6 +112,11 @@ const POLICY_HERO_BY_PRODUCT: Record<QuoteHeroProductId, PolicyHeroContent> = {
     badge: "Souscription confirmée",
     title: "Police confirmée",
     description: "Votre contrat Afri Helep est maintenant actif.",
+  },
+  hemle: {
+    badge: "Souscription confirmée",
+    title: "Police confirmée",
+    description: "Votre contrat Afri Hemle est maintenant actif.",
   },
 };
 

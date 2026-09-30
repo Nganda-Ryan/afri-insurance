@@ -41,6 +41,7 @@ export const QUOTE_PRODUCT_CODE_PREVOYANCE = "prevoyance";
 export const QUOTE_PRODUCT_CODE_ETUDES = "etudes";
 export const QUOTE_PRODUCT_CODE_ACCIDENTS = "accidents";
 export const QUOTE_PRODUCT_CODE_HELEP = "helep";
+export const QUOTE_PRODUCT_CODE_HEMLE = "hemle";
 
 /* POLICY TYPES (source de vérité DB) */
 export const POLICY_TYPE_TRAVEL = "travel";
@@ -105,6 +106,11 @@ export const HELEP_QUOTE_WIZARD_STEP_CODE_FORM = "cotation-helep";
 export const HELEP_QUOTE_WIZARD_STEP_CODE_RECAP = "recap-helep";
 export const HELEP_QUOTE_WIZARD_STEP_CODE_DEVIS = "devis-helep";
 
+/** Codes URL pour le wizard devis Afri Hemle (Capital garanti / Assuré). */
+export const HEMLE_QUOTE_WIZARD_STEP_CODE_FORM = "cotation-hemle";
+export const HEMLE_QUOTE_WIZARD_STEP_CODE_RECAP = "recap-hemle";
+export const HEMLE_QUOTE_WIZARD_STEP_CODE_DEVIS = "devis-hemle";
+
 /** Clés des query params pour le parcours devis (URL courte/lisible). */
 export const URL_PARAM_PRODUCT = "p";
 export const URL_PARAM_STEP = "e";
@@ -161,6 +167,11 @@ export const URL_PARAM_ACCIDENTS_AGE = "aage";
 
 /** Query params du parcours devis Afri Helep. */
 export const URL_PARAM_HELEP_FORMULE = "hform";
+
+/** Query params du parcours devis Afri Hemle. */
+export const URL_PARAM_HEMLE_FORMULE = "hlform";
+export const URL_PARAM_HEMLE_OPTION = "hlopt";
+export const URL_PARAM_HEMLE_ENFANT = "hlenf";
 
 /** Liens des logos Afri Insurance (1) et Afrilife (2). */
 export const AFRI_INSURANCE_LOGO_HREF = "/";

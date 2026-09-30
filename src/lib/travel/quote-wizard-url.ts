@@ -3,6 +3,7 @@ import {
   QUOTE_PRODUCT_CODE_ACCIDENTS,
   QUOTE_PRODUCT_CODE_ETUDES,
   QUOTE_PRODUCT_CODE_HELEP,
+  QUOTE_PRODUCT_CODE_HEMLE,
   QUOTE_PRODUCT_CODE_HEALTH,
   QUOTE_PRODUCT_CODE_HOME,
   QUOTE_PRODUCT_CODE_PET,
@@ -55,7 +56,8 @@ export type QuoteSidebarProductId =
   | "prevoyance"
   | "etudes"
   | "accidents"
-  | "helep";
+  | "helep"
+  | "hemle";
 
 /** Indices d'étape du parcours complet (0–4), alignés sur `TRAVEL_QUOTE_FLOW_STEP`. */
 export type QuoteWizardStepIndex = 0 | 1 | 2 | 3 | 4;
@@ -77,6 +79,7 @@ const PRODUCT_CODE_TO_ID: Record<string, QuoteSidebarProductId> = {
   [QUOTE_PRODUCT_CODE_ETUDES]: "etudes",
   [QUOTE_PRODUCT_CODE_ACCIDENTS]: "accidents",
   [QUOTE_PRODUCT_CODE_HELEP]: "helep",
+  [QUOTE_PRODUCT_CODE_HEMLE]: "hemle",
 };
 
 const PRODUCT_ID_TO_CODE: Record<QuoteSidebarProductId, string> = {
@@ -89,6 +92,7 @@ const PRODUCT_ID_TO_CODE: Record<QuoteSidebarProductId, string> = {
   etudes: QUOTE_PRODUCT_CODE_ETUDES,
   accidents: QUOTE_PRODUCT_CODE_ACCIDENTS,
   helep: QUOTE_PRODUCT_CODE_HELEP,
+  hemle: QUOTE_PRODUCT_CODE_HEMLE,
 };
 
 export function quoteProductIdFromUrlCode(

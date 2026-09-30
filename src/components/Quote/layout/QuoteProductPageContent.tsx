@@ -23,6 +23,9 @@ import { AccidentsQuotationWizard } from "@/components/AccidentsQuote/wizard/Acc
 import { HelepQuotePortalAside } from "@/components/HelepQuote/layout/HelepQuotePortalAside";
 import { HelepQuoteFlowProgressBar } from "@/components/HelepQuote/wizard/HelepQuoteFlowProgressBar";
 import { HelepQuotationWizard } from "@/components/HelepQuote/wizard/HelepQuotationWizard";
+import { HemleQuotePortalAside } from "@/components/HemleQuote/layout/HemleQuotePortalAside";
+import { HemleQuoteFlowProgressBar } from "@/components/HemleQuote/wizard/HemleQuoteFlowProgressBar";
+import { HemleQuotationWizard } from "@/components/HemleQuote/wizard/HemleQuotationWizard";
 import { QuotePageLayout } from "@/components/Quote/layout/QuotePageLayout";
 import { QuotePortalAside } from "@/components/Quote/layout/QuotePortalAside";
 import { QuoteProductBreadcrumb } from "@/components/Quote/layout/QuoteProductBreadcrumb";
@@ -118,6 +121,15 @@ function QuoteProductPageInner({ productId }: QuoteProductPageContentProps) {
             aside={<HelepQuotePortalAside />}
           >
             <HelepQuotationWizard onWizardStateChange={setWizardInProgress} />
+          </QuotePageLayout>
+        );
+      case "hemle":
+        return (
+          <QuotePageLayout
+            progress={<HemleQuoteFlowProgressBar />}
+            aside={<HemleQuotePortalAside />}
+          >
+            <HemleQuotationWizard onWizardStateChange={setWizardInProgress} />
           </QuotePageLayout>
         );
       case "pet":

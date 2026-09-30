@@ -69,8 +69,8 @@ const CATALOG: QuoteProductCatalogItem[] = [
   },
   {
     id: "home",
-    navLabel: "Multirisque habitation",
-    title: "Multirisque habitation",
+    navLabel: "Afri Multirisque habitation",
+    title: "Afri Multirisque habitation",
     job: "L'Assurance Multirisque Habitation (MRH) protège votre habitation ainsi que son contenu contre différents dommages pouvant survenir à votre logement.",
     durationLabel: "Environ 2 min",
     badge: "Devis instantané",
@@ -95,8 +95,8 @@ const CATALOG: QuoteProductCatalogItem[] = [
   },
   {
     id: "prevoyance",
-    navLabel: "Prévoyance individuelle",
-    title: "Prévoyance individuelle",
+    navLabel: "Afri Prévoyance individuelle",
+    title: "Afri Prévoyance individuelle",
     job: "La Prévoyance Individuelle permet de constituer une protection financière pour vos proches en cas de décès. Vous choisissez le niveau de capital à garantir ainsi que les bénéficiaires qui recevront les prestations prévues au contrat.",
     durationLabel: "Environ 2 min",
     badge: "Devis instantané",
@@ -108,8 +108,8 @@ const CATALOG: QuoteProductCatalogItem[] = [
   },
   {
     id: "accidents",
-    navLabel: "Individuelle accidents",
-    title: "Individuelle accidents",
+    navLabel: "Afri Individuelle accidents",
+    title: "Afri Individuelle accidents",
     job: "L'Assurance Individuelle Accidents vous protège contre les conséquences des accidents corporels pouvant survenir dans le cadre de votre vie professionnelle ou privée.",
     durationLabel: "Environ 2 min",
     badge: "Devis instantané",

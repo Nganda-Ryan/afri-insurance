@@ -77,7 +77,7 @@ const CATALOG: QuoteProductCatalogItem[] = [
     status: "active",
     icon: HandHeart,
     href: quoteProductPathFromId("hemle"),
-    imageSrc: "/images/hub/hemle.jpg",
+    imageSrc: "/images/hub/hemle.png",
     imageAlt: "Homme au cri de détermination, gnaque et rage de vaincre",
   },
   {
